@@ -9,13 +9,15 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="E.V. Core">
-  <title>E.V. // TACTICAL CORE v10.1</title>
+  <title>E.V. // TACTICAL CORE v11.0</title>
   <link rel="manifest" href="./manifest.json">
   <link rel="icon" type="image/svg+xml"
     href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23070B10' stroke='%23FF9800' stroke-width='4'/><circle cx='50' cy='50' r='20' fill='%2300E5FF'/></svg>">
 
-  <!-- LIBRERÍA BIOMÉTRICA OFFLINE PRECACHADA POR SERVICE WORKER -->
+  <!-- LIBRERÍAS DE VISIÓN ARTIFICIAL Y DETECCIÓN MULTI-OBJETO OFFLINE -->
   <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.14/dist/face-api.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js" defer></script>
 
   <style>
     :root {
@@ -834,6 +836,59 @@
       flex-shrink: 0;
     }
 
+    /* BANNER DE DETECCIÓN DE CÓDIGO QR / BARRAS (v11.0-OMNI SCANNER) */
+    .visor-barcode-banner {
+      position: absolute;
+      bottom: 84px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10005;
+      background: rgba(7, 11, 16, 0.92);
+      border: 1px solid var(--accent-green);
+      border-radius: 20px;
+      padding: 7px 16px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--accent-green);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      max-width: 90vw;
+      box-shadow: 0 4px 18px rgba(0, 230, 118, 0.3);
+      cursor: pointer;
+      pointer-events: auto !important;
+      transition: all 0.25s ease;
+      touch-action: manipulation;
+    }
+
+    .visor-barcode-banner:active {
+      transform: translateX(-50%) scale(0.97);
+      background: rgba(0, 230, 118, 0.18);
+    }
+
+    .barcode-pulse {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      box-shadow: 0 0 8px var(--accent-green);
+      animation: pulseCore 1.5s infinite ease-in-out;
+      flex-shrink: 0;
+    }
+
+    .barcode-btn-action {
+      background: rgba(0, 230, 118, 0.2);
+      border: 1px solid var(--accent-green);
+      color: #fff;
+      font-size: 10px;
+      font-weight: bold;
+      padding: 3px 8px;
+      border-radius: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      flex-shrink: 0;
+    }
+
     /* BARRA LATERAL BIOMÉTRICA EN EL VISOR */
     .ev-biometric-sidebar {
       position: absolute;
@@ -1325,12 +1380,12 @@
       <div class="msg-wrap assistant">
         <div class="msg-header">
           <span>[E.V. // CO-PILOTO TÁCTICO]</span>
-          <span>v10.1-TOUCH UNBLOCK</span>
+          <span>v11.0-OMNI SCANNER</span>
         </div>
         <div class="msg-bubble">
-          Sistemas en línea, Operador. Modo v10.1-TOUCH UNBLOCK activo: interacción táctil 100 % desbloqueada en
-          móviles Android, capas visuales pasivas sin intercepción de toques, micro-botón 🎛 en cabecera del visor y
-          reconocimiento nativo de doble toque (&lt; 320 ms). Proyección True Binocular SBS y estabilización Digital EIS en línea.
+          Sistemas en línea, Operador. Modo v11.0-OMNI SCANNER activo: escáner ambiental multi-objeto offline (COCO-SSD),
+          lectura espacial inteligente (Gemini), telemetría de brújula/horizonte y decodificación nativa de códigos QR/barras.
+          Pipeline táctico 100 % optimizado a 60 FPS sin bloqueos.
         </div>
       </div>
     </div>
@@ -1387,7 +1442,7 @@
       <div class="visor-badge">
         <span
           style="display: inline-block; width: 6px; height: 6px; background: var(--accent-cyan); border-radius: 50%;"></span>
-        <span>E.V. // OPTICAL CORE v10.1</span>
+        <span>E.V. // OPTICAL CORE v11.0</span>
         <span id="visorModelTag" style="color: var(--accent-amber); margin-left: 4px;">[3.5 FLASH-LITE]</span>
         <span id="visorBioStatus" class="visor-bio-badge" style="margin-left: 6px;">BIOMETRÍA: INICIANDO...</span>
       </div>
@@ -1406,6 +1461,13 @@
     <div id="visorAmbientBanner" class="visor-ambient-banner" style="display: none;">
       <span class="ambient-pulse"></span>
       <span id="visorAmbientText">LECTURA ÓPTICA: ESPERANDO ESCENA...</span>
+    </div>
+
+    <!-- Banner de Detección de Código de Barras / QR Interactivo (v11.0-OMNI SCANNER) -->
+    <div id="visorBarcodeBanner" class="visor-barcode-banner" style="display: none;">
+      <span class="barcode-pulse"></span>
+      <span id="visorBarcodeText" style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">CÓDIGO DETECTADO</span>
+      <span id="visorBarcodeAction" class="barcode-btn-action">🔗 ABRIR</span>
     </div>
 
     <!-- Barra Lateral Biometría Táctica en Vivo -->
@@ -1631,6 +1693,32 @@
     let isFallbackBiometrics = false;
     let nativeFaceDetectorInstance = null;
 
+    // Variables de Escáner Ambiental y Multi-Objeto (v11.0-OMNI SCANNER)
+    let cocoModel = null;
+    let isCocoLoading = false;
+    let isObjectDetecting = false;
+    let trackedObjects = [];
+    let objectIntervalId = null;
+
+    // Variables de Detección Nativa de Códigos de Barras / QR (v11.0-OMNI SCANNER)
+    let nativeBarcodeDetector = null;
+    let isBarcodeDetecting = false;
+    let trackedBarcodes = [];
+    let barcodeIntervalId = null;
+    let lastDetectedBarcodeTime = 0;
+    let activeBarcodeAction = null;
+    let barcodeBannerTimeout = null;
+
+    // Variables de Anotaciones Espaciales IA Gemini (v11.0-OMNI SCANNER)
+    let spatialGeminiCallouts = null;
+
+    // Variables de Sensores de Orientación y Brújula (v11.0-OMNI SCANNER)
+    let compassHeading = 0;
+    let targetCompassHeading = 0;
+    let devicePitch = 0;
+    let deviceRoll = 0;
+    let isOrientationActive = false;
+
     // 1. ESTADO GLOBAL DE LA APLICACIÓN
     const STATE = {
       apiKey: localStorage.getItem("ev_api_key") || "",
@@ -1652,7 +1740,7 @@
     if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
       window.addEventListener("load", () => {
         navigator.serviceWorker.register("./sw.js")
-          .then((reg) => console.log("[E.V. PWA] Service Worker v10.1 registrado:", reg.scope))
+          .then((reg) => console.log("[E.V. PWA] Service Worker v11.0 registrado:", reg.scope))
           .catch((err) => console.warn("[E.V. PWA] Fallo registro SW:", err));
       });
     }
@@ -1723,6 +1811,7 @@
       document.getElementById("btnVisorScanDetail")?.addEventListener("click", handleVisorScanDetail);
       document.getElementById("btnVisorMic")?.addEventListener("click", toggleVisorContinuousMic);
       document.getElementById("btnVisorFlipCamera")?.addEventListener("click", cycleVisorLens);
+      document.getElementById("visorBarcodeBanner")?.addEventListener("click", handleBarcodeBannerClick);
 
       // Controles True Binocular VR SBS (v10.1)
       const btnVR = document.getElementById("btnVisorVR");
@@ -3825,6 +3914,23 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
         }
       });
 
+      // Inicializar detector de objetos multi-clase COCO-SSD (v11.0-OMNI SCANNER)
+      initObjectDetector().then(() => {
+        if (isVisorActive && !objectIntervalId) {
+          objectIntervalId = setInterval(runObjectDetectionStep, 380);
+        }
+      });
+
+      // Inicializar detector pasivo de códigos QR y de barras (v11.0-OMNI SCANNER)
+      initBarcodeScanner().then(() => {
+        if (isVisorActive && !barcodeIntervalId) {
+          barcodeIntervalId = setInterval(runBarcodeDetectionStep, 450);
+        }
+      });
+
+      // Inicializar sensores de orientación y brújula (v11.0-OMNI SCANNER)
+      initDeviceSensors();
+
       // Micrófono continuo automático manos libres al entrar al visor
       isVisorContinuousMic = true;
       const micBtn = document.getElementById("btnVisorMic");
@@ -3834,7 +3940,7 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
       }
       startVisorSpeechLoop();
 
-      updateVisorSubtitle("E.V.", "Visor óptico v10.1 en línea. Interacción táctil desbloqueada y estabilización EIS activa.");
+      updateVisorSubtitle("E.V.", "Visor óptico v11.0 en línea. Escáner ambiental, lectura espacial y telemetría activas.");
       playTacticalBeep(1046, 0.1);
     }
 
@@ -3847,6 +3953,16 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
         clearInterval(biometricIntervalId);
         biometricIntervalId = null;
       }
+      if (objectIntervalId) {
+        clearInterval(objectIntervalId);
+        objectIntervalId = null;
+      }
+      if (barcodeIntervalId) {
+        clearInterval(barcodeIntervalId);
+        barcodeIntervalId = null;
+      }
+      stopDeviceSensors();
+      hideBarcodeActionBanner();
 
       if (visorAnimId) {
         cancelAnimationFrame(visorAnimId);
@@ -3865,6 +3981,9 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
       toggleStereoscopicVrMode(false);
 
       currentTrackedFaces = [];
+      trackedObjects = [];
+      trackedBarcodes = [];
+      spatialGeminiCallouts = null;
       const sidebarContent = document.getElementById("evBioSidebarContent");
       if (sidebarContent) sidebarContent.innerHTML = "";
       const sidebarTitle = document.getElementById("evBioSidebarTitle");
@@ -4012,6 +4131,31 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
           }
         }
 
+        // 4. Suavizado de Objetos Detectados COCO-SSD (v11.0-OMNI SCANNER, Lerp 0.30, TTL 1200ms)
+        if (trackedObjects && trackedObjects.length > 0) {
+          trackedObjects = trackedObjects.filter(o => (now - o.lastSeen) < 1200);
+          const lerpObj = 0.30;
+          for (let i = 0; i < trackedObjects.length; i++) {
+            const o = trackedObjects[i];
+            if (o.targetBox) {
+              o.box.x += (o.targetBox.x - o.box.x) * lerpObj;
+              o.box.y += (o.targetBox.y - o.box.y) * lerpObj;
+              o.box.width += (o.targetBox.width - o.box.width) * lerpObj;
+              o.box.height += (o.targetBox.height - o.box.height) * lerpObj;
+            }
+          }
+        }
+
+        // 5. Suavizado de Orientación de Brújula (v11.0-OMNI SCANNER)
+        if (isOrientationActive) {
+          let diff = targetCompassHeading - compassHeading;
+          while (diff > 180) diff -= 360;
+          while (diff < -180) diff += 360;
+          compassHeading += diff * 0.15;
+          if (compassHeading < 0) compassHeading += 360;
+          if (compassHeading >= 360) compassHeading -= 360;
+        }
+
         if (isVrModeActive) {
           const eyeW = Math.floor(window.innerWidth / 2);
           const eyeH = window.innerHeight;
@@ -4079,13 +4223,28 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
       // 2. HUD AR Flotante Estilo Iron Man / E.D.I.T.H.
       drawBiometricFaceOverlays(ctx, w, h, hudParallax, video);
 
-      // 3. Retícula de Puntería / Target Lock
+      // 3. Objetos Detectados COCO-SSD (v11.0-OMNI SCANNER)
+      drawDetectedObjects(ctx, w, h, hudParallax);
+
+      // 4. Códigos QR / Barras Detectados (v11.0-OMNI SCANNER)
+      drawDetectedBarcodes(ctx, w, h, hudParallax);
+
+      // 5. Callouts Espaciales IA Gemini (v11.0-OMNI SCANNER)
+      drawSpatialGeminiCallouts(ctx, w, h, hudParallax);
+
+      // 6. Horizonte Artificial y Telemetría Angular (v11.0-OMNI SCANNER)
+      drawArtificialHorizon(ctx, w, h, hudParallax);
+
+      // 7. Cinta de Brújula Superior (v11.0-OMNI SCANNER)
+      drawVisorCompassTape(ctx, w, h, hudParallax);
+
+      // 8. Retícula de Puntería / Target Lock
       drawVisorReticle(ctx, w, h, hudParallax);
 
-      // 4. Telemetría Táctica
+      // 9. Telemetría Táctica
       drawVisorTelemetry(ctx, w, h, hudParallax);
 
-      // 5. Subtítulos Flotantes en Canvas (Modo VR SBS sin invasión de pantalla)
+      // 10. Subtítulos Flotantes en Canvas (Modo VR SBS sin invasión de pantalla)
       if (isVrModeActive && isSubtitleVisible) {
         drawVisorCanvasSubtitles(ctx, w, h, hudParallax);
       }
@@ -4298,7 +4457,7 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
     async function triggerAmbientVisionAnalysis() {
       if (!isVisorActive || !isVisorAmbientActive || isAmbientAnalyzing || !STATE.apiKey) return;
       const now = performance.now();
-      if (now - lastAmbientCallTime < 12000) return;
+      if (now - lastAmbientCallTime < 9500) return;
 
       isAmbientAnalyzing = true;
       lastAmbientCallTime = now;
@@ -4306,36 +4465,752 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
       const banner = document.getElementById("visorAmbientBanner");
       const bannerText = document.getElementById("visorAmbientText");
       if (banner) banner.style.display = "flex";
-      if (bannerText) bannerText.textContent = "LECTURA ÓPTICA: ANALIZANDO ESCENA...";
+      if (bannerText) bannerText.textContent = "ESCÁNER ESPACIAL: PROCESANDO ENTORNO...";
 
       try {
-        const frameBase64 = captureVisorFrame(480, 0.60);
+        const frameBase64 = captureVisorFrame(512, 0.65);
         if (!frameBase64) return;
+
+        const promptText = `Analiza la imagen como un sistema táctico de visión artificial. Responde ÚNICAMENTE un objeto JSON válido con este formato exacto:
+{
+  "resumen": "Resumen técnico conciso de máximo 12 palabras",
+  "puntos": [
+    {
+      "etiqueta": "TEXTO CORTO EN MAYÚSCULAS",
+      "tipo": "info",
+      "box": [ymin, xmin, ymax, xmax]
+    }
+  ]
+}
+Donde "box" son coordenadas normalizadas de 0 a 1000 [ymin, xmin, ymax, xmax] del objeto o punto relevante (máximo 4 puntos). "tipo" puede ser "info", "alerta" o "texto". Sin formato markdown ni texto adicional fuera del JSON.`;
 
         const contents = [
           {
             role: "user",
             parts: [
               { inlineData: { mimeType: "image/jpeg", data: frameBase64 } },
-              { text: "Describe en máximo 12 palabras lo que observas en esta escena de forma concisa y táctica. Sin rodeos ni introducciones." }
+              { text: promptText }
             ]
           }
         ];
 
         const result = await callGeminiWithFallback("gemini-3.5-flash-lite", contents, STATE.apiKey);
-        const reading = (result.text || "").trim().replace(/\n+/g, " ");
-        lastAmbientReading = reading;
-        if (bannerText) {
-          bannerText.textContent = `LECTURA ÓPTICA: ${reading.toUpperCase()}`;
+        let rawText = (result.text || "").trim();
+        rawText = rawText.replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```$/g, "").trim();
+
+        try {
+          const parsed = JSON.parse(rawText);
+          const resumen = (parsed.resumen || "").trim().replace(/\n+/g, " ");
+          const puntos = Array.isArray(parsed.puntos) ? parsed.puntos.slice(0, 4) : [];
+
+          spatialGeminiCallouts = {
+            timestamp: Date.now(),
+            resumen: resumen || "ANÁLISIS COMPLETADO",
+            points: puntos.filter(p => p && p.box && p.box.length === 4)
+          };
+
+          lastAmbientReading = resumen;
+          if (bannerText) {
+            bannerText.textContent = `ESCÁNER: ${(resumen || "ESCENA PROCESADA").toUpperCase()}`;
+          }
+        } catch (jsonErr) {
+          console.debug("[AmbientVision] Error parseando JSON de Gemini:", jsonErr, rawText);
+          const cleanReading = rawText.slice(0, 80).replace(/\n+/g, " ");
+          lastAmbientReading = cleanReading;
+          if (bannerText) {
+            bannerText.textContent = `LECTURA: ${cleanReading.toUpperCase()}`;
+          }
         }
       } catch (err) {
         console.debug("[AmbientVision] Error en lectura óptica:", err);
         if (bannerText) {
-          bannerText.textContent = "LECTURA ÓPTICA: ESPERANDO ESCENA...";
+          bannerText.textContent = "ESCÁNER ESPACIAL: ESPERANDO ESCENA...";
         }
       } finally {
         isAmbientAnalyzing = false;
       }
+    }
+
+    // =========================================================================
+    // NÚCLEO ESCÁNER AMBIENTAL TÁCTICO v11.0-OMNI SCANNER
+    // =========================================================================
+
+    // 1. Diccionario Táctico en Español para COCO-SSD
+    const COCO_TACTICAL_ES = {
+      "person": "SUJETO_HUMANO",
+      "bicycle": "VEHÍCULO_BICICLETA",
+      "car": "VEHÍCULO_AUTOMÓVIL",
+      "motorcycle": "VEHÍCULO_MOTO",
+      "airplane": "AERONAVE",
+      "bus": "TRANSPORTE_BUS",
+      "train": "TRANSPORTE_TREN",
+      "truck": "CAMIÓN_CARGA",
+      "boat": "EMBARCACIÓN",
+      "traffic light": "SEMÁFORO_TRÁFICO",
+      "fire hydrant": "HIDRANTE_INCENDIO",
+      "stop sign": "SEÑALIZACIÓN_ALTO",
+      "parking meter": "PARQUÍMETRO",
+      "bench": "BANCO_ASIENTO",
+      "bird": "ORGANISMO_AVE",
+      "cat": "ORGANISMO_FELINO",
+      "dog": "ORGANISMO_CANINO",
+      "horse": "ORGANISMO_EQUINO",
+      "sheep": "ORGANISMO_OVINO",
+      "cow": "ORGANISMO_BOVINO",
+      "elephant": "ORGANISMO_ELEFANTE",
+      "bear": "ORGANISMO_URSO",
+      "zebra": "ORGANISMO_CEBRA",
+      "giraffe": "ORGANISMO_JIRAFA",
+      "backpack": "MOCHILA_EQUIPO",
+      "umbrella": "PARAGUAS",
+      "handbag": "BOLSO_MALETÍN",
+      "tie": "CORBATA",
+      "suitcase": "EQUIPAJE_MALETA",
+      "frisbee": "OBJETO_VOLADOR",
+      "skis": "EQUIPO_ESQUÍ",
+      "snowboard": "TABLA_NIEVE",
+      "sports ball": "BALÓN_DEPORTIVO",
+      "kite": "COMETA",
+      "baseball bat": "BATE_BÉISBOL",
+      "baseball glove": "GUANTE_BÉISBOL",
+      "skateboard": "PATINETA",
+      "surfboard": "TABLA_SURF",
+      "tennis racket": "RAQUETA_TENIS",
+      "bottle": "RECIPIENTE_BOTELLA",
+      "wine glass": "COPA_CRISTAL",
+      "cup": "TAZA_CONTENEDOR",
+      "fork": "UTENSILIO_TENEDOR",
+      "knife": "ARMA_BLANCA_CUCHILLO",
+      "spoon": "UTENSILIO_CUCHARA",
+      "bowl": "RECIPIENTE_TAZÓN",
+      "banana": "BIOMASA_FRUTA",
+      "apple": "BIOMASA_FRUTA",
+      "sandwich": "ALIMENTO_SÁNDWICH",
+      "orange": "BIOMASA_FRUTA",
+      "broccoli": "BIOMASA_VEGETAL",
+      "carrot": "BIOMASA_VEGETAL",
+      "hot dog": "ALIMENTO_PROCESADO",
+      "pizza": "ALIMENTO_PIZZA",
+      "donut": "ALIMENTO_POSTRE",
+      "cake": "ALIMENTO_PASTEL",
+      "chair": "MOBILIARIO_ASIENTO",
+      "couch": "MOBILIARIO_SOFÁ",
+      "potted plant": "VEGETACIÓN_MACETA",
+      "bed": "MOBILIARIO_CAMA",
+      "dining table": "MOBILIARIO_MESA",
+      "toilet": "SANITARIO",
+      "tv": "MONITOR_PANTALLA",
+      "laptop": "TERMINAL_PORTÁTIL",
+      "mouse": "PERIFÉRICO_MOUSE",
+      "remote": "CONTROL_REMOTO",
+      "keyboard": "PERIFÉRICO_TECLADO",
+      "cell phone": "DISPOSITIVO_MÓVIL",
+      "microwave": "ELECTRODOMÉSTICO_MICROONDAS",
+      "oven": "ELECTRODOMÉSTICO_HORNO",
+      "toaster": "ELECTRODOMÉSTICO_TOSTADOR",
+      "sink": "LAVABO_GRIFO",
+      "refrigerator": "REFRIGERADOR",
+      "book": "DOCUMENTO_LIBRO",
+      "clock": "CRONÓMETRO_RELOJ",
+      "vase": "JARRÓN_CERÁMICA",
+      "scissors": "HERRAMIENTA_TIJERAS",
+      "teddy bear": "OBJETO_PELUCHE",
+      "hair drier": "SECADOR_CABELLO",
+      "toothbrush": "CEPILLO_DENTAL"
+    };
+
+    // 2. Detección Multi-Objeto Local (Zero-Quota Edge Detection con COCO-SSD)
+    async function initObjectDetector() {
+      if (cocoModel || isCocoLoading) return cocoModel;
+      if (typeof cocoSsd === "undefined") {
+        console.warn("[COCO-SSD] Librería cocoSsd no cargada aún.");
+        return null;
+      }
+      try {
+        isCocoLoading = true;
+        console.log("[COCO-SSD] Cargando modelo lite_mobilenet_v2...");
+        cocoModel = await cocoSsd.load({ base: "lite_mobilenet_v2" });
+        console.log("[COCO-SSD] Modelo cargado con éxito.");
+        return cocoModel;
+      } catch (err) {
+        console.warn("[COCO-SSD] Error al cargar coco-ssd:", err);
+        return null;
+      } finally {
+        isCocoLoading = false;
+      }
+    }
+
+    async function runObjectDetectionStep() {
+      if (!isVisorActive || !cocoModel || isObjectDetecting) return;
+      const video = document.getElementById("visorVideo");
+      if (!video || video.readyState < 2) return;
+
+      isObjectDetecting = true;
+      try {
+        const predictions = await cocoModel.detect(video, 6, 0.52);
+        const now = performance.now();
+        const t = getVideoCoverTransform(video);
+
+        const updated = [];
+        for (let i = 0; i < predictions.length; i++) {
+          const pred = predictions[i];
+          if (pred.score < 0.52) continue;
+          const rawBox = {
+            x: pred.bbox[0],
+            y: pred.bbox[1],
+            width: pred.bbox[2],
+            height: pred.bbox[3]
+          };
+          const scrBox = videoToScreenBox(rawBox, t);
+
+          const predClass = (pred.class || "").toLowerCase();
+          const labelEs = COCO_TACTICAL_ES[predClass] || predClass.toUpperCase().replace(/\s+/g, "_");
+
+          const existing = trackedObjects.find(o => {
+            if (o.rawClass !== predClass) return false;
+            const cx1 = o.box.x + o.box.width / 2;
+            const cy1 = o.box.y + o.box.height / 2;
+            const cx2 = scrBox.x + scrBox.width / 2;
+            const cy2 = scrBox.y + scrBox.height / 2;
+            const dist = Math.hypot(cx1 - cx2, cy1 - cy2);
+            return dist < Math.max(o.box.width, o.box.height) * 0.8;
+          });
+
+          if (existing) {
+            existing.targetBox = scrBox;
+            existing.score = pred.score;
+            existing.lastSeen = now;
+            updated.push(existing);
+          } else {
+            updated.push({
+              id: "obj_" + Math.random().toString(36).substr(2, 6),
+              rawClass: predClass,
+              label: labelEs,
+              score: pred.score,
+              box: { ...scrBox },
+              targetBox: { ...scrBox },
+              lastSeen: now
+            });
+          }
+        }
+
+        // Mantener detecciones recientes (TTL 1200ms)
+        for (let j = 0; j < trackedObjects.length; j++) {
+          const old = trackedObjects[j];
+          if (!updated.some(u => u.id === old.id) && (now - old.lastSeen) < 1200) {
+            updated.push(old);
+          }
+        }
+
+        trackedObjects = updated.slice(0, 6);
+      } catch (err) {
+        console.debug("[COCO-SSD] Error en inferencia:", err);
+      } finally {
+        isObjectDetecting = false;
+      }
+    }
+
+    function drawDetectedObjects(ctx, w, h, hudParallax = 0) {
+      if (!trackedObjects || trackedObjects.length === 0) return;
+
+      const now = performance.now();
+      ctx.save();
+
+      for (let i = 0; i < trackedObjects.length; i++) {
+        const obj = trackedObjects[i];
+        if (now - obj.lastSeen > 1200) continue;
+
+        const bx = obj.box.x + hudParallax;
+        const by = obj.box.y;
+        const bw = obj.box.width;
+        const bh = obj.box.height;
+
+        if (bw <= 10 || bh <= 10) continue;
+
+        const cornerLen = Math.max(8, Math.min(18, Math.min(bw, bh) * 0.25));
+        const color = "#00E5FF";
+        const colorDim = "rgba(0, 229, 255, 0.35)";
+
+        // Esquinas tácticas finas (1.5px, cero shadowBlur)
+        ctx.strokeStyle = colorDim;
+        ctx.lineWidth = 1.5;
+        drawCornerBrackets(ctx, bx, by, bw, bh, cornerLen);
+        ctx.stroke();
+
+        const pct = Math.round((obj.score || 0.6) * 100);
+        const tagText = `${obj.label} ${pct}%`;
+
+        ctx.font = "9px 'Share Tech Mono', monospace";
+        const textMetrics = ctx.measureText(tagText);
+        const tagW = textMetrics.width + 10;
+        const tagH = 14;
+        const tagX = bx;
+        const tagY = Math.max(16, by - tagH - 3);
+
+        ctx.fillStyle = "rgba(7, 11, 16, 0.85)";
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1.0;
+        ctx.fillRect(tagX, tagY, tagW, tagH);
+        ctx.strokeRect(tagX, tagY, tagW, tagH);
+
+        ctx.fillStyle = color;
+        ctx.textAlign = "left";
+        ctx.textBaseline = "middle";
+        ctx.fillText(tagText, tagX + 5, tagY + tagH / 2);
+      }
+
+      ctx.restore();
+    }
+
+    // 3. Detección Pasiva de Códigos QR y de Barras (window.BarcodeDetector)
+    async function initBarcodeScanner() {
+      if (nativeBarcodeDetector) return nativeBarcodeDetector;
+      if (!('BarcodeDetector' in window)) {
+        console.debug("[Barcode] window.BarcodeDetector no soportado en este navegador.");
+        return null;
+      }
+      try {
+        const supportedFormats = await window.BarcodeDetector.getSupportedFormats().catch(() => []);
+        const formatsToUse = supportedFormats && supportedFormats.length > 0 ? supportedFormats : ['qr_code', 'ean_13', 'ean_8', 'code_128'];
+        nativeBarcodeDetector = new window.BarcodeDetector({ formats: formatsToUse });
+        console.log("[Barcode] BarcodeDetector inicializado con formatos:", formatsToUse);
+        return nativeBarcodeDetector;
+      } catch (err) {
+        try {
+          nativeBarcodeDetector = new window.BarcodeDetector();
+          return nativeBarcodeDetector;
+        } catch (e) {
+          console.debug("[Barcode] Error instanciando BarcodeDetector:", e);
+          return null;
+        }
+      }
+    }
+
+    async function runBarcodeDetectionStep() {
+      if (!isVisorActive || !nativeBarcodeDetector || isBarcodeDetecting) return;
+      const video = document.getElementById("visorVideo");
+      if (!video || video.readyState < 2) return;
+
+      isBarcodeDetecting = true;
+      try {
+        const barcodes = await nativeBarcodeDetector.detect(video);
+        const now = performance.now();
+        if (barcodes && barcodes.length > 0) {
+          const t = getVideoCoverTransform(video);
+          const updated = [];
+
+          for (let i = 0; i < barcodes.length; i++) {
+            const b = barcodes[i];
+            const rawBox = {
+              x: b.boundingBox.x,
+              y: b.boundingBox.y,
+              width: b.boundingBox.width,
+              height: b.boundingBox.height
+            };
+            const scrBox = videoToScreenBox(rawBox, t);
+            const val = b.rawValue || "";
+
+            updated.push({
+              rawValue: val,
+              format: b.format || "código",
+              box: scrBox,
+              lastSeen: now
+            });
+
+            if (val && now - lastDetectedBarcodeTime > 800) {
+              lastDetectedBarcodeTime = now;
+              showBarcodeActionBanner(val);
+            }
+          }
+
+          trackedBarcodes = updated;
+        } else {
+          trackedBarcodes = trackedBarcodes.filter(b => (now - b.lastSeen) < 1400);
+          if (trackedBarcodes.length === 0 && now - lastDetectedBarcodeTime > 4000) {
+            hideBarcodeActionBanner();
+          }
+        }
+      } catch (err) {
+        console.debug("[Barcode] Error en detección:", err);
+      } finally {
+        isBarcodeDetecting = false;
+      }
+    }
+
+    function showBarcodeActionBanner(value) {
+      const banner = document.getElementById("visorBarcodeBanner");
+      const textElem = document.getElementById("visorBarcodeText");
+      const actionElem = document.getElementById("visorBarcodeAction");
+      if (!banner || !textElem) return;
+
+      const isUrl = /^https?:\/\//i.test(value.trim());
+      activeBarcodeAction = { value: value.trim(), isUrl };
+
+      textElem.textContent = value.trim();
+      if (actionElem) {
+        actionElem.textContent = isUrl ? "🔗 ABRIR" : "📋 COPIAR";
+      }
+
+      banner.style.display = "flex";
+      if (barcodeBannerTimeout) clearTimeout(barcodeBannerTimeout);
+      barcodeBannerTimeout = setTimeout(() => {
+        hideBarcodeActionBanner();
+      }, 6000);
+    }
+
+    function hideBarcodeActionBanner() {
+      const banner = document.getElementById("visorBarcodeBanner");
+      if (banner) banner.style.display = "none";
+      if (barcodeBannerTimeout) {
+        clearTimeout(barcodeBannerTimeout);
+        barcodeBannerTimeout = null;
+      }
+      activeBarcodeAction = null;
+    }
+
+    function handleBarcodeBannerClick(e) {
+      if (e) {
+        e.stopPropagation();
+        e.preventDefault();
+      }
+      if (!activeBarcodeAction || !activeBarcodeAction.value) return;
+
+      const val = activeBarcodeAction.value;
+      if (activeBarcodeAction.isUrl) {
+        playCommandAckSound();
+        window.open(val, "_blank");
+      } else {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(val).then(() => {
+            const actionElem = document.getElementById("visorBarcodeAction");
+            if (actionElem) actionElem.textContent = "✔ COPIADO";
+            playCommandAckSound();
+            setTimeout(hideBarcodeActionBanner, 1500);
+          }).catch(() => {
+            playErrorSound();
+          });
+        }
+      }
+    }
+
+    function drawDetectedBarcodes(ctx, w, h, hudParallax = 0) {
+      if (!trackedBarcodes || trackedBarcodes.length === 0) return;
+
+      const now = performance.now();
+      ctx.save();
+
+      for (let i = 0; i < trackedBarcodes.length; i++) {
+        const item = trackedBarcodes[i];
+        if (now - item.lastSeen > 1400) continue;
+
+        const bx = item.box.x + hudParallax;
+        const by = item.box.y;
+        const bw = item.box.width;
+        const bh = item.box.height;
+
+        if (bw <= 8 || bh <= 8) continue;
+
+        const colorGreen = "#00E676";
+        const colorDim = "rgba(0, 230, 118, 0.25)";
+        const cornerSize = Math.max(10, Math.min(20, Math.min(bw, bh) * 0.3));
+
+        // Marco verde esmeralda (#00E676)
+        ctx.strokeStyle = colorDim;
+        ctx.lineWidth = 3.0;
+        drawCornerBrackets(ctx, bx, by, bw, bh, cornerSize);
+        ctx.stroke();
+
+        ctx.strokeStyle = colorGreen;
+        ctx.lineWidth = 1.5;
+        drawCornerBrackets(ctx, bx, by, bw, bh, cornerSize);
+        ctx.stroke();
+
+        const label = `CÓDIGO: ${item.rawValue.slice(0, 24)}${item.rawValue.length > 24 ? '...' : ''}`;
+        ctx.font = "9.5px 'Share Tech Mono', monospace";
+        const tw = ctx.measureText(label).width + 10;
+        const th = 15;
+        const tx = bx;
+        const ty = Math.max(16, by - th - 3);
+
+        ctx.fillStyle = "rgba(7, 11, 16, 0.88)";
+        ctx.strokeStyle = colorGreen;
+        ctx.lineWidth = 1.0;
+        ctx.fillRect(tx, ty, tw, th);
+        ctx.strokeRect(tx, ty, tw, th);
+
+        ctx.fillStyle = colorGreen;
+        ctx.textAlign = "left";
+        ctx.textBaseline = "middle";
+        ctx.fillText(label, tx + 5, ty + th / 2);
+      }
+
+      ctx.restore();
+    }
+
+    // 4. Callouts Espaciales Holográficos con Gemini
+    function drawSpatialGeminiCallouts(ctx, w, h, hudParallax = 0) {
+      if (!spatialGeminiCallouts || !spatialGeminiCallouts.points || spatialGeminiCallouts.points.length === 0) return;
+
+      const now = Date.now();
+      if (now - spatialGeminiCallouts.timestamp > 15000) return;
+
+      const points = spatialGeminiCallouts.points;
+      ctx.save();
+
+      for (let i = 0; i < points.length; i++) {
+        const pt = points[i];
+        if (!pt.box || pt.box.length !== 4) continue;
+
+        const ymin = pt.box[0] / 1000;
+        const xmin = pt.box[1] / 1000;
+        const ymax = pt.box[2] / 1000;
+        const xmax = pt.box[3] / 1000;
+
+        const cx = ((xmin + xmax) / 2) * w + hudParallax;
+        const cy = ((ymin + ymax) / 2) * h;
+
+        let strokeColor = "#00E5FF";
+        let fillBg = "rgba(7, 11, 16, 0.85)";
+        if (pt.tipo === "alerta") {
+          strokeColor = "#FF1744";
+        } else if (pt.tipo === "texto") {
+          strokeColor = "#FF9800";
+        }
+
+        // Nodo circular central pulsante
+        const pulseR = 5 + Math.sin(now / 200 + i) * 2;
+        ctx.fillStyle = strokeColor;
+        ctx.beginPath();
+        ctx.arc(cx, cy, 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.arc(cx, cy, pulseR, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Línea guía diagonal
+        const lineEndX = cx + 28;
+        const lineEndY = cy - 22;
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = 1.0;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(lineEndX, lineEndY);
+        ctx.lineTo(lineEndX + 16, lineEndY);
+        ctx.stroke();
+
+        // Micro-etiqueta flotante
+        const labelText = (pt.etiqueta || "OBJETO").toUpperCase();
+        ctx.font = "9px 'Share Tech Mono', monospace";
+        const textMetrics = ctx.measureText(labelText);
+        const tagW = textMetrics.width + 12;
+        const tagH = 16;
+        const tagX = lineEndX + 16;
+        const tagY = lineEndY - tagH / 2;
+
+        ctx.fillStyle = fillBg;
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = 1.0;
+        ctx.fillRect(tagX, tagY, tagW, tagH);
+        ctx.strokeRect(tagX, tagY, tagW, tagH);
+
+        ctx.fillStyle = strokeColor;
+        ctx.textAlign = "left";
+        ctx.textBaseline = "middle";
+        ctx.fillText(labelText, tagX + 6, tagY + tagH / 2);
+      }
+
+      ctx.restore();
+    }
+
+    // 5. Telemetría de Sensores Reales: Brújula y Horizonte Artificial
+    function initDeviceSensors() {
+      if (typeof window === "undefined" || !window.addEventListener) return;
+      if (typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function") {
+        DeviceOrientationEvent.requestPermission().then((res) => {
+          if (res === "granted") {
+            window.addEventListener("deviceorientation", handleDeviceOrientation, true);
+            isOrientationActive = true;
+          }
+        }).catch(() => { });
+      } else {
+        window.addEventListener("deviceorientation", handleDeviceOrientation, true);
+        isOrientationActive = true;
+      }
+    }
+
+    function stopDeviceSensors() {
+      if (typeof window !== "undefined" && window.removeEventListener) {
+        window.removeEventListener("deviceorientation", handleDeviceOrientation, true);
+      }
+      isOrientationActive = false;
+    }
+
+    function handleDeviceOrientation(event) {
+      if (!event) return;
+      let heading = null;
+      if (typeof event.webkitCompassHeading !== "undefined" && event.webkitCompassHeading !== null) {
+        heading = event.webkitCompassHeading;
+      } else if (event.alpha !== null && typeof event.alpha !== "undefined") {
+        heading = (360 - event.alpha) % 360;
+      }
+      if (heading !== null && !isNaN(heading)) {
+        targetCompassHeading = Math.round(heading);
+      }
+
+      if (event.beta !== null && typeof event.beta !== "undefined") {
+        devicePitch = Math.max(-90, Math.min(90, event.beta));
+      }
+
+      if (event.gamma !== null && typeof event.gamma !== "undefined") {
+        deviceRoll = Math.max(-90, Math.min(90, event.gamma));
+      }
+    }
+
+    function drawVisorCompassTape(ctx, w, h, hudParallax = 0) {
+      ctx.save();
+      const tapeW = Math.min(280, w * 0.7);
+      const tapeH = 26;
+      const tapeX = (w - tapeW) / 2 + hudParallax;
+      const tapeY = 38;
+
+      ctx.fillStyle = "rgba(7, 11, 16, 0.65)";
+      ctx.fillRect(tapeX, tapeY, tapeW, tapeH);
+      ctx.strokeStyle = "rgba(0, 229, 255, 0.35)";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(tapeX, tapeY, tapeW, tapeH);
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(tapeX, tapeY, tapeW, tapeH);
+      ctx.clip();
+
+      const pxPerDeg = tapeW / 90;
+      const centerX = tapeX + tapeW / 2;
+      const currentH = compassHeading;
+
+      const cardinals = {
+        0: "N",
+        45: "NE",
+        90: "E",
+        135: "SE",
+        180: "S",
+        225: "SO",
+        270: "O",
+        315: "NO"
+      };
+
+      for (let deg = -180; deg <= 540; deg += 5) {
+        const normDeg = ((deg % 360) + 360) % 360;
+        let delta = deg - currentH;
+        while (delta > 180) delta -= 360;
+        while (delta < -180) delta += 360;
+
+        if (Math.abs(delta) > 50) continue;
+
+        const markX = centerX + delta * pxPerDeg;
+        const isMajor = normDeg % 15 === 0;
+        const isCardinal = cardinals[normDeg] !== undefined;
+
+        ctx.strokeStyle = isCardinal ? "#FF9800" : (isMajor ? "#00E5FF" : "rgba(0, 229, 255, 0.4)");
+        ctx.lineWidth = isCardinal ? 1.5 : 1.0;
+        ctx.beginPath();
+        const markH = isCardinal ? 10 : (isMajor ? 7 : 4);
+        ctx.moveTo(markX, tapeY + tapeH);
+        ctx.lineTo(markX, tapeY + tapeH - markH);
+        ctx.stroke();
+
+        if (isCardinal || isMajor) {
+          ctx.fillStyle = isCardinal ? "#FF9800" : "rgba(0, 229, 255, 0.85)";
+          ctx.font = isCardinal ? "bold 8.5px 'Share Tech Mono', monospace" : "7.5px 'Share Tech Mono', monospace";
+          ctx.textAlign = "center";
+          const label = isCardinal ? cardinals[normDeg] : `${normDeg}°`;
+          ctx.fillText(label, markX, tapeY + 11);
+        }
+      }
+      ctx.restore();
+
+      ctx.fillStyle = "#FF9800";
+      ctx.beginPath();
+      ctx.moveTo(centerX, tapeY + tapeH + 1);
+      ctx.lineTo(centerX - 4, tapeY + tapeH + 5);
+      ctx.lineTo(centerX + 4, tapeY + tapeH + 5);
+      ctx.closePath();
+      ctx.fill();
+
+      const headingInt = Math.round(compassHeading);
+      const headingPad = String(headingInt).padStart(3, "0");
+      let cardLabel = "";
+      if (headingInt >= 338 || headingInt < 23) cardLabel = "N";
+      else if (headingInt < 68) cardLabel = "NE";
+      else if (headingInt < 113) cardLabel = "E";
+      else if (headingInt < 158) cardLabel = "SE";
+      else if (headingInt < 203) cardLabel = "S";
+      else if (headingInt < 248) cardLabel = "SO";
+      else if (headingInt < 293) cardLabel = "O";
+      else cardLabel = "NO";
+
+      ctx.fillStyle = "rgba(0, 229, 255, 0.9)";
+      ctx.font = "9px 'Share Tech Mono', monospace";
+      ctx.textAlign = "center";
+      ctx.fillText(`${headingPad}° ${cardLabel}`, centerX, tapeY + tapeH + 15);
+
+      ctx.restore();
+    }
+
+    function drawArtificialHorizon(ctx, w, h, hudParallax = 0) {
+      ctx.save();
+
+      const centerY = h / 2;
+      const rollRad = (deviceRoll * Math.PI) / 180;
+      const pitchOffset = Math.max(-80, Math.min(80, (devicePitch - 45) * 1.5));
+
+      const leftX = 28 + hudParallax;
+      const rightX = w - 28 + hudParallax;
+      const guideLen = 22;
+
+      ctx.strokeStyle = "rgba(0, 229, 255, 0.6)";
+      ctx.lineWidth = 1.2;
+
+      // Guía lateral izquierda
+      ctx.save();
+      ctx.translate(leftX, centerY + pitchOffset);
+      ctx.rotate(rollRad);
+      ctx.beginPath();
+      ctx.moveTo(-guideLen, 0); ctx.lineTo(guideLen, 0);
+      ctx.moveTo(guideLen, 0); ctx.lineTo(guideLen, 6);
+      ctx.stroke();
+      ctx.restore();
+
+      // Guía lateral derecha
+      ctx.save();
+      ctx.translate(rightX, centerY + pitchOffset);
+      ctx.rotate(rollRad);
+      ctx.beginPath();
+      ctx.moveTo(-guideLen, 0); ctx.lineTo(guideLen, 0);
+      ctx.moveTo(-guideLen, 0); ctx.lineTo(-guideLen, 6);
+      ctx.stroke();
+      ctx.restore();
+
+      // Micro-marcas de cabeceo (Pitch Ladder +/- 10°)
+      const cx = w / 2 + hudParallax;
+      ctx.strokeStyle = "rgba(255, 152, 0, 0.4)";
+      ctx.lineWidth = 1.0;
+      const ladderSteps = [-10, 10];
+      for (let i = 0; i < ladderSteps.length; i++) {
+        const step = ladderSteps[i];
+        const ly = centerY + pitchOffset + step * 3.5;
+        if (ly > 80 && ly < h - 80) {
+          ctx.beginPath();
+          ctx.moveTo(cx - 18, ly); ctx.lineTo(cx - 6, ly);
+          ctx.moveTo(cx + 6, ly); ctx.lineTo(cx + 18, ly);
+          ctx.stroke();
+        }
+      }
+
+      ctx.restore();
     }
 
     // Dibuja el HUD AR Holográfico Flotante Estilo Iron Man / E.D.I.T.H.
@@ -4834,6 +5709,17 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
         }
         const reply = `Lente ajustada a ${activeCameraLens.toUpperCase()}. Campo de visión calibrado.`;
         updateVisorSubtitle("ÓPTICA", reply);
+        speakEvResponse(reply);
+        return;
+      }
+
+      if (/(?:analiza(?:r)? (?:el )?entorno|escanea(?:r)? (?:el )?entorno|qu[eé] ves|qu[eé] observas|an[aá]lisis ambiental)/i.test(lower)) {
+        lastAmbientCallTime = 0;
+        updateVisorSubtitle("ESCÁNER", "Iniciando escaneo espacial del entorno...");
+        playMicOpenSound();
+        await triggerAmbientVisionAnalysis();
+        const reply = lastAmbientReading ? `Entorno analizado: ${lastAmbientReading}` : "Escaneo espacial completado.";
+        updateVisorSubtitle("ESCÁNER", reply);
         speakEvResponse(reply);
         return;
       }

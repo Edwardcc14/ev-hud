@@ -1,7 +1,7 @@
-// Service Worker: E.V. Standalone PWA (v10.1-TOUCH UNBLOCK)
-const CACHE_NAME = 'ev-core-v10.1';
+// Service Worker: E.V. Standalone PWA (v11.0-OMNI SCANNER)
+const CACHE_NAME = 'ev-core-v11.0';
 
-// Activos locales y pesos biométricos offline
+// Activos locales, pesos biométricos offline y detector de objetos local
 const PRECACHE_ASSETS = [
   './',
   './index.html',
@@ -12,7 +12,9 @@ const PRECACHE_ASSETS = [
   'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.14/model/face_landmark_68_model-weights_manifest.json',
   'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.14/model/face_landmark_68_model.bin',
   'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.14/model/face_recognition_model-weights_manifest.json',
-  'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.14/model/face_recognition_model.bin'
+  'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.14/model/face_recognition_model.bin',
+  'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js',
+  'https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js'
 ];
 
 // 1. INSTALACIÓN: Precarga tolerante con Promise.allSettled
