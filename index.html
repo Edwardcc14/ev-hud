@@ -1,15 +1,18 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#FF9800">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="E.V. Core">
-  <title>E.V. // TACTICAL CORE v9.8</title>
+  <title>E.V. // TACTICAL CORE v9.9</title>
   <link rel="manifest" href="./manifest.json">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23070B10' stroke='%23FF9800' stroke-width='4'/><circle cx='50' cy='50' r='20' fill='%2300E5FF'/></svg>">
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23070B10' stroke='%23FF9800' stroke-width='4'/><circle cx='50' cy='50' r='20' fill='%2300E5FF'/></svg>">
 
   <!-- LIBRERÍA BIOMÉTRICA OFFLINE PRECACHADA POR SERVICE WORKER -->
   <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.14/dist/face-api.min.js" defer></script>
@@ -39,11 +42,14 @@
       user-select: none;
     }
 
-    input, textarea, [contenteditable="true"] {
+    input,
+    textarea,
+    [contenteditable="true"] {
       user-select: text;
     }
 
-    html, body {
+    html,
+    body {
       width: 100%;
       height: 100%;
       height: 100dvh;
@@ -63,7 +69,7 @@
       font-family: var(--font-sans);
       display: flex;
       flex-direction: column;
-      background-image: 
+      background-image:
         radial-gradient(rgba(0, 229, 255, 0.04) 1px, transparent 1px),
         linear-gradient(to bottom, rgba(7, 11, 16, 0.95), rgba(7, 11, 16, 0.98));
       background-size: 24px 24px, 100% 100%;
@@ -113,8 +119,17 @@
     }
 
     @keyframes pulseCore {
-      0%, 100% { transform: scale(0.9); opacity: 0.8; }
-      50% { transform: scale(1.15); opacity: 1; }
+
+      0%,
+      100% {
+        transform: scale(0.9);
+        opacity: 0.8;
+      }
+
+      50% {
+        transform: scale(1.15);
+        opacity: 1;
+      }
     }
 
     .hud-title-wrap {
@@ -194,7 +209,8 @@
       color: var(--accent-cyan);
     }
 
-    .btn-hud.accent-cyan:hover, .btn-hud.accent-cyan.active {
+    .btn-hud.accent-cyan:hover,
+    .btn-hud.accent-cyan.active {
       background: rgba(0, 229, 255, 0.12);
       border-color: var(--accent-cyan);
       box-shadow: 0 0 8px rgba(0, 229, 255, 0.3);
@@ -205,7 +221,8 @@
       color: var(--accent-amber);
     }
 
-    .btn-hud.accent-amber:hover, .btn-hud.accent-amber.active {
+    .btn-hud.accent-amber:hover,
+    .btn-hud.accent-amber.active {
       background: rgba(255, 152, 0, 0.12);
       border-color: var(--accent-amber);
       box-shadow: 0 0 8px rgba(255, 152, 0, 0.3);
@@ -282,8 +299,15 @@
     }
 
     @keyframes fadeInMsg {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .msg-wrap.user {
@@ -405,8 +429,15 @@
     }
 
     @keyframes pulseMic {
-      from { transform: scale(0.8); opacity: 0.6; }
-      to { transform: scale(1.3); opacity: 1; }
+      from {
+        transform: scale(0.8);
+        opacity: 0.6;
+      }
+
+      to {
+        transform: scale(1.3);
+        opacity: 1;
+      }
     }
 
     /* PREVIEW DE IMAGEN ADJUNTA */
@@ -521,7 +552,7 @@
       box-shadow: 0 0 12px rgba(0, 229, 255, 0.5);
     }
 
-    /* VISOR E.V. PANTALLA COMPLETA INMERSIVA */
+    /* VISOR E.V. PANTALLA COMPLETA INMERSIVA / ESTEREOSCÓPICO SBS v9.9 */
     #visorOverlay {
       position: fixed;
       inset: 0;
@@ -538,7 +569,58 @@
       padding-bottom: env(safe-area-inset-bottom, 0);
     }
 
-    #visorVideo {
+    #visorOverlay.vr-mode {
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .vr-split-container {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: row;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    .vr-eye {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      transform-origin: center center;
+      background: #000;
+      will-change: transform;
+      transition: transform 0.05s ease-out;
+    }
+
+    #visorOverlay.vr-mode .vr-eye {
+      width: calc(50% - 2px);
+      flex: 0 0 calc(50% - 2px);
+    }
+
+    .vr-central-divider {
+      width: 4px;
+      height: 100%;
+      background: #000;
+      flex-shrink: 0;
+      z-index: 5;
+      box-shadow: 0 0 10px #000;
+    }
+
+    #visorOverlay.vr-mode #visorSubtitles {
+      display: none !important;
+    }
+
+    #visorOverlay.vr-mode #evBiometricSidebar {
+      display: none !important;
+    }
+
+    #visorVideo,
+    #visorVideoRight {
       position: absolute;
       inset: 0;
       width: 100%;
@@ -547,13 +629,51 @@
       z-index: 1;
     }
 
-    #visorCanvas {
+    #visorCanvas,
+    #visorCanvasRight {
       position: absolute;
       inset: 0;
       width: 100%;
       height: 100%;
       z-index: 2;
       pointer-events: none !important;
+    }
+
+    .visor-row-vr-settings {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      width: 100%;
+      padding: 6px 10px;
+      background: rgba(7, 11, 16, 0.88);
+      border: 1px solid rgba(0, 229, 255, 0.3);
+      border-radius: 6px;
+    }
+
+    #visorOverlay.vr-mode .visor-row-vr-settings {
+      display: flex;
+    }
+
+    .vr-slider-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--accent-cyan);
+    }
+
+    .vr-slider-label {
+      min-width: 65px;
+      white-space: nowrap;
+    }
+
+    .vr-range-input {
+      width: 80px;
+      height: 4px;
+      accent-color: var(--accent-cyan);
+      cursor: pointer;
     }
 
     .visor-top-bar {
@@ -703,8 +823,15 @@
     }
 
     @keyframes fadeInBio {
-      from { opacity: 0; transform: translateX(-8px); }
-      to { opacity: 1; transform: translateX(0); }
+      from {
+        opacity: 0;
+        transform: translateX(-8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
     }
 
     .bio-card.recognized {
@@ -797,7 +924,7 @@
       color: var(--accent-amber);
     }
 
-    /* DOCK INFERIOR DEL VISOR (MODO GAFAS LIMPIAS v9.8) */
+    /* DOCK INFERIOR DEL VISOR (MODO GAFAS LIMPIAS v9.9) */
     .visor-bottom-dock {
       position: absolute;
       bottom: 0;
@@ -829,7 +956,7 @@
       pointer-events: auto;
     }
 
-    /* SUBTÍTULOS FLOTANTES EN EL VISOR (AUTO-OCULTADO EN 4s v9.8) */
+    /* SUBTÍTULOS FLOTANTES EN EL VISOR (AUTO-OCULTADO EN 4s v9.9) */
     .visor-subtitles {
       position: relative;
       width: 100%;
@@ -1045,13 +1172,26 @@
 
     /* MEDIA QUERIES PARA TABLET / DESKTOP */
     @media (min-width: 768px) {
-      .hud-title { font-size: 16px; }
-      .btn-hud { font-size: 12px; padding: 7px 12px; }
-      .msg-wrap { max-width: 75%; }
-      .msg-bubble { font-size: 14px; }
+      .hud-title {
+        font-size: 16px;
+      }
+
+      .btn-hud {
+        font-size: 12px;
+        padding: 7px 12px;
+      }
+
+      .msg-wrap {
+        max-width: 75%;
+      }
+
+      .msg-bubble {
+        font-size: 14px;
+      }
     }
   </style>
 </head>
+
 <body>
 
   <!-- CABECERA TÁCTICA HUD -->
@@ -1103,10 +1243,12 @@
       <div class="msg-wrap assistant">
         <div class="msg-header">
           <span>[E.V. // CO-PILOTO TÁCTICO]</span>
-          <span>v9.8-CLEAN GLASSES HUD</span>
+          <span>v9.9-STEREOSCOPIC VR HUD</span>
         </div>
         <div class="msg-bubble">
-          Sistemas en línea, Operador. Modo Gafas Limpias v9.8 activo: visor 100 % despejado sin botones estorbando al caminar, control total por voz hands-free, recorte facial nítido en tarjetas flotantes y rastreo biométrico estabilizado sin cortes. Pulsa ⚙ API KEY para sincronizar Gemini, administra perfiles en 👥 BIOMETRÍA o abre el 👁 VISOR E.V. para operar con visión táctica inmersiva.
+          Sistemas en línea, Operador. Modo Visor Estereoscópico v9.9 activo: proyección dual SBS 3D para casco VR con
+          ajuste DIP/Zoom, HUD AR sin mareo, visor 100 % despejado sin botones estorbando al caminar, control total por
+          voz hands-free y rastreo biométrico estabilizado. Pulsa 👓 VR en el visor para alternar vista dividida.
         </div>
       </div>
     </div>
@@ -1115,7 +1257,8 @@
     <div id="attachPreviewBar" class="attach-preview-bar">
       <div style="display: flex; align-items: center; gap: 8px;">
         <img id="attachPreviewImg" class="attach-preview-img" alt="Adjunto">
-        <span style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-cyan);">FOTOGRAMA ADJUNTO</span>
+        <span style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-cyan);">FOTOGRAMA
+          ADJUNTO</span>
       </div>
       <button id="btnRemoveAttach" class="btn-remove-attach">✕ QUITAR</button>
     </div>
@@ -1132,7 +1275,8 @@
       <button id="btnAttach" class="btn-icon" title="Adjuntar Fotograma o Imagen">📷</button>
 
       <div class="input-text-wrap">
-        <textarea id="inputPrompt" class="input-prompt" placeholder="Dicta o escribe una orden para E.V...." rows="1"></textarea>
+        <textarea id="inputPrompt" class="input-prompt" placeholder="Dicta o escribe una orden para E.V...."
+          rows="1"></textarea>
       </div>
 
       <button id="btnMic" class="btn-icon" title="Dictar por Voz (Anti-Eco)">🎙</button>
@@ -1140,22 +1284,36 @@
     </div>
   </main>
 
-  <!-- VISOR ÓPTICO E.V. PANTALLA COMPLETA INMERSIVA -->
+  <!-- VISOR ÓPTICO E.V. PANTALLA COMPLETA INMERSIVA / ESTEREOSCÓPICO SBS v9.9 -->
   <div id="visorOverlay">
-    <video id="visorVideo" autoplay playsinline muted></video>
-    <canvas id="visorCanvas"></canvas>
+    <!-- Contenedor Estereoscópico Dividido SBS (Modo Casco VR v9.9) -->
+    <div id="vrContainer" class="vr-split-container">
+      <div id="vrEyeLeft" class="vr-eye">
+        <video id="visorVideo" autoplay playsinline muted></video>
+        <canvas id="visorCanvas"></canvas>
+      </div>
+      <div id="vrDivider" class="vr-central-divider" style="display: none;"></div>
+      <div id="vrEyeRight" class="vr-eye" style="display: none;">
+        <video id="visorVideoRight" autoplay playsinline muted></video>
+        <canvas id="visorCanvasRight"></canvas>
+      </div>
+    </div>
     <canvas id="motionCanvas" width="128" height="96" style="display: none;"></canvas>
 
     <!-- Barra Superior del Visor -->
     <div class="visor-top-bar">
       <div class="visor-badge">
-        <span style="display: inline-block; width: 6px; height: 6px; background: var(--accent-cyan); border-radius: 50%;"></span>
-        <span>E.V. // OPTICAL CORE v9.8</span>
+        <span
+          style="display: inline-block; width: 6px; height: 6px; background: var(--accent-cyan); border-radius: 50%;"></span>
+        <span>E.V. // OPTICAL CORE v9.9</span>
         <span id="visorModelTag" style="color: var(--accent-amber); margin-left: 4px;">[3.5 FLASH-LITE]</span>
         <span id="visorBioStatus" class="visor-bio-badge" style="margin-left: 6px;">BIOMETRÍA: INICIANDO...</span>
       </div>
       <div style="display: flex; align-items: center; gap: 6px;">
-        <button id="btnVisorForceReload" class="btn-exit-visor" title="Purgar caché y forzar recarga limpia" style="padding: 4px 8px; font-size: 13px;">↻</button>
+        <button id="btnVisorVR" class="btn-exit-visor" title="Alternar Modo Estereoscópico VR SBS (Casco)"
+          style="padding: 4px 8px; font-weight: bold;">👓 VR</button>
+        <button id="btnVisorForceReload" class="btn-exit-visor" title="Purgar caché y forzar recarga limpia"
+          style="padding: 4px 8px; font-size: 13px;">↻</button>
         <button id="btnExitVisor" class="btn-exit-visor">✕ SALIR</button>
       </div>
     </div>
@@ -1175,7 +1333,7 @@
       <div id="evBioSidebarContent" class="bio-sidebar-content"></div>
     </div>
 
-    <!-- DOCK INFERIOR SIN SUPERPOSICIONES (MODO GAFAS LIMPIAS v9.8) -->
+    <!-- DOCK INFERIOR SIN SUPERPOSICIONES (MODO GAFAS LIMPIAS v9.9) -->
     <div id="visorBottomDock" class="visor-bottom-dock">
       <!-- Fila 1 (Arriba): Cuadro de subtítulos y estado (Auto-ocultado en 4s) -->
       <div id="visorSubtitles" class="visor-subtitles">
@@ -1185,12 +1343,26 @@
 
       <!-- Fila 2 & 3: Botones tácticos (Ocultos por defecto para Modo Gafas Limpias; doble toque para alternar) -->
       <div id="visorControlsDock" class="visor-controls-dock" style="display: none;">
+        <!-- Fila VR: Calibración Óptica SBS (DIP / Zoom de Lente) -->
+        <div id="visorVrSettingsRow" class="visor-row-vr-settings">
+          <div class="vr-slider-group">
+            <span class="vr-slider-label">DIP: <span id="vrIpdVal">0</span>px</span>
+            <input type="range" id="sliderVrIpd" class="vr-range-input" min="-40" max="40" step="1" value="0">
+          </div>
+          <div class="vr-slider-group">
+            <span class="vr-slider-label">ZOOM: <span id="vrScaleVal">95</span>%</span>
+            <input type="range" id="sliderVrScale" class="vr-range-input" min="75" max="100" step="1" value="95">
+          </div>
+        </div>
+
         <!-- Fila 2 (Centro): Botones biométricos prioritarios -->
         <div class="visor-row-bio">
-          <button id="btnVisorRegisterFace" class="btn-visor-action accent-cyan" title="Registrar nuevo perfil biométrico">
+          <button id="btnVisorRegisterFace" class="btn-visor-action accent-cyan"
+            title="Registrar nuevo perfil biométrico">
             👤 REGISTRAR ROSTRO
           </button>
-          <button id="btnVisorAutoEnroll" class="btn-visor-action accent-green" title="Auto-captura manos libres de rostros">
+          <button id="btnVisorAutoEnroll" class="btn-visor-action accent-green"
+            title="Auto-captura manos libres de rostros">
             🤖 AUTO: ON
           </button>
         </div>
@@ -1206,7 +1378,8 @@
           <button id="btnVisorMic" class="btn-visor-action accent-cyan" title="Micrófono continuo">
             🎙 MIC: OFF
           </button>
-          <button id="btnVisorFlipCamera" class="btn-visor-action accent-cyan" title="Alternar Lente Óptica (0.5x Ultra / 1x Principal / Frontal)">
+          <button id="btnVisorFlipCamera" class="btn-visor-action accent-cyan"
+            title="Alternar Lente Óptica (0.5x Ultra / 1x Principal / Frontal)">
             🔭 0.5x ULTRAWIDE
           </button>
         </div>
@@ -1222,7 +1395,8 @@
         <button class="btn-timer-cancel" onclick="closeModal('modalRegisterFace')">✕</button>
       </div>
       <div style="display: flex; align-items: center; gap: 14px; margin: 4px 0;">
-        <img id="regFacePreviewImg" class="bio-avatar" style="width: 54px; height: 54px; border-width: 2px;" alt="Avatar">
+        <img id="regFacePreviewImg" class="bio-avatar" style="width: 54px; height: 54px; border-width: 2px;"
+          alt="Avatar">
         <div style="font-size: 11px; color: var(--text-muted); line-height: 1.4;">
           El descriptor neuronal (128 vectores) y la miniatura se almacenarán de forma 100 % local en tu dispositivo.
         </div>
@@ -1233,11 +1407,13 @@
       </div>
       <div class="modal-field">
         <label class="modal-label" for="regFaceRole">ROL / RELACIÓN TÁCTICA:</label>
-        <input type="text" id="regFaceRole" class="modal-input" placeholder="Ej: Operador Principal, Familia · Prioridad Alfa...">
+        <input type="text" id="regFaceRole" class="modal-input"
+          placeholder="Ej: Operador Principal, Familia · Prioridad Alfa...">
       </div>
       <div class="modal-field">
         <label class="modal-label" for="regFaceNotes">NOTAS ADICIONALES:</label>
-        <input type="text" id="regFaceNotes" class="modal-input" placeholder="Ej: Fundador del sistema, acceso ilimitado...">
+        <input type="text" id="regFaceNotes" class="modal-input"
+          placeholder="Ej: Fundador del sistema, acceso ilimitado...">
       </div>
       <div class="modal-actions">
         <button class="btn-hud" onclick="closeModal('modalRegisterFace')">CANCELAR</button>
@@ -1256,9 +1432,11 @@
       <div style="display: flex; justify-content: space-between; align-items: center; gap: 6px; flex-wrap: wrap;">
         <span class="modal-label">PERFILES EN LOCALSTORAGE:</span>
         <div style="display: flex; gap: 6px;">
-          <button id="btnExportBio" class="btn-hud accent-cyan" style="font-size: 9.5px; padding: 4px 8px;">EXPORTAR JSON</button>
+          <button id="btnExportBio" class="btn-hud accent-cyan" style="font-size: 9.5px; padding: 4px 8px;">EXPORTAR
+            JSON</button>
           <input type="file" id="bioFileInput" accept=".json" style="display: none;">
-          <button id="btnImportBio" class="btn-hud accent-amber" style="font-size: 9.5px; padding: 4px 8px;">IMPORTAR JSON</button>
+          <button id="btnImportBio" class="btn-hud accent-amber" style="font-size: 9.5px; padding: 4px 8px;">IMPORTAR
+            JSON</button>
         </div>
       </div>
       <div id="biometricProfilesList" class="notes-list" style="max-height: 260px;"></div>
@@ -1276,7 +1454,8 @@
         <button class="btn-timer-cancel" onclick="closeModal('modalApiKey')">✕</button>
       </div>
       <p style="font-size: 12px; color: var(--text-muted); line-height: 1.4;">
-        E.V. Standalone se comunica directamente desde tu navegador con Google Gemini sin servidores intermediarios. Tu clave se almacena de forma 100 % privada en el almacenamiento local de este dispositivo.
+        E.V. Standalone se comunica directamente desde tu navegador con Google Gemini sin servidores intermediarios. Tu
+        clave se almacena de forma 100 % privada en el almacenamiento local de este dispositivo.
       </p>
       <div class="modal-field">
         <label class="modal-label" for="apiKeyInput">GEMINI API KEY:</label>
@@ -1298,7 +1477,8 @@
         <button class="btn-timer-cancel" onclick="closeModal('modalNotes')">✕</button>
       </div>
       <div class="modal-field">
-        <input type="text" id="newNoteInput" class="modal-input" placeholder="Escribe una nueva nota o di 'anota que...'">
+        <input type="text" id="newNoteInput" class="modal-input"
+          placeholder="Escribe una nueva nota o di 'anota que...'">
       </div>
       <div style="display: flex; justify-content: flex-end;">
         <button id="btnAddNote" class="btn-hud accent-cyan">AGREGAR NOTA</button>
@@ -1315,14 +1495,22 @@
 
   <script>
     // =========================================================================
-    // E.V. STANDALONE PWA (v9.8-CLEAN GLASSES HUD) - NÚCLEO JS
+    // E.V. STANDALONE PWA (v9.9-STEREOSCOPIC VR HUD) - NÚCLEO JS
     // =========================================================================
 
-    // Variables de Óptica y Calibración v9.8 (Modo Gafas Limpias + HUD AR)
+    // Variables de Óptica y Calibración v9.9 (Modo Gafas Limpias + VR SBS + HUD AR)
     let availableVideoDevices = [];
     let rearCameras = [];
     let frontCameras = [];
     let activeCameraLens = "0.5x"; // '0.5x' | '1x' | 'user'
+
+    // Variables de Modo Estereoscópico VR SBS (Casco / Visor v9.9)
+    let isVrModeActive = false;
+    let vrIpd = parseInt(localStorage.getItem("ev_vr_ipd") || "0", 10);
+    let vrScale = parseFloat(localStorage.getItem("ev_vr_scale") || "0.95");
+    let currentSubtitleSpeaker = "";
+    let currentSubtitleText = "";
+    let isSubtitleVisible = false;
 
     // Variables de Calibración Cinética y Visión Ambiental
     let isAutoEnrollEnabled = true;
@@ -1341,7 +1529,7 @@
     let isSidebarCollapsed = false;
     let lastPanTimestamp = 0;
 
-    // Variables Biometría Híbrida Indestructible v9.8
+    // Variables Biometría Híbrida Indestructible v9.9
     let isFallbackBiometrics = false;
     let nativeFaceDetectorInstance = null;
 
@@ -1366,7 +1554,7 @@
     if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
       window.addEventListener("load", () => {
         navigator.serviceWorker.register("./sw.js")
-          .then((reg) => console.log("[E.V. PWA] Service Worker v9.8 registrado:", reg.scope))
+          .then((reg) => console.log("[E.V. PWA] Service Worker v9.9 registrado:", reg.scope))
           .catch((err) => console.warn("[E.V. PWA] Fallo registro SW:", err));
       });
     }
@@ -1436,16 +1624,39 @@
       document.getElementById("btnVisorMic").addEventListener("click", toggleVisorContinuousMic);
       document.getElementById("btnVisorFlipCamera").addEventListener("click", cycleVisorLens);
 
-      // Gesto de doble toque / doble clic en pantalla para alternar controles (Modo Gafas Limpias v9.8)
+      // Controles Estereoscópicos VR SBS (v9.9)
+      const btnVR = document.getElementById("btnVisorVR");
+      if (btnVR) {
+        btnVR.addEventListener("click", () => toggleStereoscopicVrMode());
+      }
+      const sliderIpd = document.getElementById("sliderVrIpd");
+      if (sliderIpd) {
+        sliderIpd.addEventListener("input", (e) => {
+          vrIpd = parseInt(e.target.value, 10);
+          localStorage.setItem("ev_vr_ipd", vrIpd);
+          applyVrCalibration();
+        });
+      }
+      const sliderScale = document.getElementById("sliderVrScale");
+      if (sliderScale) {
+        sliderScale.addEventListener("input", (e) => {
+          vrScale = parseFloat(e.target.value) / 100.0;
+          localStorage.setItem("ev_vr_scale", vrScale);
+          applyVrCalibration();
+        });
+      }
+      applyVrCalibration();
+
+      // Gesto de doble toque / doble clic en pantalla para alternar controles (Modo Gafas Limpias v9.9)
       const visorOverlayEl = document.getElementById("visorOverlay");
       if (visorOverlayEl) {
         visorOverlayEl.addEventListener("dblclick", (e) => {
-          if (e.target.closest("button, .btn-visor-action, .modal-backdrop, .btn-exit-visor")) return;
+          if (e.target.closest("button, .btn-visor-action, .modal-backdrop, .btn-exit-visor, input")) return;
           toggleVisorControls();
         });
 
         visorOverlayEl.addEventListener("touchend", (e) => {
-          if (e.target.closest("button, .btn-visor-action, .modal-backdrop, .btn-exit-visor")) return;
+          if (e.target.closest("button, .btn-visor-action, .modal-backdrop, .btn-exit-visor, input")) return;
           const now = performance.now();
           if (now - lastVisorTapTime < 340) {
             e.preventDefault();
@@ -1468,6 +1679,97 @@
         if (isVisorActive) closeVisorOverlay();
       });
     });
+
+    // =========================================================================
+    // CONTROL Y CALIBRACIÓN ÓPTICA VR ESTEREOSCÓPICA SBS (v9.9)
+    // =========================================================================
+
+    function applyVrCalibration() {
+      const eyeLeft = document.getElementById("vrEyeLeft");
+      const eyeRight = document.getElementById("vrEyeRight");
+      if (isVrModeActive) {
+        if (eyeLeft) eyeLeft.style.transform = `scale(${vrScale}) translateX(${-vrIpd}px)`;
+        if (eyeRight) eyeRight.style.transform = `scale(${vrScale}) translateX(${vrIpd}px)`;
+      } else {
+        if (eyeLeft) eyeLeft.style.transform = "none";
+        if (eyeRight) eyeRight.style.transform = "none";
+      }
+      const ipdVal = document.getElementById("vrIpdVal");
+      if (ipdVal) ipdVal.textContent = vrIpd;
+      const scaleVal = document.getElementById("vrScaleVal");
+      if (scaleVal) scaleVal.textContent = Math.round(vrScale * 100);
+      const sliderIpd = document.getElementById("sliderVrIpd");
+      if (sliderIpd) sliderIpd.value = vrIpd;
+      const sliderScale = document.getElementById("sliderVrScale");
+      if (sliderScale) sliderScale.value = Math.round(vrScale * 100);
+    }
+
+    function toggleStereoscopicVrMode(forceState) {
+      const overlay = document.getElementById("visorOverlay");
+      const btnVR = document.getElementById("btnVisorVR");
+      const videoRight = document.getElementById("visorVideoRight");
+      const eyeRight = document.getElementById("vrEyeRight");
+      const divider = document.getElementById("vrDivider");
+
+      if (typeof forceState === "boolean") {
+        isVrModeActive = forceState;
+      } else {
+        isVrModeActive = !isVrModeActive;
+      }
+
+      if (isVrModeActive) {
+        if (overlay) overlay.classList.add("vr-mode");
+        if (eyeRight) eyeRight.style.display = "block";
+        if (divider) divider.style.display = "block";
+        if (btnVR) {
+          btnVR.textContent = "👓 VR: ON";
+          btnVR.style.borderColor = "var(--accent-cyan)";
+          btnVR.style.color = "var(--accent-cyan)";
+        }
+        if (videoRight && visorStream) {
+          videoRight.srcObject = visorStream;
+          videoRight.play().catch(() => {});
+        }
+        if (screen.orientation && screen.orientation.lock) {
+          screen.orientation.lock("landscape").catch(() => {});
+        }
+        playCommandAckSound();
+        updateVisorSubtitle("ÓPTICA", "Modo Estereoscópico VR activado. Calibración SBS en línea.");
+      } else {
+        if (overlay) overlay.classList.remove("vr-mode");
+        if (eyeRight) eyeRight.style.display = "none";
+        if (divider) divider.style.display = "none";
+        if (btnVR) {
+          btnVR.textContent = "👓 VR";
+          btnVR.style.borderColor = "var(--accent-red)";
+          btnVR.style.color = "#FF5252";
+        }
+        if (videoRight) {
+          videoRight.srcObject = null;
+        }
+        if (screen.orientation && screen.orientation.unlock) {
+          try { screen.orientation.unlock(); } catch (e) {}
+        }
+        playTacticalBeep(520, 0.08);
+      }
+      applyVrCalibration();
+    }
+
+    function toggleVisorControls() {
+      const dock = document.getElementById("visorControlsDock");
+      const bottomDock = document.getElementById("visorBottomDock");
+      if (!dock || !bottomDock) return;
+      const isHidden = dock.style.display === "none";
+      if (isHidden) {
+        dock.style.display = "flex";
+        bottomDock.classList.add("controls-active");
+        playTacticalBeep(780, 0.05);
+      } else {
+        dock.style.display = "none";
+        bottomDock.classList.remove("controls-active");
+        playTacticalBeep(520, 0.05);
+      }
+    }
 
     // =========================================================================
     // ENRUTADOR HÍBRIDO (AUTO-ROUTER) Y CLIENTE REST GEMINI
@@ -1653,7 +1955,7 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
                 await faceapi.nets.faceRecognitionNet.loadFromUri(FACE_API_MODELS_URL);
                 rebuildFaceMatcher();
                 console.log("[BiometricEngine] Reconocimiento neuronal secundario en línea.");
-              } catch (e) {}
+              } catch (e) { }
             }, 1000);
           }
           return;
@@ -1675,8 +1977,8 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
         if (window.faceapi) {
           await faceapi.nets.tinyFaceDetector.loadFromUri(FACE_API_MODELS_URL);
           if (STATE.faceDb.length > 0) {
-            faceapi.nets.faceLandmark68Net.loadFromUri(FACE_API_MODELS_URL).catch(() => {});
-            faceapi.nets.faceRecognitionNet.loadFromUri(FACE_API_MODELS_URL).catch(() => {});
+            faceapi.nets.faceLandmark68Net.loadFromUri(FACE_API_MODELS_URL).catch(() => { });
+            faceapi.nets.faceRecognitionNet.loadFromUri(FACE_API_MODELS_URL).catch(() => { });
           }
           isBiometricLoaded = true;
           isBiometricLoading = false;
@@ -1727,7 +2029,7 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
     function getVideoCoverTransform(video) {
       const vw = video.videoWidth || 1280;
       const vh = video.videoHeight || 720;
-      const cw = video.clientWidth || window.innerWidth;
+      const cw = isVrModeActive ? (video.clientWidth || Math.floor(window.innerWidth / 2)) : (video.clientWidth || window.innerWidth);
       const ch = video.clientHeight || window.innerHeight;
       const scale = Math.max(cw / vw, ch / vh);
       const offsetX = (vw * scale - cw) / 2;
@@ -1991,7 +2293,7 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
                     id: "face_" + Date.now(),
                     name: autoName,
                     role: "Sujeto Auto-Capturado",
-                    notes: "Captura HUD AR v9.8",
+                    notes: "Captura HUD AR v9.9",
                     avatarDataUrl: avatarData,
                     descriptors: unknownTarget.descriptor ? [unknownTarget.descriptor] : []
                   };
@@ -2463,11 +2765,24 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
         }
       }
 
+      // 5. Detección de Modo VR Casco / Pantalla dividida
+      const vrMatch = clean.match(/(?:modo casco|modo vr|activar vr|pantalla dividida|estereosc[oó]pico)/i);
+      if (vrMatch) {
+        if (!isVisorActive) {
+          openVisorOverlay();
+        }
+        toggleStereoscopicVrMode(true);
+        return {
+          handled: true,
+          reply: "Modo estereoscópico para casco VR activado. Vista dividida Side-by-Side en línea."
+        };
+      }
+
       return { handled: false };
     }
 
     // =========================================================================
-    // TEMPORIZADORES Y SÍNTESIS DE TONOS WEB AUDIO API (FEEDBACK POSITIVO v9.8)
+    // TEMPORIZADORES Y SÍNTESIS DE TONOS WEB AUDIO API (FEEDBACK POSITIVO v9.9)
     // =========================================================================
 
     let audioContextInstance = null;
@@ -2477,7 +2792,7 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
         if (AudioCtx) audioContextInstance = new AudioCtx();
       }
       if (audioContextInstance && audioContextInstance.state === "suspended") {
-        audioContextInstance.resume().catch(() => {});
+        audioContextInstance.resume().catch(() => { });
       }
       return audioContextInstance;
     }
@@ -2497,7 +2812,7 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
         gain.connect(ctx.destination);
         osc.start();
         osc.stop(ctx.currentTime + 0.07);
-      } catch (e) {}
+      } catch (e) { }
     }
 
     // Pulso doble ascendente cristalino (660 Hz 65ms -> 990 Hz 65ms, volumen 0.14)
@@ -2527,7 +2842,7 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
         gain2.connect(ctx.destination);
         osc2.start(now + 0.065);
         osc2.stop(now + 0.13);
-      } catch (e) {}
+      } catch (e) { }
     }
 
     // Tono descendente 440 Hz -> 220 Hz (180ms) reservado para errores
@@ -2547,7 +2862,7 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
         gain.connect(ctx.destination);
         osc.start(now);
         osc.stop(now + 0.18);
-      } catch (e) {}
+      } catch (e) { }
     }
 
     function playTacticalBeep(frequency = 880, duration = 0.12, type = "sine") {
@@ -2564,7 +2879,7 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
         gain.connect(ctx.destination);
         osc.start();
         osc.stop(ctx.currentTime + duration);
-      } catch (e) {}
+      } catch (e) { }
     }
 
     function playTacticalAlarmTune() {
@@ -2769,7 +3084,7 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
 
       const voices = window.speechSynthesis.getVoices();
       const esVoice = voices.find(v => v.lang.startsWith("es") && (v.name.includes("Google") || v.name.includes("Sabina") || v.name.includes("Helena") || v.name.includes("Natural") || v.name.includes("Elvira"))) ||
-                      voices.find(v => v.lang.startsWith("es"));
+        voices.find(v => v.lang.startsWith("es"));
       if (esVoice) utterance.voice = esVoice;
 
       let watchdogId = null;
@@ -2878,7 +3193,7 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
         if (isVisorActive && isVisorContinuousMic && !STATE.isSpeaking) {
           setTimeout(() => {
             if (isVisorActive && isVisorContinuousMic && !STATE.isSpeaking) {
-              try { rec.start(); } catch (e) {}
+              try { rec.start(); } catch (e) { }
             }
           }, 350);
         }
@@ -2897,12 +3212,12 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
       }
       try {
         rec.start();
-      } catch (e) {}
+      } catch (e) { }
     }
 
     function stopVoiceRecognition() {
       if (speechRecInstance && STATE.isListening) {
-        try { speechRecInstance.abort(); } catch (e) {}
+        try { speechRecInstance.abort(); } catch (e) { }
       }
       STATE.isListening = false;
       document.getElementById("btnMic").classList.remove("active-mic");
@@ -3100,7 +3415,7 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
       if (el && navigator.clipboard) {
         navigator.clipboard.writeText(el.textContent)
           .then(() => playTacticalBeep(1200, 0.08))
-          .catch(() => {});
+          .catch(() => { });
       }
     }
 
@@ -3294,9 +3609,9 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
 
       try {
         if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
-          document.documentElement.requestFullscreen().catch(() => {});
+          document.documentElement.requestFullscreen().catch(() => { });
         }
-      } catch (e) {}
+      } catch (e) { }
 
       updateLensButtonUI();
       await startVisorCamera();
@@ -3319,7 +3634,7 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
       }
       startVisorSpeechLoop();
 
-      updateVisorSubtitle("E.V.", "Visor óptico v9.8 en línea. Modo Gafas Limpias y HUD AR activos.");
+      updateVisorSubtitle("E.V.", "Visor óptico v9.9 en línea. Proyección dual SBS y HUD AR activos.");
       playTacticalBeep(1046, 0.1);
     }
 
@@ -3344,6 +3659,10 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
       }
       const video = document.getElementById("visorVideo");
       if (video) video.srcObject = null;
+      const videoRight = document.getElementById("visorVideoRight");
+      if (videoRight) videoRight.srcObject = null;
+
+      toggleStereoscopicVrMode(false);
 
       currentTrackedFaces = [];
       const sidebarContent = document.getElementById("evBioSidebarContent");
@@ -3353,7 +3672,7 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
 
       // Limpieza de memoria WebGL en tensores para evitar saturación de RAM móvil
       if (window.faceapi && faceapi.tf) {
-        try { faceapi.tf.disposeVariables(); } catch (e) {}
+        try { faceapi.tf.disposeVariables(); } catch (e) { }
       }
 
       const overlay = document.getElementById("visorOverlay");
@@ -3361,9 +3680,9 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
 
       try {
         if (document.fullscreenElement && document.exitFullscreen) {
-          document.exitFullscreen().catch(() => {});
+          document.exitFullscreen().catch(() => { });
         }
-      } catch (e) {}
+      } catch (e) { }
     }
 
     async function startVisorCamera() {
@@ -3435,6 +3754,11 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
           video.srcObject = visorStream;
           await video.play();
         }
+        const videoRight = document.getElementById("visorVideoRight");
+        if (videoRight && isVrModeActive) {
+          videoRight.srcObject = visorStream;
+          videoRight.play().catch(() => {});
+        }
         updateLensButtonUI();
       } catch (err) {
         console.warn("[Visor E.V.] Fallo de cámara:", err);
@@ -3442,33 +3766,24 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
       }
     }
 
-    // Bucle de renderizado ultrarrápido a 60 FPS (ZERO-LAG: Solo dibuja canvas sin inferencia pesada)
+    // Bucle de renderizado ultrarrápido a 60 FPS (ZERO-LAG: Proyección dual sincronizada SBS v9.9)
     function startVisorCanvasRenderer() {
-      const canvas = document.getElementById("visorCanvas");
-      const video = document.getElementById("visorVideo");
-      if (!canvas || !video) return;
+      const canvasLeft = document.getElementById("visorCanvas");
+      const canvasRight = document.getElementById("visorCanvasRight");
+      const videoLeft = document.getElementById("visorVideo");
+      const videoRight = document.getElementById("visorVideoRight");
+      if (!canvasLeft || !videoLeft) return;
 
       function renderLoop() {
         if (!isVisorActive) return;
-
-        const w = window.innerWidth;
-        const h = window.innerHeight;
-        if (canvas.width !== w || canvas.height !== h) {
-          canvas.width = w;
-          canvas.height = h;
-          smoothedTargetX = w / 2;
-          smoothedTargetY = h / 2;
-        }
-
-        const ctx = canvas.getContext("2d");
-        ctx.clearRect(0, 0, w, h);
 
         const now = performance.now();
 
         // 1. Detección de movimiento cinematográfico (cada 120ms sin sobrecargar)
         if (now - lastMotionCheckTime > 120) {
           lastMotionCheckTime = now;
-          processVisorMotion(video, w, h);
+          const refW = isVrModeActive ? Math.floor(window.innerWidth / 2) : window.innerWidth;
+          processVisorMotion(videoLeft, refW, window.innerHeight);
         }
 
         // 2. Interpolación suave de escleras (Spider-Man Brand New Day)
@@ -3488,22 +3803,69 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
           }
         }
 
-        // 4. Dibujar Escleras Mecánicas Oculares
-        drawMechanicalScleras(ctx, w, h, scleraAperture);
+        if (isVrModeActive) {
+          const eyeW = Math.floor(window.innerWidth / 2);
+          const eyeH = window.innerHeight;
 
-        // 5. Dibujar HUD AR Flotante Estilo Iron Man / E.D.I.T.H.
-        drawBiometricFaceOverlays(ctx);
+          // Ojo Izquierdo: Paralaje positivo (+5px) para convergencia binocular 3D
+          if (canvasLeft.width !== eyeW || canvasLeft.height !== eyeH) {
+            canvasLeft.width = eyeW;
+            canvasLeft.height = eyeH;
+            smoothedTargetX = eyeW / 2;
+            smoothedTargetY = eyeH / 2;
+          }
+          const ctxLeft = canvasLeft.getContext("2d");
+          ctxLeft.clearRect(0, 0, eyeW, eyeH);
+          renderVisorEye(ctxLeft, eyeW, eyeH, 5, false, videoLeft);
 
-        // 6. Dibujar Retícula de Puntería / Target Lock
-        drawVisorReticle(ctx, w, h);
+          // Ojo Derecho: Paralaje convergente (-5px) sincronizado a 60 FPS
+          if (canvasRight) {
+            if (canvasRight.width !== eyeW || canvasRight.height !== eyeH) {
+              canvasRight.width = eyeW;
+              canvasRight.height = eyeH;
+            }
+            const ctxRight = canvasRight.getContext("2d");
+            ctxRight.clearRect(0, 0, eyeW, eyeH);
+            renderVisorEye(ctxRight, eyeW, eyeH, -5, true, videoRight || videoLeft);
+          }
+        } else {
+          const fullW = window.innerWidth;
+          const fullH = window.innerHeight;
 
-        // 7. Dibujar Telemetría Táctica
-        drawVisorTelemetry(ctx, w, h);
+          if (canvasLeft.width !== fullW || canvasLeft.height !== fullH) {
+            canvasLeft.width = fullW;
+            canvasLeft.height = fullH;
+            smoothedTargetX = fullW / 2;
+            smoothedTargetY = fullH / 2;
+          }
+          const ctx = canvasLeft.getContext("2d");
+          ctx.clearRect(0, 0, fullW, fullH);
+          renderVisorEye(ctx, fullW, fullH, 0, false, videoLeft);
+        }
 
         visorAnimId = requestAnimationFrame(renderLoop);
       }
 
       visorAnimId = requestAnimationFrame(renderLoop);
+    }
+
+    function renderVisorEye(ctx, w, h, parallaxX = 0, isRightEye = false, videoSource = null) {
+      // 1. Escleras Mecánicas Oculares
+      drawMechanicalScleras(ctx, w, h, scleraAperture, parallaxX);
+
+      // 2. HUD AR Flotante Estilo Iron Man / E.D.I.T.H.
+      drawBiometricFaceOverlays(ctx, w, h, parallaxX, videoSource);
+
+      // 3. Retícula de Puntería / Target Lock
+      drawVisorReticle(ctx, w, h, parallaxX);
+
+      // 4. Telemetría Táctica
+      drawVisorTelemetry(ctx, w, h, parallaxX);
+
+      // 5. Subtítulos Flotantes en Canvas (Modo VR SBS sin invasión de pantalla)
+      if (isVrModeActive && isSubtitleVisible) {
+        drawVisorCanvasSubtitles(ctx, w, h, parallaxX);
+      }
     }
 
     function processVisorMotion(video, dispW, dispH) {
@@ -3588,7 +3950,7 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
         for (let i = 0, p = 0; i < data.length; i += 4, p++) {
           prevMotionPixels[p] = (data[i] * 299 + data[i + 1] * 587 + data[i + 2] * 114) / 1000;
         }
-      } catch (err) {}
+      } catch (err) { }
     }
 
     async function triggerAmbientVisionAnalysis() {
@@ -3635,47 +3997,51 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
     }
 
     // Dibuja el HUD AR Holográfico Flotante Estilo Iron Man / E.D.I.T.H.
-    function drawBiometricFaceOverlays(ctx) {
+    // Dibuja el HUD AR Holográfico Flotante Estilo Iron Man / E.D.I.T.H. (con soporte de paralaje 3D VR)
+    function drawBiometricFaceOverlays(ctx, w, h, parallaxX = 0, videoSource = null) {
       if (!currentTrackedFaces || currentTrackedFaces.length === 0) return;
 
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      const video = document.getElementById("visorVideo");
+      const dispW = w || window.innerWidth;
+      const dispH = h || window.innerHeight;
+      const video = videoSource || document.getElementById("visorVideo");
 
       currentTrackedFaces.forEach((face) => {
-        const b = face.box;
+        const bx = face.box.x + parallaxX;
+        const by = face.box.y;
+        const bw = face.box.width;
+        const bh = face.box.height;
         const color = face.isRecognized ? "#00E5FF" : "#FF9800";
         const colorDim = face.isRecognized ? "rgba(0, 229, 255, 0.25)" : "rgba(255, 152, 0, 0.25)";
-        const cornerSize = Math.max(12, Math.min(22, b.width * 0.22));
+        const cornerSize = Math.max(12, Math.min(22, bw * 0.22));
 
         ctx.save();
 
         // 1. Retícula Facial con Esquinas Tácticas (Doble trazado sin shadowBlur para 60 FPS)
         ctx.strokeStyle = colorDim;
         ctx.lineWidth = 4.0;
-        drawCornerBrackets(ctx, b.x, b.y, b.width, b.height, cornerSize);
+        drawCornerBrackets(ctx, bx, by, bw, bh, cornerSize);
         ctx.stroke();
 
         ctx.strokeStyle = color;
         ctx.lineWidth = 1.8;
-        drawCornerBrackets(ctx, b.x, b.y, b.width, b.height, cornerSize);
+        drawCornerBrackets(ctx, bx, by, bw, bh, cornerSize);
         ctx.stroke();
 
         // 2. Cálculo de Posición de la Tarjeta Flotante AR (168x62 px)
         const cardW = 168;
         const cardH = 62;
         let placeRight = true;
-        let cardX = b.x + b.width + 24;
-        let cardY = Math.max(14, Math.min(h - cardH - 14, b.y + b.height * 0.22 - 28));
+        let cardX = bx + bw + 24;
+        let cardY = Math.max(14, Math.min(dispH - cardH - 14, by + bh * 0.22 - 28));
 
-        if (cardX + cardW > w - 10) {
+        if (cardX + cardW > dispW - 10) {
           placeRight = false;
-          cardX = Math.max(10, b.x - cardW - 24);
+          cardX = Math.max(10, bx - cardW - 24);
         }
 
         // 3. Línea Vectorial Conectora Dinámica desde la Retícula a la Tarjeta
-        const startX = placeRight ? (b.x + b.width) : b.x;
-        const startY = b.y + b.height * 0.25;
+        const startX = placeRight ? (bx + bw) : bx;
+        const startY = by + bh * 0.25;
         const endX = placeRight ? cardX : (cardX + cardW);
         const endY = cardY + 31;
         const midX = placeRight ? (startX + 14) : (startX - 14);
@@ -3809,14 +4175,14 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
       ctx.closePath();
     }
 
-    function drawMechanicalScleras(ctx, w, h, aperture) {
+    function drawMechanicalScleras(ctx, w, h, aperture, parallaxX = 0) {
       ctx.save();
       const cy = h * 0.5;
       const rx = w * 0.24 * aperture;
       const ry = h * 0.44;
 
-      drawScleraShutter(ctx, w * 0.02, cy, rx, ry, false, aperture);
-      drawScleraShutter(ctx, w * 0.98, cy, rx, ry, true, aperture);
+      drawScleraShutter(ctx, w * 0.02 + parallaxX, cy, rx, ry, false, aperture);
+      drawScleraShutter(ctx, w * 0.98 + parallaxX, cy, rx, ry, true, aperture);
 
       ctx.restore();
     }
@@ -3865,13 +4231,13 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
       ctx.restore();
     }
 
-    function drawVisorReticle(ctx, w, h) {
+    function drawVisorReticle(ctx, w, h, parallaxX = 0) {
       ctx.save();
-      const cx = w / 2;
+      const cx = (w / 2) + parallaxX;
       const cy = h / 2;
 
       if (hasTargetLock) {
-        const tx = targetLockCoords.x;
+        const tx = targetLockCoords.x + parallaxX;
         const ty = targetLockCoords.y;
 
         ctx.strokeStyle = "#FF9800";
@@ -3914,42 +4280,87 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
       ctx.restore();
     }
 
-    function drawVisorTelemetry(ctx, w, h) {
+    function drawVisorTelemetry(ctx, w, h, parallaxX = 0) {
       ctx.save();
       ctx.font = "10px 'Share Tech Mono', monospace";
 
       ctx.textAlign = "left";
+      const startX = 16 + parallaxX;
       if (isCameraPanning) {
         ctx.fillStyle = "#FF1744";
-        ctx.fillText("ESTADO: ESTABILIZANDO LENTE... (GMC)", 16, h - 110);
+        ctx.fillText("ESTADO: ESTABILIZANDO LENTE... (GMC)", startX, h - 110);
       } else if (hasTargetLock) {
         ctx.fillStyle = "#FF9800";
-        ctx.fillText("ESTADO: OBJETIVO FIJADO (TARGET LOCK)", 16, h - 110);
+        ctx.fillText("ESTADO: OBJETIVO FIJADO (TARGET LOCK)", startX, h - 110);
       } else {
         ctx.fillStyle = "#00E5FF";
-        ctx.fillText("ESTADO: RASTREO ÓPTICO NORMAL", 16, h - 110);
+        ctx.fillText("ESTADO: RASTREO ÓPTICO NORMAL", startX, h - 110);
       }
       ctx.fillStyle = "#E0E6ED";
       const bioCount = currentTrackedFaces.length;
-      ctx.fillText(`SENSOR MOVIMIENTO: ${motionScore.toFixed(1)}% · ROSTROS: ${bioCount} · LENTE: ${Math.round(scleraAperture * 100)}%`, 16, h - 96);
+      ctx.fillText(`SENSOR MOVIMIENTO: ${motionScore.toFixed(1)}% · ROSTROS: ${bioCount} · LENTE: ${Math.round(scleraAperture * 100)}%`, startX, h - 96);
+
+      ctx.restore();
+    }
+
+    // Subtítulos Flotantes en Canvas (Especial para Modo VR SBS con soporte de paralaje 3D)
+    function drawVisorCanvasSubtitles(ctx, w, h, parallaxX = 0) {
+      if (!currentSubtitleText) return;
+
+      ctx.save();
+      const subW = Math.min(w - 32, 380);
+      const subH = 46;
+      const subX = Math.round((w - subW) / 2) + parallaxX;
+      const subY = h - 74;
+
+      ctx.fillStyle = "rgba(7, 11, 16, 0.88)";
+      drawChamferedRect(ctx, subX, subY, subW, subH, 5);
+      ctx.fill();
+
+      ctx.strokeStyle = "rgba(0, 229, 255, 0.4)";
+      ctx.lineWidth = 1.2;
+      drawChamferedRect(ctx, subX, subY, subW, subH, 5);
+      ctx.stroke();
+
+      // Borde izquierdo ámbar
+      ctx.fillStyle = "#FF9800";
+      ctx.fillRect(subX, subY, 3, subH);
+
+      // Cabecera
+      ctx.font = "bold 9px 'Share Tech Mono', monospace";
+      ctx.fillStyle = "#FF9800";
+      ctx.fillText(`E.V. // ${(currentSubtitleSpeaker || "INTEL").toUpperCase()}`, subX + 10, subY + 14);
+
+      // Texto con truncado inteligente
+      ctx.font = "10.5px -apple-system, BlinkMacSystemFont, sans-serif";
+      ctx.fillStyle = "#E0E6ED";
+      const truncatedText = currentSubtitleText.length > 58 ? currentSubtitleText.slice(0, 55) + "..." : currentSubtitleText;
+      ctx.fillText(truncatedText, subX + 10, subY + 32);
 
       ctx.restore();
     }
 
     function updateVisorSubtitle(speaker, text, autoHideMs = 4000) {
+      currentSubtitleSpeaker = speaker;
+      currentSubtitleText = text;
+      isSubtitleVisible = true;
+
       const box = document.getElementById("visorSubtitles");
       const header = document.getElementById("visorSubHeader");
       const body = document.getElementById("visorSubText");
-      if (!box || !header || !body) return;
-
-      header.textContent = `E.V. // ${speaker.toUpperCase()}`;
-      body.textContent = text;
-      box.style.display = "block";
+      if (box && header && body) {
+        header.textContent = `E.V. // ${speaker.toUpperCase()}`;
+        body.textContent = text;
+        if (!isVrModeActive) {
+          box.style.display = "block";
+        }
+      }
 
       if (visorSubtitleTimer) clearTimeout(visorSubtitleTimer);
       if (autoHideMs > 0) {
         visorSubtitleTimer = setTimeout(() => {
           if (box) box.style.display = "none";
+          isSubtitleVisible = false;
         }, autoHideMs);
       }
     }
@@ -4046,11 +4457,27 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
     async function handleVisorVoiceCommand(transcript) {
       const lower = (transcript || "").toLowerCase().trim();
 
-      // 1. Control directo del visor y óptica por voz (Modo Gafas Limpias v9.8)
+      // 1. Control directo del visor y óptica por voz (Modo Gafas Limpias + VR SBS v9.9)
       if (/(?:salir del visor|cerrar visor|apaga(?:r)? (?:el )?visor|cerrar c[aá]mara|desactivar visor)/i.test(lower)) {
         closeVisorOverlay();
         const reply = "Visor óptico desactivado. Regresando a la consola central.";
         appendAssistantMessage(reply, "👁 VISOR CERRADO");
+        speakEvResponse(reply);
+        return;
+      }
+
+      if (/(?:modo casco|modo vr|activar vr|pantalla dividida|visi[oó]n vr|estereosc[oó]pico)/i.test(lower)) {
+        toggleStereoscopicVrMode(true);
+        const reply = "Modo estereoscópico para casco VR activado. Calibración SBS lista.";
+        updateVisorSubtitle("VR CASCO", reply);
+        speakEvResponse(reply);
+        return;
+      }
+
+      if (/(?:modo normal|modo est[aá]ndar|pantalla completa|desactivar vr|desactivar casco|quitar vr)/i.test(lower)) {
+        toggleStereoscopicVrMode(false);
+        const reply = "Modo pantalla completa estándar restablecido.";
+        updateVisorSubtitle("ÓPTICA", reply);
         speakEvResponse(reply);
         return;
       }
@@ -4226,4 +4653,5 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
     }
   </script>
 </body>
+
 </html>
