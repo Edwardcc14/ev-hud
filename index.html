@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="E.V. Core">
-  <title>E.V. // TACTICAL CORE v9.2</title>
+  <title>E.V. // TACTICAL CORE v9.3</title>
   <link rel="manifest" href="./manifest.json">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23070B10' stroke='%23FF9800' stroke-width='4'/><circle cx='50' cy='50' r='20' fill='%2300E5FF'/></svg>">
 
@@ -43,15 +43,26 @@
       user-select: text;
     }
 
+    html, body {
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      padding-top: env(safe-area-inset-top, 0);
+      padding-right: env(safe-area-inset-right, 0);
+      padding-bottom: env(safe-area-inset-bottom, 0);
+      padding-left: env(safe-area-inset-left, 0);
+      box-sizing: border-box;
+    }
+
     body {
       background-color: var(--bg-primary);
       color: var(--text-primary);
       font-family: var(--font-sans);
-      min-height: 100vh;
-      min-height: 100dvh;
       display: flex;
       flex-direction: column;
-      overflow-x: hidden;
       background-image: 
         radial-gradient(rgba(0, 229, 255, 0.04) 1px, transparent 1px),
         linear-gradient(to bottom, rgba(7, 11, 16, 0.95), rgba(7, 11, 16, 0.98));
@@ -62,7 +73,7 @@
     .hud-header {
       background: var(--bg-panel);
       border-bottom: 1px solid var(--border-tactical);
-      padding: 10px 14px;
+      padding: 8px 12px;
       display: flex;
       flex-wrap: wrap;
       align-items: center;
@@ -72,6 +83,7 @@
       top: 0;
       z-index: 100;
       box-shadow: 0 4px 18px rgba(0, 0, 0, 0.6);
+      flex-shrink: 0;
     }
 
     .hud-branding {
@@ -147,7 +159,14 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      flex-wrap: wrap;
+      overflow-x: auto;
+      max-width: 100%;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .hud-controls::-webkit-scrollbar {
+      display: none;
     }
 
     .btn-hud {
@@ -235,18 +254,22 @@
       max-width: 900px;
       width: 100%;
       margin: 0 auto;
-      height: calc(100vh - 60px);
-      height: calc(100dvh - 60px);
+      height: calc(100vh - 58px);
+      height: calc(100dvh - 58px);
+      min-height: 0;
+      overflow: hidden;
       position: relative;
     }
 
     .chat-feed {
       flex: 1;
+      min-height: 0;
       overflow-y: auto;
-      padding: 14px;
+      -webkit-overflow-scrolling: touch;
+      padding: 12px 14px;
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 12px;
       scroll-behavior: smooth;
     }
 
@@ -503,6 +526,7 @@
       position: fixed;
       inset: 0;
       width: 100vw;
+      width: 100dvw;
       height: 100vh;
       height: 100dvh;
       background: #000;
@@ -510,6 +534,8 @@
       display: none;
       flex-direction: column;
       overflow: hidden;
+      padding-top: env(safe-area-inset-top, 0);
+      padding-bottom: env(safe-area-inset-bottom, 0);
     }
 
     #visorVideo {
@@ -536,7 +562,7 @@
       left: 0;
       right: 0;
       z-index: 3;
-      padding: 12px 16px;
+      padding: 10px 14px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -584,20 +610,83 @@
       cursor: pointer;
     }
 
+    /* BANNER DE VISIÓN AMBIENTAL INTELIGENTE */
+    .visor-ambient-banner {
+      position: absolute;
+      top: 48px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 28;
+      background: rgba(7, 11, 16, 0.88);
+      border: 1px solid var(--accent-cyan);
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      color: var(--accent-cyan);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      max-width: 90vw;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      backdrop-filter: blur(6px);
+      box-shadow: 0 4px 16px rgba(0, 229, 255, 0.25);
+      pointer-events: none;
+    }
+
+    .ambient-pulse {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent-cyan);
+      box-shadow: 0 0 8px var(--accent-cyan);
+      animation: pulseCore 1.8s infinite ease-in-out;
+      flex-shrink: 0;
+    }
+
     /* BARRA LATERAL BIOMÉTRICA EN EL VISOR */
     .ev-biometric-sidebar {
       position: absolute;
-      top: 68px;
-      left: 12px;
-      width: 225px;
+      top: 50px;
+      left: 8px;
+      width: min(195px, 44vw);
       pointer-events: auto;
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      z-index: 20;
-      max-height: calc(100vh - 160px);
-      max-height: calc(100dvh - 160px);
+      gap: 6px;
+      z-index: 25;
+      max-height: calc(100vh - 130px);
+      max-height: calc(100dvh - 130px);
       overflow-y: auto;
+      transition: all 0.2s ease;
+    }
+
+    .bio-sidebar-header {
+      background: rgba(7, 11, 16, 0.92);
+      border: 1px solid var(--border-tactical);
+      border-left: 3px solid var(--accent-cyan);
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-family: var(--font-mono);
+      font-size: 9.5px;
+      color: var(--accent-cyan);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .ev-biometric-sidebar.collapsed .bio-sidebar-content {
+      display: none;
+    }
+
+    .bio-sidebar-content {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
     }
 
     .bio-card {
@@ -736,28 +825,38 @@
     /* CONTROLES FLOTANTES DEL VISOR */
     .visor-actions {
       position: absolute;
-      bottom: 14px;
-      left: 14px;
-      right: 14px;
-      z-index: 3;
+      bottom: 10px;
+      left: 6px;
+      right: 6px;
+      z-index: 30;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
+      gap: 6px;
       flex-wrap: wrap;
+      max-width: calc(100% - 12px);
+      pointer-events: auto;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .visor-actions::-webkit-scrollbar {
+      display: none;
     }
 
     .btn-visor-action {
-      background: rgba(13, 19, 28, 0.88);
+      background: rgba(13, 19, 28, 0.90);
       border: 1px solid var(--border-tactical);
       color: var(--text-primary);
       font-family: var(--font-mono);
-      font-size: 11px;
-      padding: 8px 14px;
-      border-radius: 20px;
+      font-size: 10px;
+      padding: 6px 10px;
+      border-radius: 18px;
       cursor: pointer;
       backdrop-filter: blur(4px);
       transition: all 0.2s;
+      white-space: nowrap;
     }
 
     .btn-visor-action.accent-cyan {
@@ -768,6 +867,11 @@
     .btn-visor-action.accent-amber {
       border-color: var(--accent-amber);
       color: var(--accent-amber);
+    }
+
+    .btn-visor-action.accent-green {
+      border-color: var(--accent-green);
+      color: var(--accent-green);
     }
 
     .btn-visor-action.active-mic {
@@ -951,10 +1055,10 @@
       <div class="msg-wrap assistant">
         <div class="msg-header">
           <span>[E.V. // CO-PILOTO TÁCTICO]</span>
-          <span>v9.2-BIOMETRIC</span>
+          <span>v9.3-AUTONOMOUS LENS</span>
         </div>
         <div class="msg-bubble">
-          Sistemas en línea, Operador. Enrutador híbrido y núcleo biométrico offline activos. Pulsa ⚙ API KEY si aún no has sincronizado tu clave de Gemini, abre 👥 BIOMETRÍA para administrar perfiles, o accede al 👁 VISOR E.V. para reconocimiento facial y análisis en vivo.
+          Sistemas en línea, Operador. Enrutador híbrido, auto-captura manos libres y lente ambiental autónoma v9.3 activos. Pulsa ⚙ API KEY si aún no has sincronizado tu clave de Gemini, abre 👥 BIOMETRÍA para administrar perfiles, o accede al 👁 VISOR E.V. para reconocimiento facial y análisis proactivo en vivo.
         </div>
       </div>
     </div>
@@ -998,15 +1102,27 @@
     <div class="visor-top-bar">
       <div class="visor-badge">
         <span style="display: inline-block; width: 6px; height: 6px; background: var(--accent-cyan); border-radius: 50%;"></span>
-        <span>E.V. // OPTICAL CORE v9.2</span>
+        <span>E.V. // OPTICAL CORE v9.3</span>
         <span id="visorModelTag" style="color: var(--accent-amber); margin-left: 4px;">[3.5 FLASH-LITE]</span>
         <span id="visorBioStatus" class="visor-bio-badge" style="margin-left: 6px;">BIOMETRÍA: INICIANDO...</span>
       </div>
       <button id="btnExitVisor" class="btn-exit-visor">✕ SALIR</button>
     </div>
 
+    <!-- Banner de Visión Ambiental Inteligente -->
+    <div id="visorAmbientBanner" class="visor-ambient-banner" style="display: none;">
+      <span class="ambient-pulse"></span>
+      <span id="visorAmbientText">LECTURA ÓPTICA: ESPERANDO ESCENA...</span>
+    </div>
+
     <!-- Barra Lateral Biometría Táctica en Vivo -->
-    <div id="evBiometricSidebar" class="ev-biometric-sidebar"></div>
+    <div id="evBiometricSidebar" class="ev-biometric-sidebar">
+      <div id="evBioSidebarToggle" class="bio-sidebar-header" title="Toca para colapsar/expandir">
+        <span id="evBioSidebarTitle">👥 BIOMETRÍA</span>
+        <span id="evBioSidebarIcon">▼</span>
+      </div>
+      <div id="evBioSidebarContent" class="bio-sidebar-content"></div>
+    </div>
 
     <!-- Subtítulos Flotantes del Visor -->
     <div id="visorSubtitles" class="visor-subtitles">
@@ -1019,8 +1135,14 @@
       <button id="btnVisorRegisterFace" class="btn-visor-action accent-cyan" title="Registrar nuevo perfil biométrico">
         👤 REGISTRAR
       </button>
+      <button id="btnVisorAutoEnroll" class="btn-visor-action accent-green" title="Auto-captura manos libres de rostros desconocidos">
+        🤖 AUTO-CAPTURA: ON
+      </button>
+      <button id="btnVisorAmbient" class="btn-visor-action accent-cyan" title="Visión ambiental inteligente y proactiva">
+        👁 LENTE ACTIVA: ON
+      </button>
       <button id="btnVisorScanDetail" class="btn-visor-action accent-amber" title="Escanear a 800px con Gemini 4 Hydrogen">
-        🔍 ESCANEAR DETALLE
+        🔍 DETALLE
       </button>
       <button id="btnVisorMic" class="btn-visor-action accent-cyan" title="Micrófono continuo con envío de frame">
         🎙 MIC CONTINUO: OFF
@@ -1132,8 +1254,22 @@
 
   <script>
     // =========================================================================
-    // E.V. STANDALONE PWA (v9.2-BIOMETRIC OFFLINE CORE) - NÚCLEO JS
+    // E.V. STANDALONE PWA (v9.3-AUTONOMOUS LENS) - NÚCLEO JS
     // =========================================================================
+
+    // Variables de Calibración v9.3
+    let isAutoEnrollEnabled = true;
+    let autoEnrollStreak = 0;
+    let lastAutoEnrollBox = null;
+    let lastAutoEnrollTime = 0;
+
+    let isVisorAmbientActive = true;
+    let lastAmbientCallTime = 0;
+    let cameraSteadyStartTime = null;
+    let lastAmbientReading = "";
+    let isAmbientAnalyzing = false;
+    let isSidebarCollapsed = false;
+    let lastPanTimestamp = 0;
 
     // 1. ESTADO GLOBAL DE LA APLICACIÓN
     const STATE = {
@@ -1156,7 +1292,7 @@
     if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
       window.addEventListener("load", () => {
         navigator.serviceWorker.register("./sw.js")
-          .then((reg) => console.log("[E.V. PWA] Service Worker v9.2 registrado:", reg.scope))
+          .then((reg) => console.log("[E.V. PWA] Service Worker v9.3 registrado:", reg.scope))
           .catch((err) => console.warn("[E.V. PWA] Fallo registro SW:", err));
       });
     }
@@ -1211,6 +1347,9 @@
       document.getElementById("btnVisorOpen").addEventListener("click", openVisorOverlay);
       document.getElementById("btnExitVisor").addEventListener("click", closeVisorOverlay);
       document.getElementById("btnVisorRegisterFace").addEventListener("click", handleTriggerRegisterFromVisor);
+      document.getElementById("btnVisorAutoEnroll").addEventListener("click", toggleVisorAutoEnroll);
+      document.getElementById("btnVisorAmbient").addEventListener("click", toggleVisorAmbient);
+      document.getElementById("evBioSidebarToggle").addEventListener("click", toggleBiometricSidebar);
       document.getElementById("btnVisorScanDetail").addEventListener("click", handleVisorScanDetail);
       document.getElementById("btnVisorMic").addEventListener("click", toggleVisorContinuousMic);
       document.getElementById("btnVisorFlipCamera").addEventListener("click", flipVisorCamera);
@@ -1544,6 +1683,74 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
           }
         }
 
+        // Auto-Captura Facial Manos Libres (Auto-Enroll v9.3)
+        if (isAutoEnrollEnabled && !isCameraPanning && (now - lastAutoEnrollTime > 2500)) {
+          const unknownDet = detections.find(d => {
+            if (d.detection.score < 0.68) return false;
+            const b = d.detection.box;
+            const scaledW = b.width * scaleX;
+            if (scaledW < 75) return false;
+            const normX = (b.x * scaleX + scaledW / 2) / dispW;
+            const normY = (b.y * scaleY + (b.height * scaleY) / 2) / dispH;
+            if (normX < 0.22 || normX > 0.78 || normY < 0.18 || normY > 0.82) return false;
+
+            if (biometricFaceMatcher) {
+              const match = biometricFaceMatcher.findBestMatch(d.descriptor);
+              if (match.label !== "unknown") return false;
+            }
+            return true;
+          });
+
+          if (unknownDet) {
+            const rawBox = unknownDet.detection.box;
+            const boxCenterX = rawBox.x * scaleX + (rawBox.width * scaleX) / 2;
+            const boxCenterY = rawBox.y * scaleY + (rawBox.height * scaleY) / 2;
+
+            if (lastAutoEnrollBox && Math.hypot(boxCenterX - lastAutoEnrollBox.x, boxCenterY - lastAutoEnrollBox.y) < 90) {
+              autoEnrollStreak++;
+            } else {
+              autoEnrollStreak = 1;
+              lastAutoEnrollBox = { x: boxCenterX, y: boxCenterY };
+            }
+
+            if (autoEnrollStreak >= 5) {
+              autoEnrollStreak = 0;
+              lastAutoEnrollBox = null;
+              lastAutoEnrollTime = now;
+
+              let maxNum = 0;
+              STATE.faceDb.forEach(p => {
+                const m = p.name.match(/^SUJETO_(\d+)$/i);
+                if (m) {
+                  const val = parseInt(m[1], 10);
+                  if (val > maxNum) maxNum = val;
+                }
+              });
+              const nextId = String(maxNum + 1).padStart(2, "0");
+              const autoName = `SUJETO_${nextId}`;
+              const avatarData = extractFaceAvatarUrl(video, rawBox);
+
+              const newProfile = {
+                id: "face_" + Date.now(),
+                name: autoName,
+                role: "Sujeto Auto-Capturado",
+                notes: "Captura manos libres v9.3",
+                avatarDataUrl: avatarData,
+                descriptors: [Array.from(unknownDet.descriptor)]
+              };
+
+              STATE.faceDb.push(newProfile);
+              localStorage.setItem("ev_face_db", JSON.stringify(STATE.faceDb));
+              rebuildFaceMatcher();
+              renderBiometricProfilesList();
+              playCommandAckSound();
+              updateVisorSubtitle("AUTO-CAPTURA", `Nuevo sujeto registrado automáticamente como ${autoName}. Di: "El ${autoName.toLowerCase()} es [Nombre]" para nombrarlo.`);
+            }
+          } else {
+            autoEnrollStreak = Math.max(0, autoEnrollStreak - 1);
+          }
+        }
+
         currentTrackedFaces = updatedFaces;
         renderBiometricSidebar();
 
@@ -1555,27 +1762,32 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
     }
 
     function renderBiometricSidebar() {
-      const sidebar = document.getElementById("evBiometricSidebar");
-      if (!sidebar) return;
+      const content = document.getElementById("evBioSidebarContent");
+      const title = document.getElementById("evBioSidebarTitle");
+      if (!content) return;
+
+      if (title) {
+        title.textContent = `👥 BIOMETRÍA (${currentTrackedFaces.length})`;
+      }
 
       if (currentTrackedFaces.length === 0) {
-        sidebar.innerHTML = "";
+        content.innerHTML = "";
         return;
       }
 
-      sidebar.innerHTML = currentTrackedFaces.map((face, idx) => {
+      content.innerHTML = currentTrackedFaces.map((face, idx) => {
         if (face.isRecognized) {
           return `
             <div class="bio-card recognized" id="bioCard_${idx}">
               <img class="bio-avatar" src="${face.avatarUrl || 'data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 40 40\'><circle cx=\'20\' cy=\'20\' r=\'18\' fill=\'%23070B10\' stroke=\'%2300E5FF\'/></svg>'}" alt="Avatar">
               <div class="bio-info">
-                <div class="bio-name">${escapeHtml(face.name)}</div>
+                <div class="bio-name" onclick="promptRenameProfile('${face.id}')" title="Toca para renombrar" style="cursor: pointer;">${escapeHtml(face.name)} ✎</div>
                 <div class="bio-role">${escapeHtml(face.role)}</div>
                 <div class="bio-sim-bar-wrap">
                   <div class="bio-sim-bar" style="width: ${face.similarity}%;"></div>
                 </div>
                 <div class="bio-status-tag">
-                  <span>✓ VERIFICADO OFFLINE (${face.similarity}%)</span>
+                  <span>✓ OFFLINE (${face.similarity}%)</span>
                   <button class="btn-bio-mini" onclick="addSampleAngleToProfile('${face.id}', ${idx})" title="Añadir otro ángulo de luz al perfil">+ Ángulo</button>
                 </div>
               </div>
@@ -1596,6 +1808,69 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
           `;
         }
       }).join("");
+    }
+
+    function toggleVisorAutoEnroll() {
+      isAutoEnrollEnabled = !isAutoEnrollEnabled;
+      const btn = document.getElementById("btnVisorAutoEnroll");
+      if (btn) {
+        if (isAutoEnrollEnabled) {
+          btn.textContent = "🤖 AUTO-CAPTURA: ON";
+          btn.style.borderColor = "var(--accent-green)";
+          btn.style.color = "var(--accent-green)";
+        } else {
+          btn.textContent = "🤖 AUTO-CAPTURA: OFF";
+          btn.style.borderColor = "var(--border-tactical)";
+          btn.style.color = "var(--text-muted)";
+        }
+      }
+      playTacticalBeep(isAutoEnrollEnabled ? 880 : 440, 0.08);
+    }
+
+    function toggleVisorAmbient() {
+      isVisorAmbientActive = !isVisorAmbientActive;
+      const btn = document.getElementById("btnVisorAmbient");
+      const banner = document.getElementById("visorAmbientBanner");
+      if (btn) {
+        if (isVisorAmbientActive) {
+          btn.textContent = "👁 LENTE ACTIVA: ON";
+          btn.style.borderColor = "var(--accent-cyan)";
+          btn.style.color = "var(--accent-cyan)";
+        } else {
+          btn.textContent = "👁 LENTE ACTIVA: OFF";
+          btn.style.borderColor = "var(--border-tactical)";
+          btn.style.color = "var(--text-muted)";
+          if (banner) banner.style.display = "none";
+        }
+      }
+      playTacticalBeep(isVisorAmbientActive ? 990 : 440, 0.08);
+    }
+
+    function toggleBiometricSidebar() {
+      isSidebarCollapsed = !isSidebarCollapsed;
+      const sidebar = document.getElementById("evBiometricSidebar");
+      const icon = document.getElementById("evBioSidebarIcon");
+      if (sidebar) {
+        sidebar.classList.toggle("collapsed", isSidebarCollapsed);
+      }
+      if (icon) {
+        icon.textContent = isSidebarCollapsed ? "►" : "▼";
+      }
+    }
+
+    function promptRenameProfile(profileId) {
+      const profile = STATE.faceDb.find(p => p.id === profileId);
+      if (!profile) return;
+      const newName = prompt(`Renombrar perfil biométrico "${profile.name}":`, profile.name);
+      if (newName && newName.trim() && newName.trim() !== profile.name) {
+        profile.name = newName.trim();
+        localStorage.setItem("ev_face_db", JSON.stringify(STATE.faceDb));
+        rebuildFaceMatcher();
+        renderBiometricProfilesList();
+        renderBiometricSidebar();
+        playCommandAckSound();
+        updateVisorSubtitle("BIOMETRÍA", `Perfil actualizado: "${profile.name}".`);
+      }
     }
 
     function addSampleAngleToProfile(profileId, detectionIdx) {
@@ -1820,11 +2095,64 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
         };
       }
 
+      // 4. Renombrado de Sujeto Biométrico ("el sujeto 1 es Pedro", "ese es Pedro", "sujeto 01 es Carlos")
+      const renameMatch = clean.match(/(?:e\.?v\.?,?\s+)?(?:el\s+)?sujeto\s*(\d+)\s+es\s+(.+)/i);
+      const renameThatMatch = !renameMatch && clean.match(/(?:e\.?v\.?,?\s+)?(?:ese|esa persona|aquel)\s+es\s+(.+)/i);
+
+      if (renameMatch) {
+        const num = parseInt(renameMatch[1], 10);
+        const targetPattern = new RegExp(`^SUJETO_0?${num}$`, "i");
+        const profile = STATE.faceDb.find(p => targetPattern.test(p.name));
+        const newName = renameMatch[2].trim().replace(/[.,;:!?]+$/, "");
+        if (profile && newName) {
+          const oldName = profile.name;
+          profile.name = newName;
+          profile.role = "Identificado por Voz";
+          localStorage.setItem("ev_face_db", JSON.stringify(STATE.faceDb));
+          rebuildFaceMatcher();
+          renderBiometricProfilesList();
+          renderBiometricSidebar();
+          playCommandAckSound();
+          return {
+            handled: true,
+            reply: `Perfil biométrico actualizado, Operador: ${oldName} ahora registrado como "${newName}".`
+          };
+        }
+      } else if (renameThatMatch) {
+        const newName = renameThatMatch[1].trim().replace(/[.,;:!?]+$/, "");
+        let targetProfile = null;
+        const trackedSujeto = currentTrackedFaces.find(f => /^SUJETO_\d+$/i.test(f.name));
+        if (trackedSujeto) {
+          targetProfile = STATE.faceDb.find(p => p.id === trackedSujeto.id || p.name === trackedSujeto.name);
+        } else {
+          for (let i = STATE.faceDb.length - 1; i >= 0; i--) {
+            if (/^SUJETO_\d+$/i.test(STATE.faceDb[i].name)) {
+              targetProfile = STATE.faceDb[i];
+              break;
+            }
+          }
+        }
+        if (targetProfile && newName) {
+          const oldName = targetProfile.name;
+          targetProfile.name = newName;
+          targetProfile.role = "Identificado por Voz";
+          localStorage.setItem("ev_face_db", JSON.stringify(STATE.faceDb));
+          rebuildFaceMatcher();
+          renderBiometricProfilesList();
+          renderBiometricSidebar();
+          playCommandAckSound();
+          return {
+            handled: true,
+            reply: `Sujeto identificado, Operador: ${oldName} registrado como "${newName}".`
+          };
+        }
+      }
+
       return { handled: false };
     }
 
     // =========================================================================
-    // TEMPORIZADORES Y SÍNTESIS DE TONOS WEB AUDIO API (SIN MP3)
+    // TEMPORIZADORES Y SÍNTESIS DE TONOS WEB AUDIO API (FEEDBACK POSITIVO v9.3)
     // =========================================================================
 
     let audioContextInstance = null;
@@ -1837,6 +2165,74 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
         audioContextInstance.resume().catch(() => {});
       }
       return audioContextInstance;
+    }
+
+    // Tono limpio suave a 580 Hz (sine, 70 ms, volumen 0.12)
+    function playMicOpenSound() {
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(580, ctx.currentTime);
+        gain.gain.setValueAtTime(0.12, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.07);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.07);
+      } catch (e) {}
+    }
+
+    // Pulso doble ascendente cristalino (660 Hz 65ms -> 990 Hz 65ms, volumen 0.14)
+    function playCommandAckSound() {
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        const osc1 = ctx.createOscillator();
+        const gain1 = ctx.createGain();
+        osc1.type = "sine";
+        osc1.frequency.setValueAtTime(660, now);
+        gain1.gain.setValueAtTime(0.14, now);
+        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.065);
+        osc1.connect(gain1);
+        gain1.connect(ctx.destination);
+        osc1.start(now);
+        osc1.stop(now + 0.065);
+
+        const osc2 = ctx.createOscillator();
+        const gain2 = ctx.createGain();
+        osc2.type = "sine";
+        osc2.frequency.setValueAtTime(990, now + 0.065);
+        gain2.gain.setValueAtTime(0.14, now + 0.065);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.13);
+        osc2.connect(gain2);
+        gain2.connect(ctx.destination);
+        osc2.start(now + 0.065);
+        osc2.stop(now + 0.13);
+      } catch (e) {}
+    }
+
+    // Tono descendente 440 Hz -> 220 Hz (180ms) reservado para errores
+    function playErrorSound() {
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(440, now);
+        osc.frequency.exponentialRampToValueAtTime(220, now + 0.18);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.18);
+      } catch (e) {}
     }
 
     function playTacticalBeep(frequency = 880, duration = 0.12, type = "sine") {
@@ -2112,6 +2508,7 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
         document.getElementById("btnMic").classList.add("active-mic");
         const b = document.getElementById("voiceInterimBadge");
         if (b) b.style.display = "flex";
+        playMicOpenSound();
       };
 
       rec.onresult = (evt) => {
@@ -2140,6 +2537,7 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
         if (final) {
           const cleanFinal = final.trim();
           if (cleanFinal.length > 1) {
+            playCommandAckSound();
             if (inputPrompt) inputPrompt.value = cleanFinal;
             if (badgeText) badgeText.textContent = `Procesando: "${cleanFinal}"`;
             if (isVisorActive) {
@@ -2289,6 +2687,7 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
       } catch (err) {
         const durationMs = Math.round(performance.now() - startTime);
         console.error("[E.V. Error]", err);
+        playErrorSound();
         const errorText = `Fallo de comunicación con satélite Gemini (${err.message || "Error desconocido"}). Verifica tu conexión o clave de API.`;
         updateAssistantMessage(loadingMsgId, errorText, "ERROR", durationMs);
         speakEvResponse(errorText);
@@ -2472,7 +2871,7 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
         }
       });
 
-      updateVisorSubtitle("E.V.", "Visor óptico v9.2 en línea. Rastreo cinético y biometría activa.");
+      updateVisorSubtitle("E.V.", "Visor óptico v9.3 en línea. Auto-captura y lente autónoma activas.");
       playTacticalBeep(1046, 0.1);
     }
 
@@ -2499,8 +2898,10 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
       if (video) video.srcObject = null;
 
       currentTrackedFaces = [];
-      const sidebar = document.getElementById("evBiometricSidebar");
-      if (sidebar) sidebar.innerHTML = "";
+      const sidebarContent = document.getElementById("evBioSidebarContent");
+      if (sidebarContent) sidebarContent.innerHTML = "";
+      const sidebarTitle = document.getElementById("evBioSidebarTitle");
+      if (sidebarTitle) sidebarTitle.textContent = "👥 BIOMETRÍA";
 
       // Limpieza de memoria WebGL en tensores para evitar saturación de RAM móvil
       if (window.faceapi && faceapi.tf) {
@@ -2605,6 +3006,8 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
       const mCtx = mCanvas.getContext("2d", { willReadFrequently: true });
       mCtx.drawImage(video, 0, 0, 128, 96);
 
+      const now = performance.now();
+
       try {
         const frameData = mCtx.getImageData(0, 0, 128, 96);
         const data = frameData.data;
@@ -2616,7 +3019,8 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
           for (let i = 0, p = 0; i < data.length; i += 4, p++) {
             const gray = (data[i] * 299 + data[i + 1] * 587 + data[i + 2] * 114) / 1000;
             const diff = Math.abs(gray - prevMotionPixels[p]);
-            if (diff > 45) {
+            // Umbral estricto 46 para rechazar ruido CMOS con poca luz y pasos
+            if (diff > 46) {
               changed++;
               sumX += (p % 128);
               sumY += Math.floor(p / 128);
@@ -2626,17 +3030,35 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
           const changedRatio = changed / totalPixels;
           motionScore = changedRatio * 100.0;
 
-          // FILTRO ANTI-SHAKE: Si cambia >38% en un cuadro, es giro de la mano/cámara
-          if (changedRatio > 0.38) {
+          // Compensación de Movimiento Global (GMC): giro/paneo de cámara > 0.24
+          if (changedRatio > 0.24) {
             isCameraPanning = true;
+            lastPanTimestamp = now;
             hasTargetLock = false;
             consecutiveMotionFrames = 0;
             targetScleraAperture = 0.85;
+            cameraSteadyStartTime = null;
           } else {
             isCameraPanning = false;
-            if (changedRatio > 0.02) {
+            const timeSincePan = now - lastPanTimestamp;
+
+            // Detección de estabilidad para Lente Activa (Visión Ambiental Proactiva)
+            if (changedRatio < 0.04) {
+              if (cameraSteadyStartTime === null) {
+                cameraSteadyStartTime = now;
+              } else if (now - cameraSteadyStartTime >= 3000) {
+                if (isVisorAmbientActive && !isAmbientAnalyzing && (now - lastAmbientCallTime >= 12000)) {
+                  triggerAmbientVisionAnalysis();
+                }
+              }
+            } else {
+              cameraSteadyStartTime = null;
+            }
+
+            // Movimiento localizado: requiere 5 ciclos (~1.4s) y 800ms de enfriamiento tras paneo
+            if (changedRatio > 0.025 && timeSincePan >= 800) {
               consecutiveMotionFrames++;
-              if (consecutiveMotionFrames >= 3) {
+              if (consecutiveMotionFrames >= 5) {
                 hasTargetLock = true;
                 const rawX = (sumX / changed) * (dispW / 128);
                 const rawY = (sumY / changed) * (dispH / 96);
@@ -2647,8 +3069,10 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
               }
             } else {
               consecutiveMotionFrames = Math.max(0, consecutiveMotionFrames - 1);
-              hasTargetLock = false;
-              targetScleraAperture = 0.85;
+              if (consecutiveMotionFrames === 0) {
+                hasTargetLock = false;
+                targetScleraAperture = 0.85;
+              }
             }
           }
         }
@@ -2658,6 +3082,49 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
           prevMotionPixels[p] = (data[i] * 299 + data[i + 1] * 587 + data[i + 2] * 114) / 1000;
         }
       } catch (err) {}
+    }
+
+    async function triggerAmbientVisionAnalysis() {
+      if (!isVisorActive || !isVisorAmbientActive || isAmbientAnalyzing || !STATE.apiKey) return;
+      const now = performance.now();
+      if (now - lastAmbientCallTime < 12000) return;
+
+      isAmbientAnalyzing = true;
+      lastAmbientCallTime = now;
+
+      const banner = document.getElementById("visorAmbientBanner");
+      const bannerText = document.getElementById("visorAmbientText");
+      if (banner) banner.style.display = "flex";
+      if (bannerText) bannerText.textContent = "LECTURA ÓPTICA: ANALIZANDO ESCENA...";
+
+      try {
+        const frameBase64 = captureVisorFrame(480, 0.60);
+        if (!frameBase64) return;
+
+        const contents = [
+          {
+            role: "user",
+            parts: [
+              { inlineData: { mimeType: "image/jpeg", data: frameBase64 } },
+              { text: "Describe en máximo 12 palabras lo que observas en esta escena de forma concisa y táctica. Sin rodeos ni introducciones." }
+            ]
+          }
+        ];
+
+        const result = await callGeminiWithFallback("gemini-3.5-flash-lite", contents, STATE.apiKey);
+        const reading = (result.text || "").trim().replace(/\n+/g, " ");
+        lastAmbientReading = reading;
+        if (bannerText) {
+          bannerText.textContent = `LECTURA ÓPTICA: ${reading.toUpperCase()}`;
+        }
+      } catch (err) {
+        console.debug("[AmbientVision] Error en lectura óptica:", err);
+        if (bannerText) {
+          bannerText.textContent = "LECTURA ÓPTICA: ESPERANDO ESCENA...";
+        }
+      } finally {
+        isAmbientAnalyzing = false;
+      }
     }
 
     // Dibuja las cajas biométricas faciales y líneas que conectan con la tarjeta del sidebar
@@ -2822,7 +3289,7 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
       ctx.textAlign = "left";
       if (isCameraPanning) {
         ctx.fillStyle = "#FF1744";
-        ctx.fillText("ESTADO: ESTABILIZANDO GIRO (ANTI-SHAKE)", 16, h - 110);
+        ctx.fillText("ESTADO: ESTABILIZANDO LENTE... (GMC)", 16, h - 110);
       } else if (hasTargetLock) {
         ctx.fillStyle = "#FF9800";
         ctx.fillText("ESTADO: OBJETIVO FIJADO (TARGET LOCK)", 16, h - 110);
@@ -2938,8 +3405,19 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
     }
 
     async function handleVisorVoiceCommand(transcript) {
+      // 1. Herramientas autónomas locales (temporizadores, notas, renombrado biométrico)
+      const localTool = parseAutonomousTools(transcript);
+      if (localTool.handled) {
+        targetScleraAperture = 0.85;
+        updateVisorSubtitle("E.V.", localTool.reply);
+        appendAssistantMessage(localTool.reply, "⚡ LOCAL TOOL");
+        speakEvResponse(localTool.reply);
+        return;
+      }
+
       if (!STATE.apiKey) {
         updateVisorSubtitle("ALERTA", "Falta Gemini API Key.");
+        playErrorSound();
         return;
       }
 
@@ -2948,7 +3426,13 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
 
       const frameBase64 = captureVisorFrame(512, 0.65);
       const bioContext = getBiometricContextString();
-      const combinedText = bioContext ? `${transcript}\n${bioContext}` : transcript;
+      let combinedText = bioContext ? `${transcript}\n${bioContext}` : transcript;
+
+      // Inyección proactiva de lectura ambiental si se consulta por la escena
+      const lowerT = transcript.toLowerCase();
+      if (lastAmbientReading && (lowerT.includes("viendo") || lowerT.includes("ves") || lowerT.includes("escena") || lowerT.includes("qué hay") || lowerT.includes("que hay"))) {
+        combinedText += `\n[Lectura óptica ambiental reciente del visor: "${lastAmbientReading}"]`;
+      }
 
       try {
         const userParts = [];
@@ -2972,6 +3456,7 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
 
       } catch (err) {
         targetScleraAperture = 0.85;
+        playErrorSound();
         updateVisorSubtitle("ALERTA", "Fallo: " + err.message);
       }
     }
@@ -3016,6 +3501,7 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
         statusEl.innerHTML = `<span style="color: var(--accent-green);">✓ Clave verificada con éxito. Enrutador activo.</span>`;
         setTimeout(() => closeModal("modalApiKey"), 1200);
       } else {
+        playErrorSound();
         statusEl.innerHTML = `<span style="color: var(--accent-red);">✕ Error de acceso. Clave rechazada por la API de Google.</span>`;
       }
     }
