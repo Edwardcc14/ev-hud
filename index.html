@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="E.V. Core">
-  <title>E.V. // TACTICAL CORE v9.7</title>
+  <title>E.V. // TACTICAL CORE v9.8</title>
   <link rel="manifest" href="./manifest.json">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23070B10' stroke='%23FF9800' stroke-width='4'/><circle cx='50' cy='50' r='20' fill='%2300E5FF'/></svg>">
 
@@ -797,7 +797,7 @@
       color: var(--accent-amber);
     }
 
-    /* DOCK INFERIOR DEL VISOR (ARQUITECTURA FLEXBOX COLUMN v9.7) */
+    /* DOCK INFERIOR DEL VISOR (MODO GAFAS LIMPIAS v9.8) */
     .visor-bottom-dock {
       position: absolute;
       bottom: 0;
@@ -806,31 +806,48 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
-      padding: 10px 12px calc(12px + env(safe-area-inset-bottom, 0px));
+      padding: 0 12px calc(10px + env(safe-area-inset-bottom, 0px));
       z-index: 80;
-      pointer-events: auto;
-      background: linear-gradient(to top, rgba(7, 11, 16, 0.95) 0%, rgba(7, 11, 16, 0.75) 75%, transparent 100%);
+      pointer-events: none;
+      background: transparent;
       box-sizing: border-box;
       max-width: 100vw;
+      transition: background 0.3s ease;
     }
 
-    /* SUBTÍTULOS FLOTANTES EN EL VISOR */
+    .visor-bottom-dock.controls-active {
+      background: linear-gradient(to top, rgba(7, 11, 16, 0.95) 0%, rgba(7, 11, 16, 0.75) 75%, transparent 100%);
+      pointer-events: auto;
+      padding: 10px 12px calc(12px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .visor-controls-dock {
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+      pointer-events: auto;
+    }
+
+    /* SUBTÍTULOS FLOTANTES EN EL VISOR (AUTO-OCULTADO EN 4s v9.8) */
     .visor-subtitles {
       position: relative;
       width: 100%;
       box-sizing: border-box;
-      min-height: 44px;
-      max-height: 80px;
+      min-height: 38px;
+      max-height: 76px;
       overflow-y: auto;
-      background: rgba(7, 11, 16, 0.88);
-      border: 1px solid var(--accent-cyan);
-      border-left: 4px solid var(--accent-amber);
+      background: rgba(7, 11, 16, 0.84);
+      border: 1px solid rgba(0, 229, 255, 0.45);
+      border-left: 3px solid var(--accent-amber);
       border-radius: 6px;
-      padding: 6px 10px;
-      font-size: 12px;
+      padding: 5px 10px;
+      font-size: 11.5px;
       line-height: 1.35;
       display: none;
       backdrop-filter: blur(4px);
+      pointer-events: auto;
+      transition: opacity 0.3s ease;
     }
 
     .visor-sub-header {
@@ -1086,10 +1103,10 @@
       <div class="msg-wrap assistant">
         <div class="msg-header">
           <span>[E.V. // CO-PILOTO TÁCTICO]</span>
-          <span>v9.7-IRONMAN AR HUD</span>
+          <span>v9.8-CLEAN GLASSES HUD</span>
         </div>
         <div class="msg-bubble">
-          Sistemas en línea, Operador. HUD AR holográfico Iron Man 60 FPS, detección facial acelerada por hardware nativo, telemetría táctica y tarjetas AR flotantes v9.7 activos. Pulsa ⚙ API KEY si aún no has sincronizado tu clave de Gemini, abre 👥 BIOMETRÍA para administrar perfiles, o accede al 👁 VISOR E.V. para reconocimiento facial y visión holográfica en tiempo real.
+          Sistemas en línea, Operador. Modo Gafas Limpias v9.8 activo: visor 100 % despejado sin botones estorbando al caminar, control total por voz hands-free, recorte facial nítido en tarjetas flotantes y rastreo biométrico estabilizado sin cortes. Pulsa ⚙ API KEY para sincronizar Gemini, administra perfiles en 👥 BIOMETRÍA o abre el 👁 VISOR E.V. para operar con visión táctica inmersiva.
         </div>
       </div>
     </div>
@@ -1133,7 +1150,7 @@
     <div class="visor-top-bar">
       <div class="visor-badge">
         <span style="display: inline-block; width: 6px; height: 6px; background: var(--accent-cyan); border-radius: 50%;"></span>
-        <span>E.V. // OPTICAL CORE v9.7</span>
+        <span>E.V. // OPTICAL CORE v9.8</span>
         <span id="visorModelTag" style="color: var(--accent-amber); margin-left: 4px;">[3.5 FLASH-LITE]</span>
         <span id="visorBioStatus" class="visor-bio-badge" style="margin-left: 6px;">BIOMETRÍA: INICIANDO...</span>
       </div>
@@ -1158,38 +1175,41 @@
       <div id="evBioSidebarContent" class="bio-sidebar-content"></div>
     </div>
 
-    <!-- DOCK INFERIOR SIN SUPERPOSICIONES (FLEXBOX COLUMN v9.7) -->
+    <!-- DOCK INFERIOR SIN SUPERPOSICIONES (MODO GAFAS LIMPIAS v9.8) -->
     <div id="visorBottomDock" class="visor-bottom-dock">
-      <!-- Fila 1 (Arriba): Cuadro de subtítulos y estado -->
+      <!-- Fila 1 (Arriba): Cuadro de subtítulos y estado (Auto-ocultado en 4s) -->
       <div id="visorSubtitles" class="visor-subtitles">
         <div id="visorSubHeader" class="visor-sub-header">E.V. // INTEL</div>
         <div id="visorSubText" class="visor-sub-text">Analizando campo visual...</div>
       </div>
 
-      <!-- Fila 2 (Centro): Botones biométricos prioritarios -->
-      <div class="visor-row-bio">
-        <button id="btnVisorRegisterFace" class="btn-visor-action accent-cyan" title="Registrar nuevo perfil biométrico">
-          👤 REGISTRAR ROSTRO
-        </button>
-        <button id="btnVisorAutoEnroll" class="btn-visor-action accent-green" title="Auto-captura manos libres de rostros">
-          🤖 AUTO: ON
-        </button>
-      </div>
+      <!-- Fila 2 & 3: Botones tácticos (Ocultos por defecto para Modo Gafas Limpias; doble toque para alternar) -->
+      <div id="visorControlsDock" class="visor-controls-dock" style="display: none;">
+        <!-- Fila 2 (Centro): Botones biométricos prioritarios -->
+        <div class="visor-row-bio">
+          <button id="btnVisorRegisterFace" class="btn-visor-action accent-cyan" title="Registrar nuevo perfil biométrico">
+            👤 REGISTRAR ROSTRO
+          </button>
+          <button id="btnVisorAutoEnroll" class="btn-visor-action accent-green" title="Auto-captura manos libres de rostros">
+            🤖 AUTO: ON
+          </button>
+        </div>
 
-      <!-- Fila 3 (Abajo): Controles tácticos y ópticos -->
-      <div class="visor-row-optics">
-        <button id="btnVisorAmbient" class="btn-visor-action accent-cyan" title="Visión ambiental inteligente">
-          👁 LENTE: ON
-        </button>
-        <button id="btnVisorScanDetail" class="btn-visor-action accent-amber" title="Escanear con Gemini">
-          🔍 DETALLE
-        </button>
-        <button id="btnVisorMic" class="btn-visor-action accent-cyan" title="Micrófono continuo">
-          🎙 MIC: OFF
-        </button>
-        <button id="btnVisorFlipCamera" class="btn-visor-action accent-cyan" title="Alternar Lente Óptica (0.5x Ultra / 1x Principal / Frontal)">
-          🔭 0.5x ULTRAWIDE
-        </button>
+        <!-- Fila 3 (Abajo): Controles tácticos y ópticos -->
+        <div class="visor-row-optics">
+          <button id="btnVisorAmbient" class="btn-visor-action accent-cyan" title="Visión ambiental inteligente">
+            👁 LENTE: ON
+          </button>
+          <button id="btnVisorScanDetail" class="btn-visor-action accent-amber" title="Escanear con Gemini">
+            🔍 DETALLE
+          </button>
+          <button id="btnVisorMic" class="btn-visor-action accent-cyan" title="Micrófono continuo">
+            🎙 MIC: OFF
+          </button>
+          <button id="btnVisorFlipCamera" class="btn-visor-action accent-cyan" title="Alternar Lente Óptica (0.5x Ultra / 1x Principal / Frontal)">
+            🔭 0.5x ULTRAWIDE
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -1295,10 +1315,10 @@
 
   <script>
     // =========================================================================
-    // E.V. STANDALONE PWA (v9.7-IRONMAN AR HUD) - NÚCLEO JS
+    // E.V. STANDALONE PWA (v9.8-CLEAN GLASSES HUD) - NÚCLEO JS
     // =========================================================================
 
-    // Variables de Óptica y Calibración v9.7 (Anti-Mareo 0.5x Ultra Wide + HUD AR Iron Man)
+    // Variables de Óptica y Calibración v9.8 (Modo Gafas Limpias + HUD AR)
     let availableVideoDevices = [];
     let rearCameras = [];
     let frontCameras = [];
@@ -1309,6 +1329,9 @@
     let autoEnrollStreak = 0;
     let lastAutoEnrollBox = null;
     let lastAutoEnrollTime = 0;
+    let recentEnrolledHistory = []; // Anti-duplicados (8 segundos)
+    let visorSubtitleTimer = null; // Auto-ocultado en 4 segundos
+    let lastVisorTapTime = 0; // Gesto doble toque para controles
 
     let isVisorAmbientActive = true;
     let lastAmbientCallTime = 0;
@@ -1318,7 +1341,7 @@
     let isSidebarCollapsed = false;
     let lastPanTimestamp = 0;
 
-    // Variables Biometría Híbrida Indestructible v9.7
+    // Variables Biometría Híbrida Indestructible v9.8
     let isFallbackBiometrics = false;
     let nativeFaceDetectorInstance = null;
 
@@ -1343,7 +1366,7 @@
     if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
       window.addEventListener("load", () => {
         navigator.serviceWorker.register("./sw.js")
-          .then((reg) => console.log("[E.V. PWA] Service Worker v9.7 registrado:", reg.scope))
+          .then((reg) => console.log("[E.V. PWA] Service Worker v9.8 registrado:", reg.scope))
           .catch((err) => console.warn("[E.V. PWA] Fallo registro SW:", err));
       });
     }
@@ -1412,6 +1435,27 @@
       document.getElementById("btnVisorScanDetail").addEventListener("click", handleVisorScanDetail);
       document.getElementById("btnVisorMic").addEventListener("click", toggleVisorContinuousMic);
       document.getElementById("btnVisorFlipCamera").addEventListener("click", cycleVisorLens);
+
+      // Gesto de doble toque / doble clic en pantalla para alternar controles (Modo Gafas Limpias v9.8)
+      const visorOverlayEl = document.getElementById("visorOverlay");
+      if (visorOverlayEl) {
+        visorOverlayEl.addEventListener("dblclick", (e) => {
+          if (e.target.closest("button, .btn-visor-action, .modal-backdrop, .btn-exit-visor")) return;
+          toggleVisorControls();
+        });
+
+        visorOverlayEl.addEventListener("touchend", (e) => {
+          if (e.target.closest("button, .btn-visor-action, .modal-backdrop, .btn-exit-visor")) return;
+          const now = performance.now();
+          if (now - lastVisorTapTime < 340) {
+            e.preventDefault();
+            toggleVisorControls();
+            lastVisorTapTime = 0;
+          } else {
+            lastVisorTapTime = now;
+          }
+        });
+      }
 
       // Manejo de Ahorro de Batería en background (Android)
       document.addEventListener("visibilitychange", () => {
@@ -1680,34 +1724,104 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
       }
     }
 
-    function extractFaceAvatarUrl(video, box) {
-      try {
-        offscreenProcessingCanvas.width = 64;
-        offscreenProcessingCanvas.height = 64;
-        const padX = box.width * 0.15;
-        const padY = box.height * 0.15;
-        const srcX = Math.max(0, box.x - padX);
-        const srcY = Math.max(0, box.y - padY);
-        const srcW = Math.min(video.videoWidth - srcX, box.width + padX * 2);
-        const srcH = Math.min(video.videoHeight - srcY, box.height + padY * 2);
+    function getVideoCoverTransform(video) {
+      const vw = video.videoWidth || 1280;
+      const vh = video.videoHeight || 720;
+      const cw = video.clientWidth || window.innerWidth;
+      const ch = video.clientHeight || window.innerHeight;
+      const scale = Math.max(cw / vw, ch / vh);
+      const offsetX = (vw * scale - cw) / 2;
+      const offsetY = (vh * scale - ch) / 2;
+      return { vw, vh, cw, ch, scale, offsetX, offsetY };
+    }
 
-        offscreenProcessingCtx.drawImage(video, srcX, srcY, srcW, srcH, 0, 0, 64, 64);
-        return offscreenProcessingCanvas.toDataURL("image/jpeg", 0.72);
+    function videoToScreenBox(vBox, t) {
+      return {
+        x: vBox.x * t.scale - t.offsetX,
+        y: vBox.y * t.scale - t.offsetY,
+        width: vBox.width * t.scale,
+        height: vBox.height * t.scale
+      };
+    }
+
+    function screenToVideoBox(sBox, t) {
+      return {
+        x: (sBox.x + t.offsetX) / t.scale,
+        y: (sBox.y + t.offsetY) / t.scale,
+        width: sBox.width / t.scale,
+        height: sBox.height / t.scale
+      };
+    }
+
+    // Recorte Facial Exacto en Alta Nitidez con Margen de Encuadre 22% y Validación Anti-Negro
+    function captureFaceAvatar(video, box, isScreenCoords = false, targetSize = 96) {
+      try {
+        if (!video || !video.videoWidth || video.readyState < 2) return "";
+        const t = getVideoCoverTransform(video);
+        let vBox = isScreenCoords ? screenToVideoBox(box, t) : { ...box };
+
+        // Margen de encuadre del 22 % para rostro completo (frente, ojos, nariz, boca y mentón)
+        const padX = vBox.width * 0.22;
+        const padY = vBox.height * 0.22;
+        let sx = vBox.x - padX;
+        let sy = vBox.y - padY;
+        let sw = vBox.width + padX * 2;
+        let sh = vBox.height + padY * 2;
+
+        // Limitar dentro de los límites reales del sensor
+        sx = Math.max(0, Math.min(t.vw - 10, sx));
+        sy = Math.max(0, Math.min(t.vh - 10, sy));
+        sw = Math.max(10, Math.min(t.vw - sx, sw));
+        sh = Math.max(10, Math.min(t.vh - sy, sh));
+
+        offscreenProcessingCanvas.width = targetSize;
+        offscreenProcessingCanvas.height = targetSize;
+        offscreenProcessingCtx.clearRect(0, 0, targetSize, targetSize);
+        offscreenProcessingCtx.drawImage(video, sx, sy, sw, sh, 0, 0, targetSize, targetSize);
+
+        // Validación de luminancia promedio > 12 para evitar guardar recortes negros
+        const imgData = offscreenProcessingCtx.getImageData(0, 0, targetSize, targetSize);
+        const data = imgData.data;
+        let sumLum = 0;
+        const sampleCount = data.length / 16;
+        for (let i = 0; i < data.length; i += 16) {
+          sumLum += (data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114);
+        }
+        const avgLum = sumLum / Math.max(1, sampleCount);
+        if (avgLum <= 12) {
+          console.warn("[BiometricEngine] Recorte rechazado por luminancia baja:", avgLum);
+          return "";
+        }
+
+        return offscreenProcessingCanvas.toDataURL("image/jpeg", 0.85);
       } catch (e) {
+        console.warn("[BiometricEngine] Fallo en captureFaceAvatar:", e);
         return "";
       }
     }
 
+    function extractFaceAvatarUrl(video, box) {
+      return captureFaceAvatar(video, box, false, 96);
+    }
+
     function extractCenterCropAvatarUrl(video, size = 120) {
       try {
-        offscreenProcessingCanvas.width = size;
-        offscreenProcessingCanvas.height = size;
+        if (!video || !video.videoWidth || video.readyState < 2) return "";
         const vw = video.videoWidth || 640;
         const vh = video.videoHeight || 480;
-        const cropSize = Math.min(vw, vh) * 0.50;
-        const srcX = Math.max(0, (vw - cropSize) / 2);
-        const srcY = Math.max(0, (vh - cropSize) / 2);
-        offscreenProcessingCtx.drawImage(video, srcX, srcY, cropSize, cropSize, 0, 0, size, size);
+        const cropSize = Math.min(vw, vh) * 0.52;
+        const centerBox = {
+          x: (vw - cropSize) / 2,
+          y: (vh - cropSize) / 2,
+          width: cropSize,
+          height: cropSize
+        };
+        const avatar = captureFaceAvatar(video, centerBox, false, size);
+        if (avatar) return avatar;
+
+        offscreenProcessingCanvas.width = size;
+        offscreenProcessingCanvas.height = size;
+        offscreenProcessingCtx.drawImage(video, centerBox.x, centerBox.y, cropSize, cropSize, 0, 0, size, size);
         return offscreenProcessingCanvas.toDataURL("image/jpeg", 0.82);
       } catch (e) {
         return "";
@@ -1724,14 +1838,7 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
       const now = performance.now();
 
       try {
-        const videoW = video.videoWidth || 1280;
-        const videoH = video.videoHeight || 720;
-        const dispW = window.innerWidth;
-        const dispH = window.innerHeight;
-
-        const scaleX = dispW / videoW;
-        const scaleY = dispH / videoH;
-
+        const t = getVideoCoverTransform(video);
         let detectionsList = [];
 
         // 1. Detección Facial Nativa Acelerada por Hardware (Chrome Android)
@@ -1781,15 +1888,10 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
 
         for (const det of detectionsList) {
           const rBox = det.rawBox;
-          const targetBox = {
-            x: rBox.x * scaleX,
-            y: rBox.y * scaleY,
-            width: rBox.width * scaleX,
-            height: rBox.height * scaleY
-          };
+          const targetBox = videoToScreenBox(rBox, t);
 
           // Estimación de distancia basada en proporción focal de altura
-          const distanceEst = (Math.max(0.4, Math.min(3.5, (videoH * 0.45) / Math.max(1, rBox.height)))).toFixed(1);
+          const distanceEst = (Math.max(0.4, Math.min(3.5, (t.vh * 0.45) / Math.max(1, rBox.height)))).toFixed(1);
 
           let matchLabel = "unknown";
           let matchDistance = 1.0;
@@ -1823,7 +1925,7 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
 
           // Buscar instancia previa para suavizado lerp continuo
           const existing = currentTrackedFaces.find(f =>
-            Math.hypot((f.targetBox ? f.targetBox.x : f.box.x) - targetBox.x, (f.targetBox ? f.targetBox.y : f.box.y) - targetBox.y) < 120
+            Math.hypot((f.targetBox ? f.targetBox.x : f.box.x) - targetBox.x, (f.targetBox ? f.targetBox.y : f.box.y) - targetBox.y) < 140
           );
 
           const currentBox = existing ? { ...existing.box } : { ...targetBox };
@@ -1845,52 +1947,72 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
           });
         }
 
-        // Auto-Captura Facial Manos Libres Ágil (5 ciclos de 120ms = 0.6s)
+        // Auto-Captura Facial Manos Libres con Anti-Duplicados (8 segundos)
         if (isAutoEnrollEnabled && !isCameraPanning && (now - lastAutoEnrollTime > 1500)) {
-          const unknownTarget = updatedFaces.find(f => !f.isRecognized && f.targetBox.width >= 45);
+          const unknownTarget = updatedFaces.find(f => !f.isRecognized && f.targetBox && f.targetBox.width >= 45);
           if (unknownTarget) {
             const centerX = unknownTarget.targetBox.x + unknownTarget.targetBox.width / 2;
             const centerY = unknownTarget.targetBox.y + unknownTarget.targetBox.height / 2;
+            const dispW = window.innerWidth;
+            const dispH = window.innerHeight;
+
             if (centerX > dispW * 0.12 && centerX < dispW * 0.88 && centerY > dispH * 0.10 && centerY < dispH * 0.90) {
-              if (lastAutoEnrollBox && Math.hypot(centerX - lastAutoEnrollBox.x, centerY - lastAutoEnrollBox.y) < 90) {
-                autoEnrollStreak++;
-              } else {
-                autoEnrollStreak = 1;
-                lastAutoEnrollBox = { x: centerX, y: centerY };
-              }
+              // Comprobar si ya fue registrado o visto recientemente en los últimos 8 segundos (anti-duplicados)
+              const isRecentlyEnrolled = recentEnrolledHistory.some(h =>
+                (now - h.timestamp < 8000) && (Math.hypot(h.x - centerX, h.y - centerY) < 160)
+              );
 
-              if (autoEnrollStreak >= 5) {
-                autoEnrollStreak = 0;
-                lastAutoEnrollBox = null;
-                lastAutoEnrollTime = now;
+              if (!isRecentlyEnrolled) {
+                if (lastAutoEnrollBox && Math.hypot(centerX - lastAutoEnrollBox.x, centerY - lastAutoEnrollBox.y) < 90) {
+                  autoEnrollStreak++;
+                } else {
+                  autoEnrollStreak = 1;
+                  lastAutoEnrollBox = { x: centerX, y: centerY };
+                }
 
-                let maxNum = 0;
-                STATE.faceDb.forEach(p => {
-                  const m = p.name.match(/^SUJETO_(\d+)$/i);
-                  if (m) {
-                    const val = parseInt(m[1], 10);
-                    if (val > maxNum) maxNum = val;
-                  }
-                });
-                const nextId = String(maxNum + 1).padStart(2, "0");
-                const autoName = `SUJETO_${nextId}`;
-                const avatarData = extractCenterCropAvatarUrl(video, 120);
+                if (autoEnrollStreak >= 5) {
+                  autoEnrollStreak = 0;
+                  lastAutoEnrollBox = null;
+                  lastAutoEnrollTime = now;
 
-                const newProfile = {
-                  id: "face_" + Date.now(),
-                  name: autoName,
-                  role: "Sujeto Auto-Capturado",
-                  notes: "Captura HUD AR v9.7",
-                  avatarDataUrl: avatarData,
-                  descriptors: unknownTarget.descriptor ? [unknownTarget.descriptor] : []
-                };
+                  let maxNum = 0;
+                  STATE.faceDb.forEach(p => {
+                    const m = p.name.match(/^SUJETO_(\d+)$/i);
+                    if (m) {
+                      const val = parseInt(m[1], 10);
+                      if (val > maxNum) maxNum = val;
+                    }
+                  });
+                  const nextId = String(maxNum + 1).padStart(2, "0");
+                  const autoName = `SUJETO_${nextId}`;
+                  const avatarData = captureFaceAvatar(video, unknownTarget.rawBox, false, 96) || extractCenterCropAvatarUrl(video, 120);
 
-                STATE.faceDb.push(newProfile);
-                localStorage.setItem("ev_face_db", JSON.stringify(STATE.faceDb));
-                rebuildFaceMatcher();
-                renderBiometricProfilesList();
-                playCommandAckSound();
-                updateVisorSubtitle("AUTO-CAPTURA", `Nuevo sujeto registrado automáticamente como ${autoName}. Di: "El ${autoName.toLowerCase()} es [Nombre]" para nombrarlo.`);
+                  const newProfile = {
+                    id: "face_" + Date.now(),
+                    name: autoName,
+                    role: "Sujeto Auto-Capturado",
+                    notes: "Captura HUD AR v9.8",
+                    avatarDataUrl: avatarData,
+                    descriptors: unknownTarget.descriptor ? [unknownTarget.descriptor] : []
+                  };
+
+                  STATE.faceDb.push(newProfile);
+                  localStorage.setItem("ev_face_db", JSON.stringify(STATE.faceDb));
+
+                  // Registrar en historial anti-duplicados (8 segundos)
+                  recentEnrolledHistory.push({
+                    name: autoName,
+                    x: centerX,
+                    y: centerY,
+                    timestamp: now
+                  });
+                  recentEnrolledHistory = recentEnrolledHistory.filter(h => (now - h.timestamp) < 15000);
+
+                  rebuildFaceMatcher();
+                  renderBiometricProfilesList();
+                  playCommandAckSound();
+                  updateVisorSubtitle("AUTO-CAPTURA", `Nuevo sujeto registrado como ${autoName}. Di: "E.V., el ${autoName.toLowerCase()} es [Nombre]" para nombrarlo.`);
+                }
               }
             }
           } else {
@@ -1898,8 +2020,18 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
           }
         }
 
-        // Purgar al instante (<350 ms) rostros que salieron del encuadre
-        currentTrackedFaces = updatedFaces.filter(f => (now - f.lastSeen) < 350);
+        // Suavizado Temporal y Persistencia Anti-Corte (1400ms):
+        // Si no se detectó temporalmente por vibración al caminar, mantener en pantalla
+        for (const prev of currentTrackedFaces) {
+          if (!updatedFaces.some(u => u.name === prev.name || Math.hypot((u.targetBox ? u.targetBox.x : u.box.x) - (prev.targetBox ? prev.targetBox.x : prev.box.x), (u.targetBox ? u.targetBox.y : u.box.y) - (prev.targetBox ? prev.targetBox.y : prev.box.y)) < 110)) {
+            if (now - prev.lastSeen < 1400) {
+              updatedFaces.push(prev);
+            }
+          }
+        }
+
+        // Purgar de forma reactiva cualquier rostro ausente por más de 1400ms
+        currentTrackedFaces = updatedFaces.filter(f => (now - f.lastSeen) < 1400);
         renderBiometricSidebar();
 
       } catch (err) {
@@ -2278,6 +2410,13 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
           profile.name = newName;
           profile.role = "Identificado por Voz";
           localStorage.setItem("ev_face_db", JSON.stringify(STATE.faceDb));
+          currentTrackedFaces.forEach(f => {
+            if (f.id === profile.id || f.name === oldName) {
+              f.name = newName;
+              f.role = "Identificado por Voz";
+              f.isRecognized = true;
+            }
+          });
           rebuildFaceMatcher();
           renderBiometricProfilesList();
           renderBiometricSidebar();
@@ -2306,6 +2445,13 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
           targetProfile.name = newName;
           targetProfile.role = "Identificado por Voz";
           localStorage.setItem("ev_face_db", JSON.stringify(STATE.faceDb));
+          currentTrackedFaces.forEach(f => {
+            if (f.id === targetProfile.id || f.name === oldName) {
+              f.name = newName;
+              f.role = "Identificado por Voz";
+              f.isRecognized = true;
+            }
+          });
           rebuildFaceMatcher();
           renderBiometricProfilesList();
           renderBiometricSidebar();
@@ -2321,7 +2467,7 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
     }
 
     // =========================================================================
-    // TEMPORIZADORES Y SÍNTESIS DE TONOS WEB AUDIO API (FEEDBACK POSITIVO v9.7)
+    // TEMPORIZADORES Y SÍNTESIS DE TONOS WEB AUDIO API (FEEDBACK POSITIVO v9.8)
     // =========================================================================
 
     let audioContextInstance = null;
@@ -3114,6 +3260,22 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
       await startVisorCamera();
     }
 
+    async function setVisorLens(targetLens) {
+      if (targetLens === "0.5x") {
+        activeCameraLens = "0.5x";
+        currentFacingMode = "environment";
+      } else if (targetLens === "1x") {
+        activeCameraLens = "1x";
+        currentFacingMode = "environment";
+      } else if (targetLens === "user" || targetLens === "frontal") {
+        activeCameraLens = "user";
+        currentFacingMode = "user";
+      }
+      updateLensButtonUI();
+      playTacticalBeep(784, 0.08);
+      await startVisorCamera();
+    }
+
     function flipVisorCamera() {
       cycleVisorLens();
     }
@@ -3123,6 +3285,12 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
       getAudioContext();
       const overlay = document.getElementById("visorOverlay");
       overlay.style.display = "flex";
+
+      // Modo Gafas Limpias: controles inferiores ocultos por defecto
+      const dock = document.getElementById("visorControlsDock");
+      const bottomDock = document.getElementById("visorBottomDock");
+      if (dock) dock.style.display = "none";
+      if (bottomDock) bottomDock.classList.remove("controls-active");
 
       try {
         if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
@@ -3142,7 +3310,16 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
         }
       });
 
-      updateVisorSubtitle("E.V.", "Visor óptico v9.7 en línea. HUD AR Iron Man y rastreo acelerado por hardware activos.");
+      // Micrófono continuo automático manos libres al entrar al visor
+      isVisorContinuousMic = true;
+      const micBtn = document.getElementById("btnVisorMic");
+      if (micBtn) {
+        micBtn.textContent = "🎙 MIC: ON";
+        micBtn.classList.add("active-mic");
+      }
+      startVisorSpeechLoop();
+
+      updateVisorSubtitle("E.V.", "Visor óptico v9.8 en línea. Modo Gafas Limpias y HUD AR activos.");
       playTacticalBeep(1046, 0.1);
     }
 
@@ -3297,9 +3474,9 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
         // 2. Interpolación suave de escleras (Spider-Man Brand New Day)
         scleraAperture += (targetScleraAperture - scleraAperture) * 0.16;
 
-        // 3. Suavizado lerp a 60 FPS y purga instantánea (<350ms) de tracking facial
+        // 3. Suavizado lerp a 60 FPS y persistencia anti-corte (1400ms) de tracking facial
         if (currentTrackedFaces && currentTrackedFaces.length > 0) {
-          currentTrackedFaces = currentTrackedFaces.filter(f => (now - f.lastSeen) < 350);
+          currentTrackedFaces = currentTrackedFaces.filter(f => (now - f.lastSeen) < 1400);
           for (let i = 0; i < currentTrackedFaces.length; i++) {
             const f = currentTrackedFaces[i];
             if (f.targetBox) {
@@ -3484,12 +3661,12 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
         drawCornerBrackets(ctx, b.x, b.y, b.width, b.height, cornerSize);
         ctx.stroke();
 
-        // 2. Cálculo de Posición de la Tarjeta Flotante AR (162x56 px)
-        const cardW = 162;
-        const cardH = 56;
+        // 2. Cálculo de Posición de la Tarjeta Flotante AR (168x62 px)
+        const cardW = 168;
+        const cardH = 62;
         let placeRight = true;
         let cardX = b.x + b.width + 24;
-        let cardY = Math.max(14, Math.min(h - cardH - 14, b.y + b.height * 0.25 - 24));
+        let cardY = Math.max(14, Math.min(h - cardH - 14, b.y + b.height * 0.22 - 28));
 
         if (cardX + cardW > w - 10) {
           placeRight = false;
@@ -3500,7 +3677,7 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
         const startX = placeRight ? (b.x + b.width) : b.x;
         const startY = b.y + b.height * 0.25;
         const endX = placeRight ? cardX : (cardX + cardW);
-        const endY = cardY + 28;
+        const endY = cardY + 31;
         const midX = placeRight ? (startX + 14) : (startX - 14);
 
         ctx.setLineDash([4, 3]);
@@ -3543,28 +3720,31 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
         drawChamferedRect(ctx, cardX, cardY, cardW, cardH, 6);
         ctx.stroke();
 
-        // 5. Live Video PIP de Rostro Recortado en Tiempo Real (48x48 px a 60 FPS)
-        const pipX = cardX + 4;
-        const pipY = cardY + 4;
-        const pipSize = 48;
+        // 5. Live Video PIP de Rostro Recortado en Alta Nitidez (52x52 px con borde cian #00E5FF a 60 FPS)
+        const pipX = cardX + 5;
+        const pipY = cardY + 5;
+        const pipSize = 52;
 
         if (face.rawBox && video && video.readyState >= 2) {
           ctx.save();
           ctx.beginPath();
           ctx.rect(pipX, pipY, pipSize, pipSize);
           ctx.clip();
-          const rbx = Math.max(0, face.rawBox.x);
-          const rby = Math.max(0, face.rawBox.y);
-          const rbw = Math.min(video.videoWidth - rbx, face.rawBox.width);
-          const rbh = Math.min(video.videoHeight - rby, face.rawBox.height);
-          if (rbw > 0 && rbh > 0) {
-            ctx.drawImage(video, rbx, rby, rbw, rbh, pipX, pipY, pipSize, pipSize);
-          }
+
+          const t = getVideoCoverTransform(video);
+          const padX = face.rawBox.width * 0.22;
+          const padY = face.rawBox.height * 0.22;
+          const sx = Math.max(0, Math.min(t.vw - 10, face.rawBox.x - padX));
+          const sy = Math.max(0, Math.min(t.vh - 10, face.rawBox.y - padY));
+          const sw = Math.max(10, Math.min(t.vw - sx, face.rawBox.width + padX * 2));
+          const sh = Math.max(10, Math.min(t.vh - sy, face.rawBox.height + padY * 2));
+
+          ctx.drawImage(video, sx, sy, sw, sh, pipX, pipY, pipSize, pipSize);
           ctx.restore();
 
-          // Marco fino del PIP
-          ctx.strokeStyle = color;
-          ctx.lineWidth = 1.0;
+          // Marco fino del PIP cian
+          ctx.strokeStyle = "#00E5FF";
+          ctx.lineWidth = 1.4;
           ctx.strokeRect(pipX, pipY, pipSize, pipSize);
         } else {
           // Placeholder táctico si no hay frame aún
@@ -3572,30 +3752,30 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
           ctx.fillRect(pipX, pipY, pipSize, pipSize);
           ctx.fillStyle = color;
           ctx.font = "8px 'Share Tech Mono', monospace";
-          ctx.fillText("NO SIGNAL", pipX + 3, pipY + 28);
+          ctx.fillText("NO SIGNAL", pipX + 3, pipY + 30);
         }
 
         // 6. Tipografía Táctica del HUD Flotante
-        const textX = pipX + pipSize + 6;
+        const textX = pipX + pipSize + 7;
         ctx.font = "bold 10px 'Share Tech Mono', monospace";
         ctx.fillStyle = "#FFFFFF";
         const displayName = face.name.toUpperCase().slice(0, 13);
-        ctx.fillText(displayName, textX, cardY + 16);
+        ctx.fillText(displayName, textX, cardY + 18);
 
         ctx.font = "8.5px 'Share Tech Mono', monospace";
         ctx.fillStyle = color;
         const displayRole = (face.role || "OBJETIVO").slice(0, 16);
-        ctx.fillText(displayRole, textX, cardY + 29);
+        ctx.fillText(displayRole, textX, cardY + 32);
 
         ctx.font = "8px 'Share Tech Mono', monospace";
         ctx.fillStyle = "rgba(255, 255, 255, 0.72)";
         const telemetry = `DIST: ~${face.distanceEst || '1.2'}m | ${face.similarity}%`;
-        ctx.fillText(telemetry, textX, cardY + 42);
+        ctx.fillText(telemetry, textX, cardY + 45);
 
         // Micro-barra de confianza/afinidad inferior
-        const barW = cardW - pipSize - 16;
+        const barW = cardW - pipSize - 18;
         const barH = 2.5;
-        const barY = cardY + 47;
+        const barY = cardY + 51;
         ctx.fillStyle = "rgba(255, 255, 255, 0.12)";
         ctx.fillRect(textX, barY, barW, barH);
         ctx.fillStyle = color;
@@ -3756,7 +3936,7 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
       ctx.restore();
     }
 
-    function updateVisorSubtitle(speaker, text) {
+    function updateVisorSubtitle(speaker, text, autoHideMs = 4000) {
       const box = document.getElementById("visorSubtitles");
       const header = document.getElementById("visorSubHeader");
       const body = document.getElementById("visorSubText");
@@ -3765,6 +3945,13 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
       header.textContent = `E.V. // ${speaker.toUpperCase()}`;
       body.textContent = text;
       box.style.display = "block";
+
+      if (visorSubtitleTimer) clearTimeout(visorSubtitleTimer);
+      if (autoHideMs > 0) {
+        visorSubtitleTimer = setTimeout(() => {
+          if (box) box.style.display = "none";
+        }, autoHideMs);
+      }
     }
 
     function captureVisorFrame(maxDim = 512, quality = 0.65) {
@@ -3857,7 +4044,32 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
     }
 
     async function handleVisorVoiceCommand(transcript) {
-      // 1. Herramientas autónomas locales (temporizadores, notas, renombrado biométrico)
+      const lower = (transcript || "").toLowerCase().trim();
+
+      // 1. Control directo del visor y óptica por voz (Modo Gafas Limpias v9.8)
+      if (/(?:salir del visor|cerrar visor|apaga(?:r)? (?:el )?visor|cerrar c[aá]mara|desactivar visor)/i.test(lower)) {
+        closeVisorOverlay();
+        const reply = "Visor óptico desactivado. Regresando a la consola central.";
+        appendAssistantMessage(reply, "👁 VISOR CERRADO");
+        speakEvResponse(reply);
+        return;
+      }
+
+      if (/(?:cambia(?:r)? (?:de )?lente|gran angular|ultrawide|c[aá]mara normal|lente normal|cambiar c[aá]mara|alternar lente)/i.test(lower)) {
+        if (lower.includes("gran angular") || lower.includes("ultrawide") || lower.includes("0.5")) {
+          await setVisorLens("0.5x");
+        } else if (lower.includes("normal") || lower.includes("1x")) {
+          await setVisorLens("1x");
+        } else {
+          await cycleVisorLens();
+        }
+        const reply = `Lente ajustada a ${activeCameraLens.toUpperCase()}. Campo de visión calibrado.`;
+        updateVisorSubtitle("ÓPTICA", reply);
+        speakEvResponse(reply);
+        return;
+      }
+
+      // 2. Herramientas autónomas locales (temporizadores, notas, renombrado biométrico)
       const localTool = parseAutonomousTools(transcript);
       if (localTool.handled) {
         targetScleraAperture = 0.85;
