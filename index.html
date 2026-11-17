@@ -1,0 +1,3079 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#FF9800">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="E.V. Core">
+  <title>E.V. // TACTICAL CORE v9.2</title>
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23070B10' stroke='%23FF9800' stroke-width='4'/><circle cx='50' cy='50' r='20' fill='%2300E5FF'/></svg>">
+
+  <!-- LIBRERÍA BIOMÉTRICA OFFLINE PRECACHADA POR SERVICE WORKER -->
+  <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.14/dist/face-api.min.js" defer></script>
+
+  <style>
+    :root {
+      --bg-primary: #070B10;
+      --bg-panel: #0D131C;
+      --bg-panel-alt: #131B26;
+      --border-tactical: #1B2A3D;
+      --border-active: #00E5FF;
+      --accent-cyan: #00E5FF;
+      --accent-amber: #FF9800;
+      --accent-red: #FF1744;
+      --accent-green: #00E676;
+      --text-primary: #E0E6ED;
+      --text-muted: #7E8B9B;
+      --font-mono: 'Share Tech Mono', 'Consolas', 'Courier New', monospace;
+      --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    input, textarea, [contenteditable="true"] {
+      user-select: text;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(rgba(0, 229, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(7, 11, 16, 0.95), rgba(7, 11, 16, 0.98));
+      background-size: 24px 24px, 100% 100%;
+    }
+
+    /* BARRA SUPERIOR HUD */
+    .hud-header {
+      background: var(--bg-panel);
+      border-bottom: 1px solid var(--border-tactical);
+      padding: 10px 14px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.6);
+    }
+
+    .hud-branding {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hud-logo {
+      width: 28px;
+      height: 28px;
+      border: 2px solid var(--accent-amber);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .hud-logo-inner {
+      width: 12px;
+      height: 12px;
+      background: var(--accent-cyan);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent-cyan);
+      animation: pulseCore 2.4s infinite ease-in-out;
+    }
+
+    @keyframes pulseCore {
+      0%, 100% { transform: scale(0.9); opacity: 0.8; }
+      50% { transform: scale(1.15); opacity: 1; }
+    }
+
+    .hud-title-wrap {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .hud-title {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: var(--accent-cyan);
+      text-shadow: 0 0 6px rgba(0, 229, 255, 0.4);
+    }
+
+    .hud-status-line {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    .status-led {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-red);
+      box-shadow: 0 0 6px var(--accent-red);
+      transition: background 0.3s, box-shadow 0.3s;
+    }
+
+    .status-led.online {
+      background: var(--accent-green);
+      box-shadow: 0 0 8px var(--accent-green);
+    }
+
+    /* BOTONES DE LA CABECERA */
+    .hud-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .btn-hud {
+      background: var(--bg-panel-alt);
+      border: 1px solid var(--border-tactical);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 6px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn-hud:active {
+      transform: scale(0.96);
+    }
+
+    .btn-hud.accent-cyan {
+      border-color: rgba(0, 229, 255, 0.4);
+      color: var(--accent-cyan);
+    }
+
+    .btn-hud.accent-cyan:hover, .btn-hud.accent-cyan.active {
+      background: rgba(0, 229, 255, 0.12);
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 8px rgba(0, 229, 255, 0.3);
+    }
+
+    .btn-hud.accent-amber {
+      border-color: rgba(255, 152, 0, 0.4);
+      color: var(--accent-amber);
+    }
+
+    .btn-hud.accent-amber:hover, .btn-hud.accent-amber.active {
+      background: rgba(255, 152, 0, 0.12);
+      border-color: var(--accent-amber);
+      box-shadow: 0 0 8px rgba(255, 152, 0, 0.3);
+    }
+
+    /* BANNER DE TEMPORIZADORES / ALARMAS ACTIVAS */
+    #timersContainer {
+      display: none;
+      background: rgba(255, 152, 0, 0.08);
+      border-bottom: 1px solid rgba(255, 152, 0, 0.35);
+      padding: 6px 14px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--accent-amber);
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .timer-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 152, 0, 0.15);
+      padding: 3px 8px;
+      border-radius: 3px;
+      border: 1px solid var(--accent-amber);
+    }
+
+    .btn-timer-cancel {
+      background: transparent;
+      border: none;
+      color: var(--accent-red);
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 13px;
+      margin-left: 4px;
+    }
+
+    /* CONTENEDOR PRINCIPAL / CHAT FEED */
+    .main-layout {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      max-width: 900px;
+      width: 100%;
+      margin: 0 auto;
+      height: calc(100vh - 60px);
+      height: calc(100dvh - 60px);
+      position: relative;
+    }
+
+    .chat-feed {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      scroll-behavior: smooth;
+    }
+
+    /* BURBUJAS DE MENSAJE */
+    .msg-wrap {
+      display: flex;
+      flex-direction: column;
+      max-width: 85%;
+      animation: fadeInMsg 0.25s ease-out;
+    }
+
+    @keyframes fadeInMsg {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .msg-wrap.user {
+      align-self: flex-end;
+    }
+
+    .msg-wrap.assistant {
+      align-self: flex-start;
+    }
+
+    .msg-header {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .msg-wrap.user .msg-header {
+      justify-content: flex-end;
+      color: var(--accent-cyan);
+    }
+
+    .msg-wrap.assistant .msg-header {
+      justify-content: flex-start;
+      color: var(--accent-amber);
+    }
+
+    .msg-bubble {
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 13.5px;
+      line-height: 1.48;
+      word-break: break-word;
+      position: relative;
+    }
+
+    .msg-wrap.user .msg-bubble {
+      background: var(--bg-panel-alt);
+      border: 1px solid rgba(0, 229, 255, 0.35);
+      border-top-right-radius: 0;
+      color: #F0F6FC;
+    }
+
+    .msg-wrap.assistant .msg-bubble {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-tactical);
+      border-left: 3px solid var(--accent-amber);
+      border-top-left-radius: 0;
+      color: #E6EDF3;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+    }
+
+    .msg-thumb {
+      max-width: 200px;
+      max-height: 160px;
+      border-radius: 4px;
+      border: 1px solid var(--accent-cyan);
+      margin-top: 6px;
+      display: block;
+    }
+
+    .msg-telemetry {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 9.5px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    .msg-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .btn-msg-action {
+      background: transparent;
+      border: 1px solid var(--border-tactical);
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    .btn-msg-action:hover {
+      color: var(--accent-cyan);
+      border-color: var(--accent-cyan);
+    }
+
+    /* BADGE DE VOZ EN TIEMPO REAL */
+    .voice-interim-badge {
+      display: none;
+      background: rgba(0, 229, 255, 0.12);
+      border: 1px solid var(--accent-cyan);
+      padding: 6px 12px;
+      margin: 0 14px 6px 14px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--accent-cyan);
+      align-items: center;
+      gap: 8px;
+    }
+
+    .voice-pulse {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-red);
+      animation: pulseMic 1s infinite alternate;
+    }
+
+    @keyframes pulseMic {
+      from { transform: scale(0.8); opacity: 0.6; }
+      to { transform: scale(1.3); opacity: 1; }
+    }
+
+    /* PREVIEW DE IMAGEN ADJUNTA */
+    .attach-preview-bar {
+      display: none;
+      background: var(--bg-panel);
+      border: 1px solid var(--border-tactical);
+      padding: 6px 14px;
+      margin: 0 14px 6px 14px;
+      border-radius: 4px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .attach-preview-img {
+      height: 48px;
+      width: auto;
+      border-radius: 3px;
+      border: 1px solid var(--accent-cyan);
+    }
+
+    .btn-remove-attach {
+      background: transparent;
+      border: 1px solid var(--accent-red);
+      color: var(--accent-red);
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: var(--font-mono);
+    }
+
+    /* BARRA DE ENTRADA / INPUT */
+    .input-bar-container {
+      background: var(--bg-panel);
+      border-top: 1px solid var(--border-tactical);
+      padding: 10px 14px;
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+    }
+
+    .input-text-wrap {
+      flex: 1;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-tactical);
+      border-radius: 6px;
+      padding: 6px 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: border-color 0.2s;
+    }
+
+    .input-text-wrap:focus-within {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 6px rgba(0, 229, 255, 0.25);
+    }
+
+    .input-prompt {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      font-size: 13.5px;
+      resize: none;
+      max-height: 100px;
+      min-height: 24px;
+      line-height: 1.4;
+    }
+
+    .btn-icon {
+      background: var(--bg-panel-alt);
+      border: 1px solid var(--border-tactical);
+      color: var(--text-primary);
+      width: 40px;
+      height: 40px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+
+    .btn-icon:active {
+      transform: scale(0.94);
+    }
+
+    .btn-icon.active-mic {
+      background: rgba(255, 23, 68, 0.15);
+      border-color: var(--accent-red);
+      color: var(--accent-red);
+      box-shadow: 0 0 10px rgba(255, 23, 68, 0.4);
+      animation: pulseMic 1.2s infinite alternate;
+    }
+
+    .btn-icon.send-btn {
+      background: rgba(0, 229, 255, 0.12);
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+    }
+
+    .btn-icon.send-btn:hover {
+      background: var(--accent-cyan);
+      color: #070B10;
+      box-shadow: 0 0 12px rgba(0, 229, 255, 0.5);
+    }
+
+    /* VISOR E.V. PANTALLA COMPLETA INMERSIVA */
+    #visorOverlay {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
+      background: #000;
+      z-index: 9999;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    #visorVideo {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 1;
+    }
+
+    #visorCanvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .visor-top-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 3;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(to bottom, rgba(7, 11, 16, 0.9), transparent);
+    }
+
+    .visor-badge {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--accent-cyan);
+      background: rgba(7, 11, 16, 0.7);
+      border: 1px solid var(--accent-cyan);
+      padding: 4px 8px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .visor-bio-badge {
+      font-family: var(--font-mono);
+      font-size: 9.5px;
+      color: var(--accent-cyan);
+      background: rgba(0, 229, 255, 0.1);
+      border: 1px solid rgba(0, 229, 255, 0.35);
+      padding: 2px 6px;
+      border-radius: 3px;
+    }
+
+    .visor-bio-badge.ready {
+      color: var(--accent-green);
+      border-color: rgba(0, 230, 118, 0.4);
+      background: rgba(0, 230, 118, 0.1);
+    }
+
+    .btn-exit-visor {
+      background: rgba(255, 23, 68, 0.2);
+      border: 1px solid var(--accent-red);
+      color: #FF5252;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: bold;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    /* BARRA LATERAL BIOMÉTRICA EN EL VISOR */
+    .ev-biometric-sidebar {
+      position: absolute;
+      top: 68px;
+      left: 12px;
+      width: 225px;
+      pointer-events: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 20;
+      max-height: calc(100vh - 160px);
+      max-height: calc(100dvh - 160px);
+      overflow-y: auto;
+    }
+
+    .bio-card {
+      background: rgba(13, 19, 28, 0.88);
+      border: 1px solid var(--border-tactical);
+      border-radius: 6px;
+      padding: 8px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      backdrop-filter: blur(6px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      animation: fadeInBio 0.25s ease-out;
+    }
+
+    @keyframes fadeInBio {
+      from { opacity: 0; transform: translateX(-8px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .bio-card.recognized {
+      border-left: 3px solid var(--accent-cyan);
+    }
+
+    .bio-card.unknown {
+      border-left: 3px solid var(--accent-amber);
+    }
+
+    .bio-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 1.5px solid var(--accent-cyan);
+      object-fit: cover;
+      flex-shrink: 0;
+      background: #070B10;
+    }
+
+    .bio-card.unknown .bio-avatar {
+      border-color: var(--accent-amber);
+    }
+
+    .bio-info {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .bio-name {
+      font-size: 12px;
+      font-weight: 700;
+      color: #FFF;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .bio-role {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--accent-cyan);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .bio-sim-bar-wrap {
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 2px;
+    }
+
+    .bio-sim-bar {
+      height: 100%;
+      background: var(--accent-cyan);
+      border-radius: 2px;
+    }
+
+    .bio-status-tag {
+      font-family: var(--font-mono);
+      font-size: 8.5px;
+      color: var(--accent-green);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 2px;
+    }
+
+    .btn-bio-mini {
+      background: rgba(0, 229, 255, 0.15);
+      border: 1px solid var(--accent-cyan);
+      color: var(--accent-cyan);
+      font-family: var(--font-mono);
+      font-size: 8.5px;
+      padding: 1px 5px;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    .btn-bio-mini.amber {
+      background: rgba(255, 152, 0, 0.15);
+      border-color: var(--accent-amber);
+      color: var(--accent-amber);
+    }
+
+    /* SUBTÍTULOS FLOTANTES EN EL VISOR */
+    .visor-subtitles {
+      position: absolute;
+      bottom: 74px;
+      left: 14px;
+      right: 14px;
+      z-index: 3;
+      background: rgba(7, 11, 16, 0.85);
+      border: 1px solid var(--accent-cyan);
+      border-left: 4px solid var(--accent-amber);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 13px;
+      line-height: 1.4;
+      display: none;
+      backdrop-filter: blur(4px);
+    }
+
+    .visor-sub-header {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--accent-amber);
+      margin-bottom: 2px;
+    }
+
+    /* CONTROLES FLOTANTES DEL VISOR */
+    .visor-actions {
+      position: absolute;
+      bottom: 14px;
+      left: 14px;
+      right: 14px;
+      z-index: 3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn-visor-action {
+      background: rgba(13, 19, 28, 0.88);
+      border: 1px solid var(--border-tactical);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 8px 14px;
+      border-radius: 20px;
+      cursor: pointer;
+      backdrop-filter: blur(4px);
+      transition: all 0.2s;
+    }
+
+    .btn-visor-action.accent-cyan {
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+    }
+
+    .btn-visor-action.accent-amber {
+      border-color: var(--accent-amber);
+      color: var(--accent-amber);
+    }
+
+    .btn-visor-action.active-mic {
+      background: rgba(255, 23, 68, 0.3);
+      border-color: var(--accent-red);
+      color: #FF5252;
+    }
+
+    /* MODALES TÁCTICOS */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(3px);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-tactical);
+      border-top: 3px solid var(--accent-amber);
+      border-radius: 8px;
+      max-width: 500px;
+      width: 100%;
+      padding: 18px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+
+    .modal-title {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--accent-amber);
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .modal-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .modal-input {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-tactical);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      padding: 8px 12px;
+      border-radius: 4px;
+      outline: none;
+    }
+
+    .modal-input:focus {
+      border-color: var(--accent-cyan);
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    /* NOTAS Y MEMORIA */
+    .notes-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 280px;
+      overflow-y: auto;
+    }
+
+    .note-item {
+      background: var(--bg-panel-alt);
+      border: 1px solid var(--border-tactical);
+      border-left: 2px solid var(--accent-cyan);
+      padding: 8px 10px;
+      border-radius: 4px;
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .note-content-wrap {
+      flex: 1;
+      font-size: 12.5px;
+      line-height: 1.35;
+    }
+
+    .note-date {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .btn-note-del {
+      background: transparent;
+      border: none;
+      color: var(--accent-red);
+      font-size: 14px;
+      cursor: pointer;
+      align-self: flex-start;
+    }
+
+    /* MEDIA QUERIES PARA TABLET / DESKTOP */
+    @media (min-width: 768px) {
+      .hud-title { font-size: 16px; }
+      .btn-hud { font-size: 12px; padding: 7px 12px; }
+      .msg-wrap { max-width: 75%; }
+      .msg-bubble { font-size: 14px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- CABECERA TÁCTICA HUD -->
+  <header class="hud-header">
+    <div class="hud-branding">
+      <div class="hud-logo">
+        <div class="hud-logo-inner"></div>
+      </div>
+      <div class="hud-title-wrap">
+        <span class="hud-title">E.V. // TACTICAL CORE</span>
+        <div class="hud-status-line">
+          <div id="statusLed" class="status-led"></div>
+          <span id="statusLedText">SIN CLAVE</span>
+          <span>•</span>
+          <span id="badgeCurrentModel">AUTO-ROUTER</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hud-controls">
+      <button id="btnModelMode" class="btn-hud accent-cyan" title="Alternar Enrutador Híbrido">
+        🧠 AUTO-ROUTER
+      </button>
+      <button id="btnVoiceToggle" class="btn-hud accent-amber" title="Alternar Síntesis Vocal">
+        🔊 VOZ: ON
+      </button>
+      <button id="btnVisorOpen" class="btn-hud accent-cyan" title="Abrir Visor Óptico E.V.">
+        👁 VISOR E.V.
+      </button>
+      <button id="btnBiometricsOpen" class="btn-hud accent-cyan" title="Base Biometrica Facial Offline">
+        👥 BIOMETRÍA
+      </button>
+      <button id="btnNotesOpen" class="btn-hud" title="Abrir Libreta Táctica">
+        📝 NOTAS
+      </button>
+      <button id="btnApiKeyOpen" class="btn-hud" title="Configurar Gemini API Key">
+        ⚙ API KEY
+      </button>
+    </div>
+  </header>
+
+  <!-- BANNER DE TEMPORIZADORES / ALARMAS ACTIVAS -->
+  <div id="timersContainer"></div>
+
+  <!-- CONTENEDOR PRINCIPAL -->
+  <main class="main-layout">
+    <!-- CHAT FEED -->
+    <div id="chatFeed" class="chat-feed">
+      <div class="msg-wrap assistant">
+        <div class="msg-header">
+          <span>[E.V. // CO-PILOTO TÁCTICO]</span>
+          <span>v9.2-BIOMETRIC</span>
+        </div>
+        <div class="msg-bubble">
+          Sistemas en línea, Operador. Enrutador híbrido y núcleo biométrico offline activos. Pulsa ⚙ API KEY si aún no has sincronizado tu clave de Gemini, abre 👥 BIOMETRÍA para administrar perfiles, o accede al 👁 VISOR E.V. para reconocimiento facial y análisis en vivo.
+        </div>
+      </div>
+    </div>
+
+    <!-- PREVIEW DE IMAGEN ADJUNTA -->
+    <div id="attachPreviewBar" class="attach-preview-bar">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <img id="attachPreviewImg" class="attach-preview-img" alt="Adjunto">
+        <span style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-cyan);">FOTOGRAMA ADJUNTO</span>
+      </div>
+      <button id="btnRemoveAttach" class="btn-remove-attach">✕ QUITAR</button>
+    </div>
+
+    <!-- BADGE DE VOZ EN TIEMPO REAL -->
+    <div id="voiceInterimBadge" class="voice-interim-badge">
+      <div class="voice-pulse"></div>
+      <span id="voiceInterimText">Escuchando...</span>
+    </div>
+
+    <!-- BARRA DE ENTRADA -->
+    <div class="input-bar-container">
+      <input type="file" id="fileInput" accept="image/*" style="display: none;">
+      <button id="btnAttach" class="btn-icon" title="Adjuntar Fotograma o Imagen">📷</button>
+
+      <div class="input-text-wrap">
+        <textarea id="inputPrompt" class="input-prompt" placeholder="Dicta o escribe una orden para E.V...." rows="1"></textarea>
+      </div>
+
+      <button id="btnMic" class="btn-icon" title="Dictar por Voz (Anti-Eco)">🎙</button>
+      <button id="btnSend" class="btn-icon send-btn" title="Transmitir Orden">➤</button>
+    </div>
+  </main>
+
+  <!-- VISOR ÓPTICO E.V. PANTALLA COMPLETA INMERSIVA -->
+  <div id="visorOverlay">
+    <video id="visorVideo" autoplay playsinline muted></video>
+    <canvas id="visorCanvas"></canvas>
+    <canvas id="motionCanvas" width="128" height="96" style="display: none;"></canvas>
+
+    <!-- Barra Superior del Visor -->
+    <div class="visor-top-bar">
+      <div class="visor-badge">
+        <span style="display: inline-block; width: 6px; height: 6px; background: var(--accent-cyan); border-radius: 50%;"></span>
+        <span>E.V. // OPTICAL CORE v9.2</span>
+        <span id="visorModelTag" style="color: var(--accent-amber); margin-left: 4px;">[3.5 FLASH-LITE]</span>
+        <span id="visorBioStatus" class="visor-bio-badge" style="margin-left: 6px;">BIOMETRÍA: INICIANDO...</span>
+      </div>
+      <button id="btnExitVisor" class="btn-exit-visor">✕ SALIR</button>
+    </div>
+
+    <!-- Barra Lateral Biometría Táctica en Vivo -->
+    <div id="evBiometricSidebar" class="ev-biometric-sidebar"></div>
+
+    <!-- Subtítulos Flotantes del Visor -->
+    <div id="visorSubtitles" class="visor-subtitles">
+      <div id="visorSubHeader" class="visor-sub-header">E.V. // INTEL</div>
+      <div id="visorSubText">Analizando campo visual...</div>
+    </div>
+
+    <!-- Barra Inferior de Acciones del Visor -->
+    <div class="visor-actions">
+      <button id="btnVisorRegisterFace" class="btn-visor-action accent-cyan" title="Registrar nuevo perfil biométrico">
+        👤 REGISTRAR
+      </button>
+      <button id="btnVisorScanDetail" class="btn-visor-action accent-amber" title="Escanear a 800px con Gemini 4 Hydrogen">
+        🔍 ESCANEAR DETALLE
+      </button>
+      <button id="btnVisorMic" class="btn-visor-action accent-cyan" title="Micrófono continuo con envío de frame">
+        🎙 MIC CONTINUO: OFF
+      </button>
+      <button id="btnVisorFlipCamera" class="btn-visor-action" title="Cambiar cámara frontal/trasera">
+        🔄 CÁMARA
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL: REGISTRO RÁPIDO DE ROSTRO BIOMÉTRICO -->
+  <div id="modalRegisterFace" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-title">
+        <span>👤 REGISTRAR PERFIL BIOMÉTRICO OFFLINE</span>
+        <button class="btn-timer-cancel" onclick="closeModal('modalRegisterFace')">✕</button>
+      </div>
+      <div style="display: flex; align-items: center; gap: 14px; margin: 4px 0;">
+        <img id="regFacePreviewImg" class="bio-avatar" style="width: 54px; height: 54px; border-width: 2px;" alt="Avatar">
+        <div style="font-size: 11px; color: var(--text-muted); line-height: 1.4;">
+          El descriptor neuronal (128 vectores) y la miniatura se almacenarán de forma 100 % local en tu dispositivo.
+        </div>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label" for="regFaceName">NOMBRE DEL SUJETO:</label>
+        <input type="text" id="regFaceName" class="modal-input" placeholder="Ej: Edward, Peter Parker...">
+      </div>
+      <div class="modal-field">
+        <label class="modal-label" for="regFaceRole">ROL / RELACIÓN TÁCTICA:</label>
+        <input type="text" id="regFaceRole" class="modal-input" placeholder="Ej: Operador Principal, Familia · Prioridad Alfa...">
+      </div>
+      <div class="modal-field">
+        <label class="modal-label" for="regFaceNotes">NOTAS ADICIONALES:</label>
+        <input type="text" id="regFaceNotes" class="modal-input" placeholder="Ej: Fundador del sistema, acceso ilimitado...">
+      </div>
+      <div class="modal-actions">
+        <button class="btn-hud" onclick="closeModal('modalRegisterFace')">CANCELAR</button>
+        <button id="btnSaveRegisteredFace" class="btn-hud accent-cyan">GUARDAR PERFIL</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: BASE BIOMÉTRICA Y GESTIÓN DE PERFILES -->
+  <div id="modalBiometrics" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-title">
+        <span>👥 BASE BIOMÉTRICA // PERFILES GUARDADOS</span>
+        <button class="btn-timer-cancel" onclick="closeModal('modalBiometrics')">✕</button>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; gap: 6px; flex-wrap: wrap;">
+        <span class="modal-label">PERFILES EN LOCALSTORAGE:</span>
+        <div style="display: flex; gap: 6px;">
+          <button id="btnExportBio" class="btn-hud accent-cyan" style="font-size: 9.5px; padding: 4px 8px;">EXPORTAR JSON</button>
+          <input type="file" id="bioFileInput" accept=".json" style="display: none;">
+          <button id="btnImportBio" class="btn-hud accent-amber" style="font-size: 9.5px; padding: 4px 8px;">IMPORTAR JSON</button>
+        </div>
+      </div>
+      <div id="biometricProfilesList" class="notes-list" style="max-height: 260px;"></div>
+      <div class="modal-actions">
+        <button class="btn-hud" onclick="closeModal('modalBiometrics')">CERRAR</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CONFIGURAR API KEY -->
+  <div id="modalApiKey" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-title">
+        <span>⚙ CONFIGURACIÓN // GEMINI API KEY</span>
+        <button class="btn-timer-cancel" onclick="closeModal('modalApiKey')">✕</button>
+      </div>
+      <p style="font-size: 12px; color: var(--text-muted); line-height: 1.4;">
+        E.V. Standalone se comunica directamente desde tu navegador con Google Gemini sin servidores intermediarios. Tu clave se almacena de forma 100 % privada en el almacenamiento local de este dispositivo.
+      </p>
+      <div class="modal-field">
+        <label class="modal-label" for="apiKeyInput">GEMINI API KEY:</label>
+        <input type="password" id="apiKeyInput" class="modal-input" placeholder="AIzaSy...">
+      </div>
+      <div id="apiKeyStatus" style="font-family: var(--font-mono); font-size: 11px; min-height: 18px;"></div>
+      <div class="modal-actions">
+        <button class="btn-hud" onclick="closeModal('modalApiKey')">CANCELAR</button>
+        <button id="btnSaveApiKey" class="btn-hud accent-amber">GUARDAR Y VERIFICAR</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: LIBRETA TÁCTICA Y MEMORIA -->
+  <div id="modalNotes" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-title">
+        <span>📝 LIBRETA TÁCTICA // NOTAS Y MEMORIA</span>
+        <button class="btn-timer-cancel" onclick="closeModal('modalNotes')">✕</button>
+      </div>
+      <div class="modal-field">
+        <input type="text" id="newNoteInput" class="modal-input" placeholder="Escribe una nueva nota o di 'anota que...'">
+      </div>
+      <div style="display: flex; justify-content: flex-end;">
+        <button id="btnAddNote" class="btn-hud accent-cyan">AGREGAR NOTA</button>
+      </div>
+      <div class="modal-label" style="margin-top: 6px;">NOTAS PERSISTENTES:</div>
+      <div id="notesList" class="notes-list"></div>
+      <div class="modal-label" style="margin-top: 10px;">MEMORIA A LARGO PLAZO DE E.V.:</div>
+      <div id="memoryList" class="notes-list" style="max-height: 120px;"></div>
+      <div class="modal-actions">
+        <button class="btn-hud" onclick="closeModal('modalNotes')">CERRAR</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================================
+    // E.V. STANDALONE PWA (v9.2-BIOMETRIC OFFLINE CORE) - NÚCLEO JS
+    // =========================================================================
+
+    // 1. ESTADO GLOBAL DE LA APLICACIÓN
+    const STATE = {
+      apiKey: localStorage.getItem("ev_api_key") || "",
+      modelMode: localStorage.getItem("ev_model_mode") || "auto", // 'auto' | 'flash_lite' | 'hydrogen'
+      ttsEnabled: localStorage.getItem("ev_tts_enabled") !== "false",
+      longMemory: JSON.parse(localStorage.getItem("ev_long_memory") || "[]"),
+      notes: JSON.parse(localStorage.getItem("ev_notes") || "[]"),
+      faceDb: JSON.parse(localStorage.getItem("ev_face_db") || "[]"),
+      chatHistory: [], // Últimos 12 turnos en memoria de sesión
+      activeTimers: [],
+      isListening: false,
+      isSpeaking: false,
+      attachedImageBase64: null,
+      attachedImageMime: null,
+      availableModels: []
+    };
+
+    // 2. REGISTRO CONDICIONAL DE SERVICE WORKER (PWA)
+    if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js")
+          .then((reg) => console.log("[E.V. PWA] Service Worker v9.2 registrado:", reg.scope))
+          .catch((err) => console.warn("[E.V. PWA] Fallo registro SW:", err));
+      });
+    }
+
+    // 3. INICIALIZACIÓN DE LA INTERFAZ
+    document.addEventListener("DOMContentLoaded", () => {
+      updateApiKeyStatusUI();
+      updateModelModeUI();
+      updateVoiceToggleUI();
+      renderNotesList();
+      renderMemoryList();
+      renderBiometricProfilesList();
+
+      // Auto-verificar clave guardada si existe
+      if (STATE.apiKey) {
+        verifyGeminiApiKey(STATE.apiKey, false);
+      }
+
+      // Eventos de botones de cabecera
+      document.getElementById("btnModelMode").addEventListener("click", cycleModelMode);
+      document.getElementById("btnVoiceToggle").addEventListener("click", toggleVoiceOutput);
+      document.getElementById("btnApiKeyOpen").addEventListener("click", () => openModal("modalApiKey"));
+      document.getElementById("btnNotesOpen").addEventListener("click", () => openModal("modalNotes"));
+      document.getElementById("btnBiometricsOpen").addEventListener("click", () => openModal("modalBiometrics"));
+      document.getElementById("btnSaveApiKey").addEventListener("click", handleSaveApiKey);
+      document.getElementById("btnAddNote").addEventListener("click", handleAddNoteManual);
+
+      // Eventos de gestión biométrica
+      document.getElementById("btnSaveRegisteredFace").addEventListener("click", handleSaveFaceRegistration);
+      document.getElementById("btnExportBio").addEventListener("click", exportBiometricsJson);
+      const bioFileInput = document.getElementById("bioFileInput");
+      document.getElementById("btnImportBio").addEventListener("click", () => bioFileInput.click());
+      bioFileInput.addEventListener("change", handleImportBiometricsJson);
+
+      // Eventos de entrada y envío
+      document.getElementById("btnSend").addEventListener("click", handleUserSubmit);
+      document.getElementById("btnMic").addEventListener("click", toggleVoiceDictation);
+      document.getElementById("inputPrompt").addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          handleUserSubmit();
+        }
+      });
+
+      // Adjuntar imagen
+      const fileInput = document.getElementById("fileInput");
+      document.getElementById("btnAttach").addEventListener("click", () => fileInput.click());
+      fileInput.addEventListener("change", handleFileSelected);
+      document.getElementById("btnRemoveAttach").addEventListener("click", removeAttachedImage);
+
+      // Visor E.V.
+      document.getElementById("btnVisorOpen").addEventListener("click", openVisorOverlay);
+      document.getElementById("btnExitVisor").addEventListener("click", closeVisorOverlay);
+      document.getElementById("btnVisorRegisterFace").addEventListener("click", handleTriggerRegisterFromVisor);
+      document.getElementById("btnVisorScanDetail").addEventListener("click", handleVisorScanDetail);
+      document.getElementById("btnVisorMic").addEventListener("click", toggleVisorContinuousMic);
+      document.getElementById("btnVisorFlipCamera").addEventListener("click", flipVisorCamera);
+
+      // Manejo de Ahorro de Batería en background (Android)
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden && isVisorActive) {
+          console.log("[E.V. Power] Pestaña oculta. Pausando visor para ahorrar batería.");
+          closeVisorOverlay();
+        }
+      });
+      window.addEventListener("pagehide", () => {
+        if (isVisorActive) closeVisorOverlay();
+      });
+    });
+
+    // =========================================================================
+    // ENRUTADOR HÍBRIDO (AUTO-ROUTER) Y CLIENTE REST GEMINI
+    // =========================================================================
+
+    function updateModelModeUI() {
+      const btn = document.getElementById("btnModelMode");
+      const badge = document.getElementById("badgeCurrentModel");
+      if (STATE.modelMode === "flash_lite") {
+        btn.textContent = "⚡ 3.5 FLASH-LITE";
+        badge.textContent = "FLASH-LITE (VELOCIDAD)";
+      } else if (STATE.modelMode === "hydrogen") {
+        btn.textContent = "💎 4 HYDROGEN";
+        badge.textContent = "HYDROGEN (MÁX PRECISIÓN)";
+      } else {
+        btn.textContent = "🧠 AUTO-ROUTER";
+        badge.textContent = "AUTO-ROUTER HÍBRIDO";
+      }
+    }
+
+    function cycleModelMode() {
+      if (STATE.modelMode === "auto") {
+        STATE.modelMode = "flash_lite";
+      } else if (STATE.modelMode === "flash_lite") {
+        STATE.modelMode = "hydrogen";
+      } else {
+        STATE.modelMode = "auto";
+      }
+      localStorage.setItem("ev_model_mode", STATE.modelMode);
+      updateModelModeUI();
+      playTacticalBeep(880, 0.08);
+    }
+
+    function selectTargetModel(userText, hasHighResImage = false) {
+      if (STATE.modelMode === "flash_lite") return "gemini-3.5-flash-lite";
+      if (STATE.modelMode === "hydrogen") return "gemini-4-hydrogen";
+
+      // LÓGICA AUTO-ROUTER
+      if (hasHighResImage) return "gemini-4-hydrogen";
+
+      const text = (userText || "").toLowerCase().trim();
+      const words = text ? text.split(/\s+/) : [];
+      if (words.length > 15) return "gemini-4-hydrogen";
+
+      const complexKeywords = [
+        "explica", "analiza", "por qué", "código", "calcula", "diagnostica",
+        "diferencia", "resume", "investiga", "exacto", "dosis", "guía",
+        "compara", "traduce", "diseña", "arquitectura", "revisa", "audita"
+      ];
+      for (const kw of complexKeywords) {
+        if (text.includes(kw)) {
+          return "gemini-4-hydrogen";
+        }
+      }
+
+      return "gemini-3.5-flash-lite";
+    }
+
+    function buildSystemInstruction(targetModel) {
+      let instr = `Eres E.V., copiloto táctico autónomo de grado producción con estética e inspiración de Spider-Man: Brand New Day y tecnología H.E.V.
+Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio. Te comunicas directamente con tu Operador.`;
+
+      if (targetModel.includes("flash-lite")) {
+        instr += `\nREGLA ESTRICTA DE FORMATO: Responde de forma ultra-directa, ágil y precisa en 1 a 3 frases máximo. No uses símbolos markdown como asteriscos (*) o numerales (#) para que la síntesis de voz suene limpia y natural.`;
+      } else {
+        instr += `\nREGLA ESTRICTA DE FORMATO: Desarrolla explicaciones estructuradas, altamente analíticas, técnicas y precisas. No uses adornos innecesarios.`;
+      }
+
+      if (STATE.longMemory && STATE.longMemory.length > 0) {
+        instr += `\nMEMORIA PERSISTENTE DEL OPERADOR:\n${STATE.longMemory.map(m => `- ${m}`).join("\n")}`;
+      }
+
+      return instr;
+    }
+
+    async function callGeminiApi(model, contents, apiKey) {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+      const systemInstruction = {
+        parts: [{ text: buildSystemInstruction(model) }]
+      };
+      const isHydrogen = model.includes("hydrogen");
+      const payload = {
+        systemInstruction,
+        contents,
+        generationConfig: {
+          temperature: isHydrogen ? 0.4 : 0.7,
+          maxOutputTokens: isHydrogen ? 2048 : 512
+        }
+      };
+
+      const resp = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      if (!resp.ok) {
+        const errJson = await resp.json().catch(() => ({}));
+        const err = new Error(errJson.error?.message || `HTTP ${resp.status}`);
+        err.status = resp.status;
+        err.errorDetails = errJson.error;
+        throw err;
+      }
+
+      const data = await resp.json();
+      const reply = data.candidates?.[0]?.content?.parts?.map(p => p.text).join("") || "";
+      return reply;
+    }
+
+    async function callGeminiWithFallback(preferredModel, contents, apiKey) {
+      let attempts = [preferredModel];
+      if (preferredModel === "gemini-4-hydrogen") {
+        attempts = ["gemini-4-hydrogen", "gemini-3.5-flash", "gemini-3.5-flash-lite"];
+      } else if (preferredModel === "gemini-3.5-flash") {
+        attempts = ["gemini-3.5-flash", "gemini-3.5-flash-lite"];
+      }
+
+      let lastError = null;
+      for (const m of attempts) {
+        try {
+          const text = await callGeminiApi(m, contents, apiKey);
+          return { text, modelUsed: m };
+        } catch (err) {
+          lastError = err;
+          console.warn(`[E.V. Router] Fallo en modelo ${m} (${err.status}): ${err.message}. Intentando fallback...`);
+          if (err.status === 401 || err.status === 403) {
+            throw err;
+          }
+        }
+      }
+      throw lastError;
+    }
+
+    // =========================================================================
+    // MOTOR BIOMÉTRICO FACIAL 100% OFFLINE (BIOMETRIC ENGINE)
+    // =========================================================================
+
+    const FACE_API_MODELS_URL = "https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.14/model";
+    let isBiometricLoaded = false;
+    let isBiometricLoading = false;
+    let biometricFaceMatcher = null;
+    let biometricIntervalId = null;
+    let isBiometricInferring = false;
+
+    // Buffer temporal de rostros reconocidos (Track Persistence con smoothing de 900ms)
+    let currentTrackedFaces = [];
+    let pendingFaceRegistrationData = null;
+
+    // Canvas offscreen reutilizable para evitar recolección de basura
+    const offscreenProcessingCanvas = document.createElement("canvas");
+    const offscreenProcessingCtx = offscreenProcessingCanvas.getContext("2d", { willReadFrequently: true });
+
+    async function initBiometricEngine() {
+      if (isBiometricLoaded || isBiometricLoading) return;
+      isBiometricLoading = true;
+
+      const badge = document.getElementById("visorBioStatus");
+      if (badge) {
+        badge.className = "visor-bio-badge";
+        badge.textContent = "BIOMETRÍA: CARGANDO PESOS...";
+      }
+
+      try {
+        if (!window.faceapi) {
+          console.warn("[BiometricEngine] Esperando librería face-api...");
+          await new Promise((r) => setTimeout(r, 600));
+        }
+
+        // Cargar los 3 modelos neuronales ligeros
+        await Promise.all([
+          faceapi.nets.tinyFaceDetector.loadFromUri(FACE_API_MODELS_URL),
+          faceapi.nets.faceLandmark68Net.loadFromUri(FACE_API_MODELS_URL),
+          faceapi.nets.faceRecognitionNet.loadFromUri(FACE_API_MODELS_URL)
+        ]);
+
+        isBiometricLoaded = true;
+        isBiometricLoading = false;
+
+        rebuildFaceMatcher();
+
+        if (badge) {
+          badge.className = "visor-bio-badge ready";
+          badge.textContent = "BIOMETRÍA: OFFLINE READY";
+        }
+        console.log("[BiometricEngine] Pesos biométricos offline cargados al 100%.");
+      } catch (err) {
+        isBiometricLoading = false;
+        console.warn("[BiometricEngine] Error cargando biometría:", err);
+        if (badge) {
+          badge.className = "visor-bio-badge";
+          badge.textContent = "BIOMETRÍA: ERROR CARGA";
+        }
+      }
+    }
+
+    function rebuildFaceMatcher() {
+      if (!window.faceapi || !STATE.faceDb || STATE.faceDb.length === 0) {
+        biometricFaceMatcher = null;
+        return;
+      }
+      try {
+        const labeledDescriptors = [];
+        for (const profile of STATE.faceDb) {
+          if (profile.descriptors && profile.descriptors.length > 0) {
+            const floatArrays = profile.descriptors.map(d => new Float32Array(d));
+            labeledDescriptors.push(new faceapi.LabeledFaceDescriptors(profile.name, floatArrays));
+          }
+        }
+        if (labeledDescriptors.length > 0) {
+          // Umbral estricto 0.48 para descartar falsos positivos
+          biometricFaceMatcher = new faceapi.FaceMatcher(labeledDescriptors, 0.48);
+        } else {
+          biometricFaceMatcher = null;
+        }
+      } catch (err) {
+        console.warn("[BiometricEngine] Error reconstruyendo FaceMatcher:", err);
+        biometricFaceMatcher = null;
+      }
+    }
+
+    function extractFaceAvatarUrl(video, box) {
+      try {
+        offscreenProcessingCanvas.width = 64;
+        offscreenProcessingCanvas.height = 64;
+        const padX = box.width * 0.15;
+        const padY = box.height * 0.15;
+        const srcX = Math.max(0, box.x - padX);
+        const srcY = Math.max(0, box.y - padY);
+        const srcW = Math.min(video.videoWidth - srcX, box.width + padX * 2);
+        const srcH = Math.min(video.videoHeight - srcY, box.height + padY * 2);
+
+        offscreenProcessingCtx.drawImage(video, srcX, srcY, srcW, srcH, 0, 0, 64, 64);
+        return offscreenProcessingCanvas.toDataURL("image/jpeg", 0.72);
+      } catch (e) {
+        return "";
+      }
+    }
+
+    // Bucle de inferencia biométrica desacoplado (~3.5 FPS / cada 280ms)
+    async function runBiometricInferenceStep() {
+      if (isBiometricInferring || !isVisorActive || !isBiometricLoaded) return;
+      const video = document.getElementById("visorVideo");
+      if (!video || video.readyState < 2) return;
+
+      isBiometricInferring = true;
+      const now = performance.now();
+
+      try {
+        // Detección ultraligera optimizada para móviles (inputSize 224, threshold 0.52)
+        const detections = await faceapi
+          .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.52 }))
+          .withFaceLandmarks(true)
+          .withFaceDescriptors();
+
+        const videoW = video.videoWidth || 1280;
+        const videoH = video.videoHeight || 720;
+        const dispW = window.innerWidth;
+        const dispH = window.innerHeight;
+
+        const scaleX = dispW / videoW;
+        const scaleY = dispH / videoH;
+
+        const updatedFaces = [];
+
+        for (const det of detections) {
+          const rawBox = det.detection.box;
+          const box = {
+            x: rawBox.x * scaleX,
+            y: rawBox.y * scaleY,
+            width: rawBox.width * scaleX,
+            height: rawBox.height * scaleY
+          };
+
+          const descriptorArray = Array.from(det.descriptor);
+          let matchLabel = "unknown";
+          let matchDistance = 1.0;
+          let matchedProfile = null;
+
+          if (biometricFaceMatcher) {
+            const bestMatch = biometricFaceMatcher.findBestMatch(det.descriptor);
+            matchLabel = bestMatch.label;
+            matchDistance = bestMatch.distance;
+            if (matchLabel !== "unknown") {
+              matchedProfile = STATE.faceDb.find(p => p.name === matchLabel);
+            }
+          }
+
+          let avatarUrl = "";
+          if (!matchedProfile) {
+            avatarUrl = extractFaceAvatarUrl(video, rawBox);
+          } else {
+            avatarUrl = matchedProfile.avatarDataUrl || extractFaceAvatarUrl(video, rawBox);
+          }
+
+          updatedFaces.push({
+            id: matchedProfile ? matchedProfile.id : "unk_" + Math.round(box.x),
+            name: matchedProfile ? matchedProfile.name : "Sujeto Desconocido",
+            role: matchedProfile ? matchedProfile.role : "SUJETO NO REGISTRADO",
+            notes: matchedProfile ? matchedProfile.notes : "",
+            isRecognized: matchLabel !== "unknown",
+            similarity: Math.round(Math.max(0, 1 - matchDistance) * 100),
+            distance: matchDistance,
+            box,
+            descriptor: descriptorArray,
+            avatarUrl,
+            lastSeen: now
+          });
+        }
+
+        // Suavizado Temporal (Track Persistence): Mantener rostros vistos en los últimos 900ms para evitar parpadeos
+        for (const prev of currentTrackedFaces) {
+          if (!updatedFaces.some(u => u.name === prev.name || Math.abs(u.box.x - prev.box.x) < 50)) {
+            if (now - prev.lastSeen < 900) {
+              updatedFaces.push(prev);
+            }
+          }
+        }
+
+        currentTrackedFaces = updatedFaces;
+        renderBiometricSidebar();
+
+      } catch (err) {
+        console.debug("[BiometricEngine] Aviso inferencia facial:", err);
+      } finally {
+        isBiometricInferring = false;
+      }
+    }
+
+    function renderBiometricSidebar() {
+      const sidebar = document.getElementById("evBiometricSidebar");
+      if (!sidebar) return;
+
+      if (currentTrackedFaces.length === 0) {
+        sidebar.innerHTML = "";
+        return;
+      }
+
+      sidebar.innerHTML = currentTrackedFaces.map((face, idx) => {
+        if (face.isRecognized) {
+          return `
+            <div class="bio-card recognized" id="bioCard_${idx}">
+              <img class="bio-avatar" src="${face.avatarUrl || 'data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 40 40\'><circle cx=\'20\' cy=\'20\' r=\'18\' fill=\'%23070B10\' stroke=\'%2300E5FF\'/></svg>'}" alt="Avatar">
+              <div class="bio-info">
+                <div class="bio-name">${escapeHtml(face.name)}</div>
+                <div class="bio-role">${escapeHtml(face.role)}</div>
+                <div class="bio-sim-bar-wrap">
+                  <div class="bio-sim-bar" style="width: ${face.similarity}%;"></div>
+                </div>
+                <div class="bio-status-tag">
+                  <span>✓ VERIFICADO OFFLINE (${face.similarity}%)</span>
+                  <button class="btn-bio-mini" onclick="addSampleAngleToProfile('${face.id}', ${idx})" title="Añadir otro ángulo de luz al perfil">+ Ángulo</button>
+                </div>
+              </div>
+            </div>
+          `;
+        } else {
+          return `
+            <div class="bio-card unknown" id="bioCard_${idx}">
+              <img class="bio-avatar" src="${face.avatarUrl || 'data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 40 40\'><circle cx=\'20\' cy=\'20\' r=\'18\' fill=\'%23070B10\' stroke=\'%23FF9800\'/></svg>'}" alt="Avatar">
+              <div class="bio-info">
+                <div class="bio-name" style="color: var(--accent-amber);">SUJETO NO IDENTIFICADO</div>
+                <div class="bio-role" style="color: var(--text-muted);">SIN REGISTRO OFFLINE</div>
+                <div class="bio-status-tag" style="margin-top: 4px;">
+                  <button class="btn-bio-mini amber" onclick="openRegisterFaceModalFromDetection(${idx})" style="padding: 3px 8px; font-weight: bold;">+ REGISTRAR</button>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+      }).join("");
+    }
+
+    function addSampleAngleToProfile(profileId, detectionIdx) {
+      const detection = currentTrackedFaces[detectionIdx];
+      if (!detection || !detection.descriptor) return;
+
+      const profile = STATE.faceDb.find(p => p.id === profileId);
+      if (!profile) return;
+
+      if (!profile.descriptors) profile.descriptors = [];
+      if (profile.descriptors.length >= 3) {
+        alert(`El perfil de "${profile.name}" ya cuenta con el máximo de 3 ángulos de entrenamiento.`);
+        return;
+      }
+
+      profile.descriptors.push(detection.descriptor);
+      localStorage.setItem("ev_face_db", JSON.stringify(STATE.faceDb));
+      rebuildFaceMatcher();
+      renderBiometricProfilesList();
+      playTacticalBeep(1200, 0.12);
+      updateVisorSubtitle("BIOMETRÍA", `Ángulo adicional guardado para "${profile.name}" (${profile.descriptors.length}/3 muestras).`);
+    }
+
+    function openRegisterFaceModalFromDetection(detectionIdx) {
+      const detection = currentTrackedFaces[detectionIdx];
+      if (!detection) return;
+
+      pendingFaceRegistrationData = {
+        descriptor: detection.descriptor,
+        avatarUrl: detection.avatarUrl
+      };
+
+      document.getElementById("regFacePreviewImg").src = detection.avatarUrl || "";
+      document.getElementById("regFaceName").value = "";
+      document.getElementById("regFaceRole").value = "Prioridad Alfa";
+      document.getElementById("regFaceNotes").value = "";
+
+      openModal("modalRegisterFace");
+      playTacticalBeep(988, 0.1);
+    }
+
+    function handleTriggerRegisterFromVisor() {
+      // Si hay un rostro desconocido en pantalla, registrarlo
+      const unkIdx = currentTrackedFaces.findIndex(f => !f.isRecognized);
+      if (unkIdx !== -1) {
+        openRegisterFaceModalFromDetection(unkIdx);
+        return;
+      }
+      // Si hay cualquier rostro
+      if (currentTrackedFaces.length > 0) {
+        openRegisterFaceModalFromDetection(0);
+        return;
+      }
+
+      updateVisorSubtitle("BIOMETRÍA", "Enfoca un rostro en el visor antes de registrar.");
+      playTacticalBeep(440, 0.1);
+    }
+
+    function handleSaveFaceRegistration() {
+      const nameInput = document.getElementById("regFaceName");
+      const roleInput = document.getElementById("regFaceRole");
+      const notesInput = document.getElementById("regFaceNotes");
+
+      const name = (nameInput.value || "").trim();
+      const role = (roleInput.value || "").trim() || "Contacto";
+      const notes = (notesInput.value || "").trim();
+
+      if (!name) {
+        alert("Por favor ingresa un nombre para el perfil.");
+        return;
+      }
+
+      if (!pendingFaceRegistrationData) {
+        alert("No hay descriptor facial pendiente.");
+        closeModal("modalRegisterFace");
+        return;
+      }
+
+      const newProfile = {
+        id: "face_" + Date.now(),
+        name,
+        role,
+        notes,
+        avatarDataUrl: pendingFaceRegistrationData.avatarUrl,
+        descriptors: [pendingFaceRegistrationData.descriptor]
+      };
+
+      STATE.faceDb.push(newProfile);
+      localStorage.setItem("ev_face_db", JSON.stringify(STATE.faceDb));
+
+      rebuildFaceMatcher();
+      renderBiometricProfilesList();
+      pendingFaceRegistrationData = null;
+
+      closeModal("modalRegisterFace");
+      playTacticalBeep(1318, 0.15);
+
+      if (isVisorActive) {
+        updateVisorSubtitle("BIOMETRÍA", `Perfil "${name}" registrado exitosamente.`);
+      }
+    }
+
+    function removeBiometricProfile(id) {
+      if (!confirm("¿Deseas eliminar este perfil biométrico?")) return;
+      STATE.faceDb = STATE.faceDb.filter(p => p.id !== id);
+      localStorage.setItem("ev_face_db", JSON.stringify(STATE.faceDb));
+      rebuildFaceMatcher();
+      renderBiometricProfilesList();
+    }
+
+    function renderBiometricProfilesList() {
+      const list = document.getElementById("biometricProfilesList");
+      if (!list) return;
+
+      if (STATE.faceDb.length === 0) {
+        list.innerHTML = `<div style="font-size: 11px; color: var(--text-muted); padding: 8px;">No hay perfiles faciales registrados en la base local.</div>`;
+        return;
+      }
+
+      list.innerHTML = STATE.faceDb.map((p) => `
+        <div class="note-item" style="border-left-color: var(--accent-cyan); align-items: center;">
+          <img class="bio-avatar" style="width: 36px; height: 36px;" src="${p.avatarDataUrl || 'data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 36 36\'><circle cx=\'18\' cy=\'18\' r=\'16\' fill=\'%23070B10\' stroke=\'%2300E5FF\'/></svg>'}" alt="Avatar">
+          <div class="note-content-wrap" style="margin-left: 6px;">
+            <div style="font-weight: bold; color: #FFF;">${escapeHtml(p.name)}</div>
+            <div style="font-family: var(--font-mono); font-size: 10px; color: var(--accent-cyan);">${escapeHtml(p.role)} • ${(p.descriptors || []).length}/3 muestras</div>
+            ${p.notes ? `<div style="font-size: 9.5px; color: var(--text-muted);">${escapeHtml(p.notes)}</div>` : ""}
+          </div>
+          <button class="btn-note-del" onclick="removeBiometricProfile('${p.id}')" title="Eliminar">✕</button>
+        </div>
+      `).join("");
+    }
+
+    function exportBiometricsJson() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(STATE.faceDb, null, 2));
+      const dlAnchor = document.createElement("a");
+      dlAnchor.setAttribute("href", dataStr);
+      dlAnchor.setAttribute("download", `ev_face_db_${Date.now()}.json`);
+      dlAnchor.click();
+      playTacticalBeep(1100, 0.08);
+    }
+
+    function handleImportBiometricsJson(e) {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const parsed = JSON.parse(event.target.result);
+          if (Array.isArray(parsed)) {
+            STATE.faceDb = parsed;
+            localStorage.setItem("ev_face_db", JSON.stringify(STATE.faceDb));
+            rebuildFaceMatcher();
+            renderBiometricProfilesList();
+            alert(`Base biométrica importada con éxito: ${parsed.length} perfiles.`);
+            playTacticalBeep(1200, 0.12);
+          } else {
+            alert("El archivo JSON no tiene un formato válido.");
+          }
+        } catch (err) {
+          alert("Error leyendo archivo JSON: " + err.message);
+        }
+      };
+      reader.readAsText(file);
+      e.target.value = "";
+    }
+
+    // Inyecta el contexto biométrico en las consultas hacia Gemini
+    function getBiometricContextString() {
+      const activeRecognized = currentTrackedFaces.filter(f => f.isRecognized);
+      if (activeRecognized.length === 0) return "";
+      const summary = activeRecognized.map(f => `${f.name} (${f.role})`).join(", ");
+      return `\n[CONTEXTO BIOMÉTRICO EN VIVO: Frente al operador se encuentra ${summary}]`;
+    }
+
+    // =========================================================================
+    // PARSER DE HERRAMIENTAS AUTÓNOMAS LOCALES (TEMPORIZADORES, NOTAS, MEMORIA)
+    // =========================================================================
+
+    function parseAutonomousTools(text) {
+      const clean = (text || "").toLowerCase().trim();
+
+      // 1. Detección de Memoria Permanente ("recuerda que...")
+      const memMatch = clean.match(/(?:recuerda que|recuerda esto:?|guarda en memoria que|anota en memoria que)\s+(.+)/i);
+      if (memMatch && memMatch[1]) {
+        const item = memMatch[1].trim();
+        STATE.longMemory.push(item);
+        localStorage.setItem("ev_long_memory", JSON.stringify(STATE.longMemory));
+        renderMemoryList();
+        return {
+          handled: true,
+          reply: `Entendido, Operador. He registrado en memoria táctica permanente: "${item}".`
+        };
+      }
+
+      // 2. Detección de Temporizadores / Alarmas
+      const timerMatch = clean.match(/(?:temporizador|alarma|av[ií]same|cuenta regresiva)(?: de| en)?\s+(\d+)\s*(segundo|segundos|minuto|minutos|hora|horas)/i);
+      if (timerMatch) {
+        const val = parseInt(timerMatch[1], 10);
+        const unit = timerMatch[2].toLowerCase();
+        let seconds = val;
+        if (unit.startsWith("minuto")) seconds = val * 60;
+        else if (unit.startsWith("hora")) seconds = val * 3600;
+
+        if (seconds > 0) {
+          createLocalTimer(seconds, `Alarma (${val} ${unit})`);
+          return {
+            handled: true,
+            reply: `Temporizador de ${val} ${unit} configurado, Operador. Iniciando cuenta regresiva táctica.`
+          };
+        }
+      }
+
+      // 3. Detección de Notas ("anota que...", "nueva nota: ...")
+      const noteMatch = clean.match(/(?:anota que|nueva nota:?|apunta que|guarda nota:?)\s+(.+)/i);
+      if (noteMatch && noteMatch[1]) {
+        const noteText = noteMatch[1].trim();
+        addLocalNote(noteText);
+        return {
+          handled: true,
+          reply: `Nota archivada en tu libreta táctica, Operador: "${noteText}".`
+        };
+      }
+
+      return { handled: false };
+    }
+
+    // =========================================================================
+    // TEMPORIZADORES Y SÍNTESIS DE TONOS WEB AUDIO API (SIN MP3)
+    // =========================================================================
+
+    let audioContextInstance = null;
+    function getAudioContext() {
+      if (!audioContextInstance) {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx) audioContextInstance = new AudioCtx();
+      }
+      if (audioContextInstance && audioContextInstance.state === "suspended") {
+        audioContextInstance.resume().catch(() => {});
+      }
+      return audioContextInstance;
+    }
+
+    function playTacticalBeep(frequency = 880, duration = 0.12, type = "sine") {
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(frequency, ctx.currentTime);
+        gain.gain.setValueAtTime(0.18, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    function playTacticalAlarmTune() {
+      playTacticalBeep(1046, 0.14, "square");
+      setTimeout(() => playTacticalBeep(1318, 0.14, "square"), 150);
+      setTimeout(() => playTacticalBeep(1568, 0.28, "square"), 300);
+      setTimeout(() => playTacticalBeep(2093, 0.35, "square"), 480);
+      if ("vibrate" in navigator) {
+        navigator.vibrate([200, 100, 200, 100, 400]);
+      }
+    }
+
+    function createLocalTimer(seconds, label) {
+      const id = "timer_" + Date.now();
+      const timer = {
+        id,
+        label,
+        totalSec: seconds,
+        remainingSec: seconds,
+        intervalId: null
+      };
+
+      timer.intervalId = setInterval(() => {
+        timer.remainingSec--;
+        if (timer.remainingSec <= 0) {
+          clearInterval(timer.intervalId);
+          removeTimer(timer.id);
+          playTacticalAlarmTune();
+          const alertMsg = `Operador, la alarma "${timer.label}" ha finalizado.`;
+          appendAssistantMessage(alertMsg, "⏱ TEMPORIZADOR FINALIZADO");
+          speakEvResponse(alertMsg);
+        } else {
+          renderTimersUI();
+        }
+      }, 1000);
+
+      STATE.activeTimers.push(timer);
+      renderTimersUI();
+      playTacticalBeep(659, 0.15);
+    }
+
+    function removeTimer(id) {
+      const idx = STATE.activeTimers.findIndex(t => t.id === id);
+      if (idx !== -1) {
+        clearInterval(STATE.activeTimers[idx].intervalId);
+        STATE.activeTimers.splice(idx, 1);
+        renderTimersUI();
+      }
+    }
+
+    function renderTimersUI() {
+      const container = document.getElementById("timersContainer");
+      if (STATE.activeTimers.length === 0) {
+        container.style.display = "none";
+        container.innerHTML = "";
+        return;
+      }
+
+      container.style.display = "flex";
+      container.innerHTML = STATE.activeTimers.map(t => {
+        const m = Math.floor(t.remainingSec / 60).toString().padStart(2, "0");
+        const s = (t.remainingSec % 60).toString().padStart(2, "0");
+        return `
+          <div class="timer-badge">
+            <span>⏱ ${escapeHtml(t.label)}: <strong>${m}:${s}</strong></span>
+            <button class="btn-timer-cancel" onclick="removeTimer('${t.id}')" title="Cancelar">✕</button>
+          </div>
+        `;
+      }).join("");
+    }
+
+    // =========================================================================
+    // LIBRETA TÁCTICA Y MEMORIA PERSISTENTE
+    // =========================================================================
+
+    function addLocalNote(content) {
+      const note = {
+        id: "note_" + Date.now(),
+        content,
+        timestamp: new Date().toLocaleString()
+      };
+      STATE.notes.unshift(note);
+      localStorage.setItem("ev_notes", JSON.stringify(STATE.notes));
+      renderNotesList();
+      playTacticalBeep(784, 0.1);
+    }
+
+    function removeLocalNote(id) {
+      STATE.notes = STATE.notes.filter(n => n.id !== id);
+      localStorage.setItem("ev_notes", JSON.stringify(STATE.notes));
+      renderNotesList();
+    }
+
+    function removeMemoryItem(index) {
+      STATE.longMemory.splice(index, 1);
+      localStorage.setItem("ev_long_memory", JSON.stringify(STATE.longMemory));
+      renderMemoryList();
+    }
+
+    function renderNotesList() {
+      const list = document.getElementById("notesList");
+      if (!list) return;
+      if (STATE.notes.length === 0) {
+        list.innerHTML = `<div style="font-size: 11px; color: var(--text-muted); padding: 6px;">No hay notas archivadas.</div>`;
+        return;
+      }
+      list.innerHTML = STATE.notes.map(n => `
+        <div class="note-item">
+          <div class="note-content-wrap">
+            <div>${escapeHtml(n.content)}</div>
+            <div class="note-date">${escapeHtml(n.timestamp)}</div>
+          </div>
+          <button class="btn-note-del" onclick="removeLocalNote('${n.id}')" title="Eliminar">✕</button>
+        </div>
+      `).join("");
+    }
+
+    function renderMemoryList() {
+      const list = document.getElementById("memoryList");
+      if (!list) return;
+      if (STATE.longMemory.length === 0) {
+        list.innerHTML = `<div style="font-size: 11px; color: var(--text-muted); padding: 6px;">Sin registros en memoria a largo plazo.</div>`;
+        return;
+      }
+      list.innerHTML = STATE.longMemory.map((m, i) => `
+        <div class="note-item" style="border-left-color: var(--accent-amber);">
+          <div class="note-content-wrap">${escapeHtml(m)}</div>
+          <button class="btn-note-del" onclick="removeMemoryItem(${i})" title="Olvidar">✕</button>
+        </div>
+      `).join("");
+    }
+
+    function handleAddNoteManual() {
+      const input = document.getElementById("newNoteInput");
+      const val = (input.value || "").trim();
+      if (!val) return;
+      addLocalNote(val);
+      input.value = "";
+    }
+
+    // =========================================================================
+    // MOTOR VOCAL NATIVO (SPEECH RECOGNITION + SPEECH SYNTHESIS CERO ECO)
+    // =========================================================================
+
+    let speechRecInstance = null;
+
+    function toggleVoiceOutput() {
+      STATE.ttsEnabled = !STATE.ttsEnabled;
+      localStorage.setItem("ev_tts_enabled", STATE.ttsEnabled ? "true" : "false");
+      updateVoiceToggleUI();
+      if (!STATE.ttsEnabled && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+      playTacticalBeep(STATE.ttsEnabled ? 880 : 440, 0.08);
+    }
+
+    function updateVoiceToggleUI() {
+      const btn = document.getElementById("btnVoiceToggle");
+      if (STATE.ttsEnabled) {
+        btn.textContent = "🔊 VOZ: ON";
+        btn.classList.add("accent-amber");
+      } else {
+        btn.textContent = "🔇 VOZ: OFF";
+        btn.classList.remove("accent-amber");
+      }
+    }
+
+    function sanitizeTextForTTS(text) {
+      return (text || "")
+        .replace(/\*\*(.*?)\*\*/g, "$1")
+        .replace(/\*(.*?)\*/g, "$1")
+        .replace(/#{1,6}\s?/g, "")
+        .replace(/`{1,3}[\s\S]*?`{1,3}/g, "código")
+        .replace(/\[(.*?)\]\(.*?\)/g, "$1")
+        .replace(/[•\-\_]/g, " ")
+        .replace(/⚡|💎|🧠|⏱|👁|🔍|🎙|🔄|⚙|📝|👥|👤/g, "")
+        .trim();
+    }
+
+    function speakEvResponse(text, onComplete) {
+      if (!STATE.ttsEnabled || !window.speechSynthesis) {
+        if (onComplete) onComplete();
+        return;
+      }
+
+      // BLOQUEO ANTI-ECO ESTRICTO: Detener micrófono antes de que E.V. hable
+      stopVoiceRecognition();
+      STATE.isSpeaking = true;
+      window.speechSynthesis.cancel();
+
+      const cleanText = sanitizeTextForTTS(text);
+      if (!cleanText) {
+        STATE.isSpeaking = false;
+        if (onComplete) onComplete();
+        return;
+      }
+
+      const utterance = new SpeechSynthesisUtterance(cleanText);
+      utterance.rate = 1.07;
+      utterance.pitch = 1.04;
+      utterance.lang = "es-ES";
+
+      const voices = window.speechSynthesis.getVoices();
+      const esVoice = voices.find(v => v.lang.startsWith("es") && (v.name.includes("Google") || v.name.includes("Sabina") || v.name.includes("Helena") || v.name.includes("Natural") || v.name.includes("Elvira"))) ||
+                      voices.find(v => v.lang.startsWith("es"));
+      if (esVoice) utterance.voice = esVoice;
+
+      let watchdogId = null;
+      const finish = () => {
+        if (watchdogId) clearTimeout(watchdogId);
+        STATE.isSpeaking = false;
+        setTimeout(() => {
+          if (isVisorActive && isVisorContinuousMic) {
+            startVisorSpeechLoop();
+          }
+        }, 400);
+        if (onComplete) onComplete();
+      };
+
+      utterance.onend = finish;
+      utterance.onerror = (e) => {
+        console.warn("[E.V. TTS] Aviso en síntesis:", e);
+        finish();
+      };
+
+      // Watchdog de 15 segundos para móviles Android
+      watchdogId = setTimeout(() => {
+        console.debug("[E.V. TTS] Watchdog de 15s ejecutado.");
+        finish();
+      }, 15000);
+
+      window.speechSynthesis.speak(utterance);
+    }
+
+    if (window.speechSynthesis) {
+      window.speechSynthesis.onvoiceschanged = () => {
+        window.speechSynthesis.getVoices();
+      };
+    }
+
+    function initSpeechRecognition() {
+      if (speechRecInstance) return speechRecInstance;
+      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRec) {
+        console.warn("[E.V. Voice] SpeechRecognition no soportado en este navegador.");
+        return null;
+      }
+
+      const rec = new SpeechRec();
+      rec.continuous = true;
+      rec.interimResults = true;
+      rec.lang = "es-PE";
+
+      rec.onstart = () => {
+        STATE.isListening = true;
+        document.getElementById("btnMic").classList.add("active-mic");
+        const b = document.getElementById("voiceInterimBadge");
+        if (b) b.style.display = "flex";
+      };
+
+      rec.onresult = (evt) => {
+        if (STATE.isSpeaking) return;
+
+        let interim = "";
+        let final = "";
+
+        for (let i = evt.resultIndex; i < evt.results.length; i++) {
+          const res = evt.results[i];
+          if (res.isFinal) {
+            final += res[0].transcript;
+          } else {
+            interim += res[0].transcript;
+          }
+        }
+
+        const badgeText = document.getElementById("voiceInterimText");
+        const inputPrompt = document.getElementById("inputPrompt");
+
+        if (interim) {
+          if (badgeText) badgeText.textContent = `« ${interim} »`;
+          if (isVisorActive) updateVisorSubtitle("TÚ", interim);
+        }
+
+        if (final) {
+          const cleanFinal = final.trim();
+          if (cleanFinal.length > 1) {
+            if (inputPrompt) inputPrompt.value = cleanFinal;
+            if (badgeText) badgeText.textContent = `Procesando: "${cleanFinal}"`;
+            if (isVisorActive) {
+              updateVisorSubtitle("TÚ", cleanFinal);
+              handleVisorVoiceCommand(cleanFinal);
+            } else {
+              handleUserSubmit();
+            }
+          }
+        }
+      };
+
+      rec.onerror = (err) => {
+        console.debug("[E.V. Voice] Aviso de reconocimiento:", err);
+      };
+
+      rec.onend = () => {
+        STATE.isListening = false;
+        document.getElementById("btnMic").classList.remove("active-mic");
+        const b = document.getElementById("voiceInterimBadge");
+        if (b) b.style.display = "none";
+
+        if (isVisorActive && isVisorContinuousMic && !STATE.isSpeaking) {
+          setTimeout(() => {
+            if (isVisorActive && isVisorContinuousMic && !STATE.isSpeaking) {
+              try { rec.start(); } catch (e) {}
+            }
+          }, 350);
+        }
+      };
+
+      speechRecInstance = rec;
+      return speechRecInstance;
+    }
+
+    function startVoiceRecognition() {
+      if (STATE.isSpeaking) return;
+      const rec = initSpeechRecognition();
+      if (!rec) {
+        alert("Reconocimiento de voz no soportado por este navegador.");
+        return;
+      }
+      try {
+        rec.start();
+      } catch (e) {}
+    }
+
+    function stopVoiceRecognition() {
+      if (speechRecInstance && STATE.isListening) {
+        try { speechRecInstance.abort(); } catch (e) {}
+      }
+      STATE.isListening = false;
+      document.getElementById("btnMic").classList.remove("active-mic");
+      const b = document.getElementById("voiceInterimBadge");
+      if (b) b.style.display = "none";
+    }
+
+    function toggleVoiceDictation() {
+      getAudioContext();
+      if (STATE.isListening) {
+        stopVoiceRecognition();
+      } else {
+        startVoiceRecognition();
+      }
+    }
+
+    // =========================================================================
+    // GESTIÓN DE ENVÍO DE ÓRDENES Y FLUJO CONVERSACIONAL
+    // =========================================================================
+
+    async function handleUserSubmit() {
+      const input = document.getElementById("inputPrompt");
+      const userText = (input.value || "").trim();
+      const hasImage = !!STATE.attachedImageBase64;
+
+      if (!userText && !hasImage) return;
+
+      input.value = "";
+      stopVoiceRecognition();
+
+      appendUserMessage(userText, STATE.attachedImageBase64, STATE.attachedImageMime);
+
+      const imageToSend = STATE.attachedImageBase64;
+      const mimeToSend = STATE.attachedImageMime;
+      removeAttachedImage();
+
+      // 1. Herramientas autónomas locales
+      if (!imageToSend) {
+        const toolResult = parseAutonomousTools(userText);
+        if (toolResult.handled) {
+          appendAssistantMessage(toolResult.reply, "⚡ LOCAL TOOL");
+          speakEvResponse(toolResult.reply);
+          return;
+        }
+      }
+
+      // 2. Comprobar API Key
+      if (!STATE.apiKey) {
+        const warnMsg = "Operador, no has configurado tu Gemini API Key. Pulsa el botón ⚙ API KEY arriba para sincronizarla.";
+        appendAssistantMessage(warnMsg, "ALERTA TÁCTICA");
+        speakEvResponse(warnMsg);
+        openModal("modalApiKey");
+        return;
+      }
+
+      // 3. Enrutador Híbrido Inteligente con Inyección Biométrica
+      const targetModel = selectTargetModel(userText, hasImage);
+      const isHydrogen = targetModel.includes("hydrogen");
+      const modelBadgeText = isHydrogen ? "💎 4 HYDROGEN" : "⚡ 3.5 FLASH-LITE";
+
+      const loadingMsgId = appendAssistantMessage("Procesando con " + modelBadgeText + "...", "ENLACE ACTIVO", true);
+      const startTime = performance.now();
+
+      try {
+        const userParts = [];
+        if (imageToSend) {
+          userParts.push({
+            inlineData: {
+              mimeType: mimeToSend || "image/jpeg",
+              data: imageToSend
+            }
+          });
+        }
+
+        // Inyectar contexto biométrico si hay rostros identificados frente a la cámara
+        const bioContext = getBiometricContextString();
+        const fullPrompt = bioContext ? `${userText}\n${bioContext}` : userText;
+
+        if (fullPrompt) {
+          userParts.push({ text: fullPrompt });
+        }
+
+        const contents = [...STATE.chatHistory, { role: "user", parts: userParts }];
+        const result = await callGeminiWithFallback(targetModel, contents, STATE.apiKey);
+        const durationMs = Math.round(performance.now() - startTime);
+
+        updateAssistantMessage(loadingMsgId, result.text, result.modelUsed, durationMs);
+
+        STATE.chatHistory.push({ role: "user", parts: userParts });
+        STATE.chatHistory.push({ role: "model", parts: [{ text: result.text }] });
+        if (STATE.chatHistory.length > 24) {
+          STATE.chatHistory = STATE.chatHistory.slice(-24);
+        }
+
+        speakEvResponse(result.text);
+
+      } catch (err) {
+        const durationMs = Math.round(performance.now() - startTime);
+        console.error("[E.V. Error]", err);
+        const errorText = `Fallo de comunicación con satélite Gemini (${err.message || "Error desconocido"}). Verifica tu conexión o clave de API.`;
+        updateAssistantMessage(loadingMsgId, errorText, "ERROR", durationMs);
+        speakEvResponse(errorText);
+      }
+    }
+
+    function appendUserMessage(text, imageBase64, mimeType) {
+      const feed = document.getElementById("chatFeed");
+      const msgWrap = document.createElement("div");
+      msgWrap.className = "msg-wrap user";
+
+      let imgHtml = "";
+      if (imageBase64) {
+        imgHtml = `<img src="data:${mimeType || "image/jpeg"};base64,${imageBase64}" class="msg-thumb" alt="Fotograma">`;
+      }
+
+      msgWrap.innerHTML = `
+        <div class="msg-header">
+          <span>[OPERADOR]</span>
+        </div>
+        <div class="msg-bubble">
+          ${text ? escapeHtml(text) : ""}
+          ${imgHtml}
+        </div>
+      `;
+      feed.appendChild(msgWrap);
+      feed.scrollTop = feed.scrollHeight;
+    }
+
+    function appendAssistantMessage(text, metaTag, isLoading = false) {
+      const feed = document.getElementById("chatFeed");
+      const msgId = "msg_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
+      const msgWrap = document.createElement("div");
+      msgWrap.className = "msg-wrap assistant";
+      msgWrap.id = msgId;
+
+      msgWrap.innerHTML = `
+        <div class="msg-header">
+          <span>[E.V. // CO-PILOTO]</span>
+          <span style="color: var(--accent-cyan);">${escapeHtml(metaTag)}</span>
+        </div>
+        <div class="msg-bubble" id="${msgId}_text">
+          ${isLoading ? `<span style="font-family: var(--font-mono); color: var(--accent-amber);">${escapeHtml(text)}</span>` : escapeHtml(text)}
+        </div>
+        <div class="msg-telemetry" id="${msgId}_tele">
+          <span>[${escapeHtml(metaTag)}]</span>
+        </div>
+        ${!isLoading ? `
+        <div class="msg-actions">
+          <button class="btn-msg-action" onclick="speakStoredMessage('${msgId}_text')">🔊 Hablar</button>
+          <button class="btn-msg-action" onclick="copyStoredMessage('${msgId}_text')">📋 Copiar</button>
+        </div>` : ""}
+      `;
+      feed.appendChild(msgWrap);
+      feed.scrollTop = feed.scrollHeight;
+      return msgId;
+    }
+
+    function updateAssistantMessage(msgId, text, modelUsed, durationMs) {
+      const textEl = document.getElementById(msgId + "_text");
+      const teleEl = document.getElementById(msgId + "_tele");
+      const wrap = document.getElementById(msgId);
+      if (!textEl || !teleEl) return;
+
+      textEl.innerHTML = escapeHtml(text);
+
+      let badge = "[⚡ 3.5 FLASH-LITE";
+      if (modelUsed.includes("hydrogen")) badge = "[💎 4 HYDROGEN";
+      else if (modelUsed.includes("flash")) badge = "[⚡ 3.5 FLASH";
+      badge += ` · ${durationMs} ms]`;
+
+      teleEl.innerHTML = `<span>${badge}</span>`;
+
+      if (wrap && !wrap.querySelector(".msg-actions")) {
+        const actions = document.createElement("div");
+        actions.className = "msg-actions";
+        actions.innerHTML = `
+          <button class="btn-msg-action" onclick="speakStoredMessage('${msgId}_text')">🔊 Hablar</button>
+          <button class="btn-msg-action" onclick="copyStoredMessage('${msgId}_text')">📋 Copiar</button>
+        `;
+        wrap.appendChild(actions);
+      }
+
+      const feed = document.getElementById("chatFeed");
+      feed.scrollTop = feed.scrollHeight;
+    }
+
+    function speakStoredMessage(elementId) {
+      const el = document.getElementById(elementId);
+      if (el) speakEvResponse(el.textContent);
+    }
+
+    function copyStoredMessage(elementId) {
+      const el = document.getElementById(elementId);
+      if (el && navigator.clipboard) {
+        navigator.clipboard.writeText(el.textContent)
+          .then(() => playTacticalBeep(1200, 0.08))
+          .catch(() => {});
+      }
+    }
+
+    // =========================================================================
+    // MANEJO DE ADJUNTOS / IMÁGENES
+    // =========================================================================
+
+    function handleFileSelected(e) {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const dataUrl = event.target.result;
+        const base64 = dataUrl.split(",")[1];
+        const mime = dataUrl.split(";")[0].split(":")[1] || "image/jpeg";
+
+        STATE.attachedImageBase64 = base64;
+        STATE.attachedImageMime = mime;
+
+        const previewBar = document.getElementById("attachPreviewBar");
+        const previewImg = document.getElementById("attachPreviewImg");
+        if (previewBar && previewImg) {
+          previewImg.src = dataUrl;
+          previewBar.style.display = "flex";
+        }
+        playTacticalBeep(988, 0.1);
+      };
+      reader.readAsDataURL(file);
+      e.target.value = "";
+    }
+
+    function removeAttachedImage() {
+      STATE.attachedImageBase64 = null;
+      STATE.attachedImageMime = null;
+      const previewBar = document.getElementById("attachPreviewBar");
+      if (previewBar) previewBar.style.display = "none";
+    }
+
+    // =========================================================================
+    // VISOR ÓPTICO E.V. (SPIDER-MAN: BRAND NEW DAY / 60 FPS RENDER LOOP)
+    // =========================================================================
+
+    let isVisorActive = false;
+    let isVisorContinuousMic = false;
+    let visorStream = null;
+    let visorAnimId = null;
+    let currentFacingMode = "environment";
+
+    // Variables de Lentes Mecánicas y Rastreo
+    let scleraAperture = 0.85;
+    let targetScleraAperture = 0.85;
+    let motionScore = 0.0;
+    let prevMotionPixels = null;
+    let isCameraPanning = false;
+    let consecutiveMotionFrames = 0;
+    let hasTargetLock = false;
+    let targetLockCoords = { x: 0, y: 0 };
+    let smoothedTargetX = 0;
+    let smoothedTargetY = 0;
+    let lastMotionCheckTime = 0;
+
+    async function openVisorOverlay() {
+      isVisorActive = true;
+      getAudioContext();
+      const overlay = document.getElementById("visorOverlay");
+      overlay.style.display = "flex";
+
+      try {
+        if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        }
+      } catch (e) {}
+
+      await startVisorCamera();
+      startVisorCanvasRenderer();
+
+      // Inicializar inferencia biométrica en segundo plano
+      initBiometricEngine().then(() => {
+        if (isVisorActive && !biometricIntervalId) {
+          // Bucle de inferencia a ~3.5 FPS (280ms) desacoplado del render 60 FPS
+          biometricIntervalId = setInterval(runBiometricInferenceStep, 280);
+        }
+      });
+
+      updateVisorSubtitle("E.V.", "Visor óptico v9.2 en línea. Rastreo cinético y biometría activa.");
+      playTacticalBeep(1046, 0.1);
+    }
+
+    function closeVisorOverlay() {
+      isVisorActive = false;
+      isVisorContinuousMic = false;
+      stopVoiceRecognition();
+
+      if (biometricIntervalId) {
+        clearInterval(biometricIntervalId);
+        biometricIntervalId = null;
+      }
+
+      if (visorAnimId) {
+        cancelAnimationFrame(visorAnimId);
+        visorAnimId = null;
+      }
+
+      if (visorStream) {
+        visorStream.getTracks().forEach(t => t.stop());
+        visorStream = null;
+      }
+      const video = document.getElementById("visorVideo");
+      if (video) video.srcObject = null;
+
+      currentTrackedFaces = [];
+      const sidebar = document.getElementById("evBiometricSidebar");
+      if (sidebar) sidebar.innerHTML = "";
+
+      // Limpieza de memoria WebGL en tensores para evitar saturación de RAM móvil
+      if (window.faceapi && faceapi.tf) {
+        try { faceapi.tf.disposeVariables(); } catch (e) {}
+      }
+
+      const overlay = document.getElementById("visorOverlay");
+      overlay.style.display = "none";
+
+      try {
+        if (document.fullscreenElement && document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        }
+      } catch (e) {}
+    }
+
+    async function startVisorCamera() {
+      try {
+        if (visorStream) {
+          visorStream.getTracks().forEach(t => t.stop());
+        }
+        const constraints = {
+          video: {
+            facingMode: { ideal: currentFacingMode },
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          },
+          audio: false
+        };
+        visorStream = await navigator.mediaDevices.getUserMedia(constraints);
+        const video = document.getElementById("visorVideo");
+        if (video) {
+          video.srcObject = visorStream;
+          await video.play();
+        }
+      } catch (err) {
+        console.warn("[Visor E.V.] Fallo de cámara:", err);
+        updateVisorSubtitle("ALERTA", "Fallo al acceder al sensor óptico de cámara.");
+      }
+    }
+
+    function flipVisorCamera() {
+      currentFacingMode = currentFacingMode === "environment" ? "user" : "environment";
+      startVisorCamera();
+      playTacticalBeep(784, 0.08);
+    }
+
+    // Bucle de renderizado ultrarrápido a 60 FPS (ZERO-LAG: Solo dibuja canvas sin inferencia pesada)
+    function startVisorCanvasRenderer() {
+      const canvas = document.getElementById("visorCanvas");
+      const video = document.getElementById("visorVideo");
+      if (!canvas || !video) return;
+
+      function renderLoop() {
+        if (!isVisorActive) return;
+
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        if (canvas.width !== w || canvas.height !== h) {
+          canvas.width = w;
+          canvas.height = h;
+          smoothedTargetX = w / 2;
+          smoothedTargetY = h / 2;
+        }
+
+        const ctx = canvas.getContext("2d");
+        ctx.clearRect(0, 0, w, h);
+
+        const now = performance.now();
+
+        // 1. Detección de movimiento cinematográfico (cada 120ms sin sobrecargar)
+        if (now - lastMotionCheckTime > 120) {
+          lastMotionCheckTime = now;
+          processVisorMotion(video, w, h);
+        }
+
+        // 2. Interpolación suave de escleras (Spider-Man Brand New Day)
+        scleraAperture += (targetScleraAperture - scleraAperture) * 0.16;
+
+        // 3. Dibujar Escleras Mecánicas Oculares
+        drawMechanicalScleras(ctx, w, h, scleraAperture);
+
+        // 4. Dibujar Cajas Biométricas Faciales y Líneas de Telemetría al Sidebar
+        drawBiometricFaceOverlays(ctx);
+
+        // 5. Dibujar Retícula de Puntería / Target Lock
+        drawVisorReticle(ctx, w, h);
+
+        // 6. Dibujar Telemetría Táctica
+        drawVisorTelemetry(ctx, w, h);
+
+        visorAnimId = requestAnimationFrame(renderLoop);
+      }
+
+      visorAnimId = requestAnimationFrame(renderLoop);
+    }
+
+    function processVisorMotion(video, dispW, dispH) {
+      if (!video || video.readyState < 2) return;
+      const mCanvas = document.getElementById("motionCanvas");
+      if (!mCanvas) return;
+      const mCtx = mCanvas.getContext("2d", { willReadFrequently: true });
+      mCtx.drawImage(video, 0, 0, 128, 96);
+
+      try {
+        const frameData = mCtx.getImageData(0, 0, 128, 96);
+        const data = frameData.data;
+        const totalPixels = 128 * 96;
+        let changed = 0;
+        let sumX = 0, sumY = 0;
+
+        if (prevMotionPixels && prevMotionPixels.length === totalPixels) {
+          for (let i = 0, p = 0; i < data.length; i += 4, p++) {
+            const gray = (data[i] * 299 + data[i + 1] * 587 + data[i + 2] * 114) / 1000;
+            const diff = Math.abs(gray - prevMotionPixels[p]);
+            if (diff > 45) {
+              changed++;
+              sumX += (p % 128);
+              sumY += Math.floor(p / 128);
+            }
+          }
+
+          const changedRatio = changed / totalPixels;
+          motionScore = changedRatio * 100.0;
+
+          // FILTRO ANTI-SHAKE: Si cambia >38% en un cuadro, es giro de la mano/cámara
+          if (changedRatio > 0.38) {
+            isCameraPanning = true;
+            hasTargetLock = false;
+            consecutiveMotionFrames = 0;
+            targetScleraAperture = 0.85;
+          } else {
+            isCameraPanning = false;
+            if (changedRatio > 0.02) {
+              consecutiveMotionFrames++;
+              if (consecutiveMotionFrames >= 3) {
+                hasTargetLock = true;
+                const rawX = (sumX / changed) * (dispW / 128);
+                const rawY = (sumY / changed) * (dispH / 96);
+                smoothedTargetX += (rawX - smoothedTargetX) * 0.3;
+                smoothedTargetY += (rawY - smoothedTargetY) * 0.3;
+                targetLockCoords = { x: smoothedTargetX, y: smoothedTargetY };
+                targetScleraAperture = Math.max(0.48, 0.85 - (motionScore / 50.0));
+              }
+            } else {
+              consecutiveMotionFrames = Math.max(0, consecutiveMotionFrames - 1);
+              hasTargetLock = false;
+              targetScleraAperture = 0.85;
+            }
+          }
+        }
+
+        if (!prevMotionPixels) prevMotionPixels = new Uint8Array(totalPixels);
+        for (let i = 0, p = 0; i < data.length; i += 4, p++) {
+          prevMotionPixels[p] = (data[i] * 299 + data[i + 1] * 587 + data[i + 2] * 114) / 1000;
+        }
+      } catch (err) {}
+    }
+
+    // Dibuja las cajas biométricas faciales y líneas que conectan con la tarjeta del sidebar
+    function drawBiometricFaceOverlays(ctx) {
+      if (!currentTrackedFaces || currentTrackedFaces.length === 0) return;
+
+      const sidebarEl = document.getElementById("evBiometricSidebar");
+
+      currentTrackedFaces.forEach((face, idx) => {
+        const b = face.box;
+        const color = face.isRecognized ? "#00E5FF" : "#FF9800";
+        const cornerSize = Math.min(18, b.width * 0.25);
+
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2.0;
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 6;
+
+        // Marco con esquinas cortadas tácticas alrededor del rostro
+        ctx.beginPath();
+        // Superior Izquierda
+        ctx.moveTo(b.x, b.y + cornerSize); ctx.lineTo(b.x, b.y); ctx.lineTo(b.x + cornerSize, b.y);
+        // Superior Derecha
+        ctx.moveTo(b.x + b.width - cornerSize, b.y); ctx.lineTo(b.x + b.width, b.y); ctx.lineTo(b.x + b.width, b.y + cornerSize);
+        // Inferior Derecha
+        ctx.moveTo(b.x + b.width, b.y + b.height - cornerSize); ctx.lineTo(b.x + b.width, b.y + b.height); ctx.lineTo(b.x + b.width - cornerSize, b.y + b.height);
+        // Inferior Izquierda
+        ctx.moveTo(b.x + cornerSize, b.y + b.height); ctx.lineTo(b.x, b.y + b.height); ctx.lineTo(b.x, b.y + b.height - cornerSize);
+        ctx.stroke();
+
+        // Etiqueta flotante superior
+        ctx.font = "10px 'Share Tech Mono', monospace";
+        ctx.fillStyle = color;
+        const labelText = face.isRecognized ? `ID: ${face.name.toUpperCase()} [${face.similarity}%]` : `SUJETO NO REGISTRADO`;
+        ctx.fillText(labelText, b.x, Math.max(16, b.y - 6));
+
+        // Línea vectorial discontinua que conecta la caja con la tarjeta lateral correspondiente
+        const cardEl = document.getElementById(`bioCard_${idx}`);
+        if (cardEl && sidebarEl) {
+          const cardRect = cardEl.getBoundingClientRect();
+          const targetX = cardRect.right;
+          const targetY = cardRect.top + cardRect.height / 2;
+
+          ctx.setLineDash([4, 4]);
+          ctx.strokeStyle = face.isRecognized ? "rgba(0, 229, 255, 0.45)" : "rgba(255, 152, 0, 0.45)";
+          ctx.lineWidth = 1.2;
+
+          ctx.beginPath();
+          ctx.moveTo(b.x, b.y + b.height / 2);
+          ctx.lineTo(targetX, targetY);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
+
+        ctx.restore();
+      });
+    }
+
+    function drawMechanicalScleras(ctx, w, h, aperture) {
+      ctx.save();
+      const cy = h * 0.5;
+      const rx = w * 0.24 * aperture;
+      const ry = h * 0.44;
+
+      drawScleraShutter(ctx, w * 0.02, cy, rx, ry, false, aperture);
+      drawScleraShutter(ctx, w * 0.98, cy, rx, ry, true, aperture);
+
+      ctx.restore();
+    }
+
+    function drawScleraShutter(ctx, cx, cy, rx, ry, isRight, aperture) {
+      ctx.save();
+      const strokeColor = hasTargetLock || currentTrackedFaces.length > 0 ? (currentTrackedFaces.some(f => !f.isRecognized) ? "#FF9800" : "#00E5FF") : "#00E5FF";
+      ctx.strokeStyle = strokeColor;
+      ctx.shadowColor = strokeColor;
+      ctx.shadowBlur = 8;
+      ctx.lineWidth = 2.5;
+
+      const dir = isRight ? -1 : 1;
+      const startAngle = isRight ? Math.PI * 0.65 : -Math.PI * 0.35;
+      const endAngle = isRight ? Math.PI * 1.35 : Math.PI * 0.35;
+
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, rx, ry, 0, startAngle, endAngle);
+      ctx.stroke();
+
+      ctx.lineWidth = 1.6;
+      ctx.strokeStyle = strokeColor === "#FF9800" ? "rgba(255, 152, 0, 0.7)" : "rgba(0, 229, 255, 0.7)";
+      const blades = 4;
+      for (let b = 1; b <= blades; b++) {
+        const factor = 1.0 - (b * 0.15 * (1.1 - aperture));
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, rx * factor, ry * factor, 0, startAngle, endAngle);
+        ctx.stroke();
+
+        const notchAngle = startAngle + ((endAngle - startAngle) * (b / (blades + 1)));
+        const nx = cx + Math.cos(notchAngle) * (rx * factor);
+        const ny = cy + Math.sin(notchAngle) * (ry * factor);
+        ctx.fillStyle = "#FF9800";
+        ctx.beginPath();
+        ctx.arc(nx, ny, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.restore();
+    }
+
+    function drawVisorReticle(ctx, w, h) {
+      ctx.save();
+      const cx = w / 2;
+      const cy = h / 2;
+
+      if (hasTargetLock) {
+        const tx = targetLockCoords.x;
+        const ty = targetLockCoords.y;
+
+        ctx.strokeStyle = "#FF9800";
+        ctx.lineWidth = 2;
+        const s = 24;
+
+        ctx.beginPath();
+        ctx.moveTo(tx - s, ty - s + 8); ctx.lineTo(tx - s, ty - s); ctx.lineTo(tx - s + 8, ty - s);
+        ctx.moveTo(tx + s - 8, ty - s); ctx.lineTo(tx + s, ty - s); ctx.lineTo(tx + s, ty - s + 8);
+        ctx.moveTo(tx - s, ty + s - 8); ctx.lineTo(tx - s, ty + s); ctx.lineTo(tx - s + 8, ty + s);
+        ctx.moveTo(tx + s - 8, ty + s); ctx.lineTo(tx + s, ty + s); ctx.lineTo(tx + s, ty + s - 8);
+        ctx.stroke();
+
+        ctx.fillStyle = "#00E5FF";
+        ctx.beginPath();
+        ctx.arc(tx, ty, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.font = "10px 'Share Tech Mono', monospace";
+        ctx.fillStyle = "#FF9800";
+        ctx.fillText(`TARGET LOCK [${motionScore.toFixed(1)}%]`, tx + s + 6, ty - 4);
+        ctx.fillStyle = "#00E5FF";
+        ctx.fillText(`COORD: (${Math.round(tx)}, ${Math.round(ty)})`, tx + s + 6, ty + 10);
+
+      } else {
+        ctx.strokeStyle = "rgba(0, 229, 255, 0.6)";
+        ctx.lineWidth = 1.5;
+
+        ctx.beginPath();
+        ctx.arc(cx, cy, 22, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(cx - 30, cy); ctx.lineTo(cx - 24, cy);
+        ctx.moveTo(cx + 24, cy); ctx.lineTo(cx + 30, cy);
+        ctx.moveTo(cx, cy - 30); ctx.lineTo(cx, cy - 24);
+        ctx.moveTo(cx, cy + 24); ctx.lineTo(cx, cy + 30);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function drawVisorTelemetry(ctx, w, h) {
+      ctx.save();
+      ctx.font = "10px 'Share Tech Mono', monospace";
+
+      ctx.textAlign = "left";
+      if (isCameraPanning) {
+        ctx.fillStyle = "#FF1744";
+        ctx.fillText("ESTADO: ESTABILIZANDO GIRO (ANTI-SHAKE)", 16, h - 110);
+      } else if (hasTargetLock) {
+        ctx.fillStyle = "#FF9800";
+        ctx.fillText("ESTADO: OBJETIVO FIJADO (TARGET LOCK)", 16, h - 110);
+      } else {
+        ctx.fillStyle = "#00E5FF";
+        ctx.fillText("ESTADO: RASTREO ÓPTICO NORMAL", 16, h - 110);
+      }
+      ctx.fillStyle = "#E0E6ED";
+      const bioCount = currentTrackedFaces.length;
+      ctx.fillText(`SENSOR MOVIMIENTO: ${motionScore.toFixed(1)}% · ROSTROS: ${bioCount} · LENTE: ${Math.round(scleraAperture * 100)}%`, 16, h - 96);
+
+      ctx.restore();
+    }
+
+    function updateVisorSubtitle(speaker, text) {
+      const box = document.getElementById("visorSubtitles");
+      const header = document.getElementById("visorSubHeader");
+      const body = document.getElementById("visorSubText");
+      if (!box || !header || !body) return;
+
+      header.textContent = `E.V. // ${speaker.toUpperCase()}`;
+      body.textContent = text;
+      box.style.display = "block";
+    }
+
+    function captureVisorFrame(maxDim = 512, quality = 0.65) {
+      const video = document.getElementById("visorVideo");
+      if (!video || !video.videoWidth) return null;
+
+      const c = document.createElement("canvas");
+      let w = video.videoWidth;
+      let h = video.videoHeight;
+      if (w > maxDim || h > maxDim) {
+        if (w >= h) {
+          h = Math.round((h * maxDim) / w);
+          w = maxDim;
+        } else {
+          w = Math.round((w * maxDim) / h);
+          h = maxDim;
+        }
+      }
+      c.width = w;
+      c.height = h;
+      const ctx = c.getContext("2d");
+      ctx.drawImage(video, 0, 0, w, h);
+      const dataUrl = c.toDataURL("image/jpeg", quality);
+      return dataUrl.split(",")[1];
+    }
+
+    async function handleVisorScanDetail() {
+      if (!STATE.apiKey) {
+        updateVisorSubtitle("ALERTA", "Falta Gemini API Key. Configúrala en la pantalla principal.");
+        return;
+      }
+
+      targetScleraAperture = 0.45;
+      updateVisorSubtitle("E.V.", "Capturando fotograma a 800px para análisis con Gemini 4 Hydrogen...");
+      playTacticalBeep(1200, 0.1);
+
+      const frameBase64 = captureVisorFrame(800, 0.80);
+      if (!frameBase64) {
+        updateVisorSubtitle("ALERTA", "No hay imagen disponible desde la cámara.");
+        targetScleraAperture = 0.85;
+        return;
+      }
+
+      try {
+        const bioContext = getBiometricContextString();
+        const prompt = `Describe con máxima precisión técnica y estilo táctico lo que observas en esta escena a través del visor óptico de E.V.${bioContext}`;
+        const contents = [
+          {
+            role: "user",
+            parts: [
+              { inlineData: { mimeType: "image/jpeg", data: frameBase64 } },
+              { text: prompt }
+            ]
+          }
+        ];
+
+        const result = await callGeminiWithFallback("gemini-4-hydrogen", contents, STATE.apiKey);
+        targetScleraAperture = 0.85;
+
+        updateVisorSubtitle("E.V. INTEL", result.text);
+        appendAssistantMessage(result.text, `[VISOR ESCANEO · ${result.modelUsed}]`);
+        speakEvResponse(result.text);
+
+      } catch (err) {
+        targetScleraAperture = 0.85;
+        updateVisorSubtitle("ALERTA", "Fallo al procesar imagen con Gemini: " + err.message);
+      }
+    }
+
+    function toggleVisorContinuousMic() {
+      isVisorContinuousMic = !isVisorContinuousMic;
+      const btn = document.getElementById("btnVisorMic");
+      if (isVisorContinuousMic) {
+        btn.textContent = "🎙 MIC CONTINUO: ON";
+        btn.classList.add("active-mic");
+        startVisorSpeechLoop();
+        updateVisorSubtitle("E.V.", "Micrófono continuo activo. Habla para consultar lo que enfocas.");
+      } else {
+        btn.textContent = "🎙 MIC CONTINUO: OFF";
+        btn.classList.remove("active-mic");
+        stopVoiceRecognition();
+        updateVisorSubtitle("E.V.", "Micrófono continuo desactivado.");
+      }
+      playTacticalBeep(isVisorContinuousMic ? 880 : 440, 0.08);
+    }
+
+    function startVisorSpeechLoop() {
+      if (STATE.isSpeaking) return;
+      startVoiceRecognition();
+    }
+
+    async function handleVisorVoiceCommand(transcript) {
+      if (!STATE.apiKey) {
+        updateVisorSubtitle("ALERTA", "Falta Gemini API Key.");
+        return;
+      }
+
+      updateVisorSubtitle("TÚ", transcript);
+      targetScleraAperture = 0.52;
+
+      const frameBase64 = captureVisorFrame(512, 0.65);
+      const bioContext = getBiometricContextString();
+      const combinedText = bioContext ? `${transcript}\n${bioContext}` : transcript;
+
+      try {
+        const userParts = [];
+        if (frameBase64) {
+          userParts.push({ inlineData: { mimeType: "image/jpeg", data: frameBase64 } });
+        }
+        userParts.push({ text: combinedText });
+
+        const contents = [
+          ...STATE.chatHistory,
+          { role: "user", parts: userParts }
+        ];
+
+        const targetModel = selectTargetModel(transcript, false);
+        const result = await callGeminiWithFallback(targetModel, contents, STATE.apiKey);
+        targetScleraAperture = 0.85;
+
+        updateVisorSubtitle("E.V.", result.text);
+        appendAssistantMessage(result.text, `[VISOR VOZ · ${result.modelUsed}]`);
+        speakEvResponse(result.text);
+
+      } catch (err) {
+        targetScleraAperture = 0.85;
+        updateVisorSubtitle("ALERTA", "Fallo: " + err.message);
+      }
+    }
+
+    // =========================================================================
+    // MODALES Y VALIDACIÓN DE CLAVE GEMINI
+    // =========================================================================
+
+    function openModal(id) {
+      const modal = document.getElementById(id);
+      if (modal) {
+        modal.style.display = "flex";
+        if (id === "modalApiKey") {
+          document.getElementById("apiKeyInput").value = STATE.apiKey || "";
+          document.getElementById("apiKeyStatus").textContent = "";
+        }
+      }
+    }
+
+    function closeModal(id) {
+      const modal = document.getElementById(id);
+      if (modal) modal.style.display = "none";
+    }
+
+    async function handleSaveApiKey() {
+      const input = document.getElementById("apiKeyInput");
+      const keyVal = (input.value || "").trim();
+      const statusEl = document.getElementById("apiKeyStatus");
+
+      if (!keyVal) {
+        statusEl.innerHTML = `<span style="color: var(--accent-red);">Por favor ingresa una clave válida.</span>`;
+        return;
+      }
+
+      statusEl.innerHTML = `<span style="color: var(--accent-amber);">Verificando clave con Google Gemini...</span>`;
+
+      const isValid = await verifyGeminiApiKey(keyVal, true);
+      if (isValid) {
+        STATE.apiKey = keyVal;
+        localStorage.setItem("ev_api_key", keyVal);
+        updateApiKeyStatusUI();
+        statusEl.innerHTML = `<span style="color: var(--accent-green);">✓ Clave verificada con éxito. Enrutador activo.</span>`;
+        setTimeout(() => closeModal("modalApiKey"), 1200);
+      } else {
+        statusEl.innerHTML = `<span style="color: var(--accent-red);">✕ Error de acceso. Clave rechazada por la API de Google.</span>`;
+      }
+    }
+
+    async function verifyGeminiApiKey(apiKey, verbose = false) {
+      try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`;
+        const resp = await fetch(url);
+        if (!resp.ok) {
+          if (verbose) console.warn("[E.V. Key Check] HTTP " + resp.status);
+          setLedOnline(false);
+          return false;
+        }
+        const data = await resp.json();
+        const models = (data.models || []).map(m => m.name.replace("models/", ""));
+        STATE.availableModels = models;
+        console.log("[E.V. Key Check] Modelos habilitados:", models);
+
+        setLedOnline(true);
+        return true;
+      } catch (err) {
+        console.warn("[E.V. Key Check] Error de conexión:", err);
+        setLedOnline(false);
+        return false;
+      }
+    }
+
+    function setLedOnline(online) {
+      const led = document.getElementById("statusLed");
+      const text = document.getElementById("statusLedText");
+      if (online) {
+        led.className = "status-led online";
+        text.textContent = "EN LÍNEA";
+        text.style.color = "var(--accent-green)";
+      } else {
+        led.className = "status-led";
+        text.textContent = STATE.apiKey ? "SIN ACCESO" : "SIN CLAVE";
+        text.style.color = "var(--accent-red)";
+      }
+    }
+
+    function updateApiKeyStatusUI() {
+      setLedOnline(!!STATE.apiKey);
+    }
+
+    // =========================================================================
+    // UTILIDADES GENERALES
+    // =========================================================================
+
+    function escapeHtml(str) {
+      if (!str) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+  </script>
+</body>
+</html>

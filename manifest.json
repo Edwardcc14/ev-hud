@@ -1,0 +1,24 @@
+{
+  "name": "E.V. Tactical Core",
+  "short_name": "E.V.",
+  "description": "Interfaz Táctica Autónoma con Visión Óptica y Enrutamiento Híbrido",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#070B10",
+  "theme_color": "#FF9800",
+  "icons": [
+    {
+      "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' fill='%23070B10'/><circle cx='256' cy='256' r='220' stroke='%23FF9800' stroke-width='8' fill='none' stroke-dasharray='30 15'/><circle cx='256' cy='256' r='180' stroke='%2300E5FF' stroke-width='4' fill='none'/><path d='M80 256 Q 160 140 256 140 Q 352 140 432 256 Q 352 372 256 372 Q 160 372 80 256 Z' stroke='%2300E5FF' stroke-width='10' fill='rgba(0,229,255,0.06)'/><circle cx='256' cy='256' r='64' fill='none' stroke='%23FF9800' stroke-width='12'/><circle cx='256' cy='256' r='24' fill='%2300E5FF'/><line x1='256' y1='60' x2='256' y2='100' stroke='%23FF9800' stroke-width='6'/><line x1='256' y1='412' x2='256' y2='452' stroke='%23FF9800' stroke-width='6'/><line x1='60' y1='256' x2='100' y2='256' stroke='%23FF9800' stroke-width='6'/><line x1='412' y1='256' x2='452' y2='256' stroke='%23FF9800' stroke-width='6'/><text x='256' y='484' text-anchor='middle' fill='%2300E5FF' font-family='monospace' font-size='26' letter-spacing='4'>E.V. CORE</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' fill='%23070B10'/><circle cx='96' cy='96' r='84' stroke='%23FF9800' stroke-width='4' fill='none' stroke-dasharray='12 6'/><circle cx='96' cy='96' r='68' stroke='%2300E5FF' stroke-width='2' fill='none'/><path d='M30 96 Q 60 50 96 50 Q 132 50 162 96 Q 132 142 96 142 Q 60 142 30 96 Z' stroke='%2300E5FF' stroke-width='4' fill='rgba(0,229,255,0.08)'/><circle cx='96' cy='96' r='24' fill='none' stroke='%23FF9800' stroke-width='5'/><circle cx='96' cy='96' r='10' fill='%2300E5FF'/></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
