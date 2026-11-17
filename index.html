@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="E.V. Core">
-  <title>E.V. // TACTICAL CORE v9.5</title>
+  <title>E.V. // TACTICAL CORE v9.6</title>
   <link rel="manifest" href="./manifest.json">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23070B10' stroke='%23FF9800' stroke-width='4'/><circle cx='50' cy='50' r='20' fill='%2300E5FF'/></svg>">
 
@@ -553,7 +553,7 @@
       width: 100%;
       height: 100%;
       z-index: 2;
-      pointer-events: none;
+      pointer-events: none !important;
     }
 
     .visor-top-bar {
@@ -797,56 +797,84 @@
       color: var(--accent-amber);
     }
 
+    /* DOCK INFERIOR DEL VISOR (ARQUITECTURA FLEXBOX COLUMN v9.6) */
+    .visor-bottom-dock {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 10px 12px calc(12px + env(safe-area-inset-bottom, 0px));
+      z-index: 80;
+      pointer-events: auto;
+      background: linear-gradient(to top, rgba(7, 11, 16, 0.95) 0%, rgba(7, 11, 16, 0.75) 75%, transparent 100%);
+      box-sizing: border-box;
+      max-width: 100vw;
+    }
+
     /* SUBTÍTULOS FLOTANTES EN EL VISOR */
     .visor-subtitles {
-      position: absolute;
-      bottom: 74px;
-      left: 14px;
-      right: 14px;
-      z-index: 3;
-      background: rgba(7, 11, 16, 0.85);
+      position: relative;
+      width: 100%;
+      box-sizing: border-box;
+      min-height: 44px;
+      max-height: 80px;
+      overflow-y: auto;
+      background: rgba(7, 11, 16, 0.88);
       border: 1px solid var(--accent-cyan);
       border-left: 4px solid var(--accent-amber);
       border-radius: 6px;
-      padding: 8px 12px;
-      font-size: 13px;
-      line-height: 1.4;
+      padding: 6px 10px;
+      font-size: 12px;
+      line-height: 1.35;
       display: none;
       backdrop-filter: blur(4px);
     }
 
     .visor-sub-header {
       font-family: var(--font-mono);
-      font-size: 10px;
+      font-size: 9px;
       color: var(--accent-amber);
       margin-bottom: 2px;
+      letter-spacing: 0.5px;
     }
 
-    /* CONTROLES FLOTANTES DEL VISOR */
-    .visor-actions {
-      position: absolute;
-      bottom: 10px;
-      left: 6px;
-      right: 6px;
-      z-index: 60;
+    .visor-sub-text {
+      color: var(--text-primary);
+      word-break: break-word;
+    }
+
+    /* FILA 2: BOTONES BIOMÉTRICOS */
+    .visor-row-bio {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .visor-row-bio .btn-visor-action {
+      flex: 1;
+      max-width: 220px;
+      font-weight: bold;
+      padding: 8px 12px;
+      font-size: 11px;
+    }
+
+    /* FILA 3: CONTROLES ÓPTICOS */
+    .visor-row-optics {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 6px;
+      width: 100%;
       flex-wrap: wrap;
-      max-width: calc(100% - 12px);
-      pointer-events: auto;
-      overflow-x: auto;
-      scrollbar-width: none;
-      -ms-overflow-style: none;
-    }
-
-    .visor-actions::-webkit-scrollbar {
-      display: none;
     }
 
     .btn-visor-action {
-      background: rgba(13, 19, 28, 0.90);
+      background: rgba(13, 19, 28, 0.92);
       border: 1px solid var(--border-tactical);
       color: var(--text-primary);
       font-family: var(--font-mono);
@@ -858,7 +886,8 @@
       transition: all 0.2s;
       white-space: nowrap;
       pointer-events: auto;
-      z-index: 60;
+      z-index: 85;
+      touch-action: manipulation;
     }
 
     .btn-visor-action.accent-cyan {
@@ -888,7 +917,7 @@
       inset: 0;
       background: rgba(0, 0, 0, 0.82);
       backdrop-filter: blur(5px);
-      z-index: 10010;
+      z-index: 10020;
       display: none;
       align-items: center;
       justify-content: center;
@@ -1057,10 +1086,10 @@
       <div class="msg-wrap assistant">
         <div class="msg-header">
           <span>[E.V. // CO-PILOTO TÁCTICO]</span>
-          <span>v9.5-ULTRAWIDE CORE</span>
+          <span>v9.6-OMNI BIOMETRIC</span>
         </div>
         <div class="msg-bubble">
-          Sistemas en línea, Operador. Óptica ultra gran angular 0.5x anti-mareo, enrutador híbrido, auto-captura manos libres y núcleo biométrico reactivo v9.5 activos. Pulsa ⚙ API KEY si aún no has sincronizado tu clave de Gemini, abre 👥 BIOMETRÍA para administrar perfiles, o accede al 👁 VISOR E.V. para reconocimiento facial y visión panorámica en tiempo real.
+          Sistemas en línea, Operador. Óptica ultra gran angular 0.5x, detección facial multi-ángulo omni-orientación, auto-captura ágil y layout táctico sin superposiciones v9.6 activos. Pulsa ⚙ API KEY si aún no has sincronizado tu clave de Gemini, abre 👥 BIOMETRÍA para administrar perfiles, o accede al 👁 VISOR E.V. para reconocimiento facial y visión panorámica en tiempo real.
         </div>
       </div>
     </div>
@@ -1104,11 +1133,14 @@
     <div class="visor-top-bar">
       <div class="visor-badge">
         <span style="display: inline-block; width: 6px; height: 6px; background: var(--accent-cyan); border-radius: 50%;"></span>
-        <span>E.V. // OPTICAL CORE v9.5</span>
+        <span>E.V. // OPTICAL CORE v9.6</span>
         <span id="visorModelTag" style="color: var(--accent-amber); margin-left: 4px;">[3.5 FLASH-LITE]</span>
         <span id="visorBioStatus" class="visor-bio-badge" style="margin-left: 6px;">BIOMETRÍA: INICIANDO...</span>
       </div>
-      <button id="btnExitVisor" class="btn-exit-visor">✕ SALIR</button>
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <button id="btnVisorForceReload" class="btn-exit-visor" title="Purgar caché y forzar recarga limpia" style="padding: 4px 8px; font-size: 13px;">↻</button>
+        <button id="btnExitVisor" class="btn-exit-visor">✕ SALIR</button>
+      </div>
     </div>
 
     <!-- Banner de Visión Ambiental Inteligente -->
@@ -1126,32 +1158,39 @@
       <div id="evBioSidebarContent" class="bio-sidebar-content"></div>
     </div>
 
-    <!-- Subtítulos Flotantes del Visor -->
-    <div id="visorSubtitles" class="visor-subtitles">
-      <div id="visorSubHeader" class="visor-sub-header">E.V. // INTEL</div>
-      <div id="visorSubText">Analizando campo visual...</div>
-    </div>
+    <!-- DOCK INFERIOR SIN SUPERPOSICIONES (FLEXBOX COLUMN v9.6) -->
+    <div id="visorBottomDock" class="visor-bottom-dock">
+      <!-- Fila 1 (Arriba): Cuadro de subtítulos y estado -->
+      <div id="visorSubtitles" class="visor-subtitles">
+        <div id="visorSubHeader" class="visor-sub-header">E.V. // INTEL</div>
+        <div id="visorSubText" class="visor-sub-text">Analizando campo visual...</div>
+      </div>
 
-    <!-- Barra Inferior de Acciones del Visor -->
-    <div class="visor-actions">
-      <button id="btnVisorRegisterFace" class="btn-visor-action accent-cyan" title="Registrar nuevo perfil biométrico">
-        👤 REGISTRAR
-      </button>
-      <button id="btnVisorAutoEnroll" class="btn-visor-action accent-green" title="Auto-captura manos libres de rostros desconocidos">
-        🤖 AUTO-CAPTURA: ON
-      </button>
-      <button id="btnVisorAmbient" class="btn-visor-action accent-cyan" title="Visión ambiental inteligente y proactiva">
-        👁 LENTE ACTIVA: ON
-      </button>
-      <button id="btnVisorScanDetail" class="btn-visor-action accent-amber" title="Escanear a 800px con Gemini 4 Hydrogen">
-        🔍 DETALLE
-      </button>
-      <button id="btnVisorMic" class="btn-visor-action accent-cyan" title="Micrófono continuo con envío de frame">
-        🎙 MIC CONTINUO: OFF
-      </button>
-      <button id="btnVisorFlipCamera" class="btn-visor-action accent-cyan" title="Alternar Lente Óptica (0.5x Ultra / 1x Principal / Frontal)">
-        🔭 0.5x ULTRAWIDE
-      </button>
+      <!-- Fila 2 (Centro): Botones biométricos prioritarios -->
+      <div class="visor-row-bio">
+        <button id="btnVisorRegisterFace" class="btn-visor-action accent-cyan" title="Registrar nuevo perfil biométrico">
+          👤 REGISTRAR ROSTRO
+        </button>
+        <button id="btnVisorAutoEnroll" class="btn-visor-action accent-green" title="Auto-captura manos libres de rostros">
+          🤖 AUTO: ON
+        </button>
+      </div>
+
+      <!-- Fila 3 (Abajo): Controles tácticos y ópticos -->
+      <div class="visor-row-optics">
+        <button id="btnVisorAmbient" class="btn-visor-action accent-cyan" title="Visión ambiental inteligente">
+          👁 LENTE: ON
+        </button>
+        <button id="btnVisorScanDetail" class="btn-visor-action accent-amber" title="Escanear con Gemini">
+          🔍 DETALLE
+        </button>
+        <button id="btnVisorMic" class="btn-visor-action accent-cyan" title="Micrófono continuo">
+          🎙 MIC: OFF
+        </button>
+        <button id="btnVisorFlipCamera" class="btn-visor-action accent-cyan" title="Alternar Lente Óptica (0.5x Ultra / 1x Principal / Frontal)">
+          🔭 0.5x ULTRAWIDE
+        </button>
+      </div>
     </div>
   </div>
 
@@ -1256,10 +1295,10 @@
 
   <script>
     // =========================================================================
-    // E.V. STANDALONE PWA (v9.5-ULTRAWIDE CORE) - NÚCLEO JS
+    // E.V. STANDALONE PWA (v9.6-OMNI BIOMETRIC) - NÚCLEO JS
     // =========================================================================
 
-    // Variables de Óptica y Calibración v9.5 (Anti-Mareo 0.5x Ultra Wide)
+    // Variables de Óptica y Calibración v9.6 (Anti-Mareo 0.5x Ultra Wide)
     let availableVideoDevices = [];
     let rearCameras = [];
     let frontCameras = [];
@@ -1279,7 +1318,7 @@
     let isSidebarCollapsed = false;
     let lastPanTimestamp = 0;
 
-    // Variables Biometría Híbrida Indestructible v9.5
+    // Variables Biometría Híbrida Indestructible v9.6
     let isFallbackBiometrics = false;
     let nativeFaceDetectorInstance = null;
 
@@ -1304,7 +1343,7 @@
     if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
       window.addEventListener("load", () => {
         navigator.serviceWorker.register("./sw.js")
-          .then((reg) => console.log("[E.V. PWA] Service Worker v9.5 registrado:", reg.scope))
+          .then((reg) => console.log("[E.V. PWA] Service Worker v9.6 registrado:", reg.scope))
           .catch((err) => console.warn("[E.V. PWA] Fallo registro SW:", err));
       });
     }
@@ -1358,6 +1397,14 @@
       // Visor E.V.
       document.getElementById("btnVisorOpen").addEventListener("click", openVisorOverlay);
       document.getElementById("btnExitVisor").addEventListener("click", closeVisorOverlay);
+      document.getElementById("btnVisorForceReload").addEventListener("click", () => {
+        playCommandAckSound();
+        if (window.caches) {
+          caches.keys().then((ks) => Promise.all(ks.map((k) => caches.delete(k)))).then(() => location.reload(true));
+        } else {
+          location.reload(true);
+        }
+      });
       document.getElementById("btnVisorRegisterFace").addEventListener("click", handleTriggerRegisterFromVisor);
       document.getElementById("btnVisorAutoEnroll").addEventListener("click", toggleVisorAutoEnroll);
       document.getElementById("btnVisorAmbient").addEventListener("click", toggleVisorAmbient);
@@ -1529,6 +1576,11 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
     const offscreenProcessingCanvas = document.createElement("canvas");
     const offscreenProcessingCtx = offscreenProcessingCanvas.getContext("2d", { willReadFrequently: true });
 
+    // Canvas offscreen para detección multi-rotación (0°, 90°, -90°)
+    const rotProcessingCanvas = document.createElement("canvas");
+    const rotProcessingCtx = rotProcessingCanvas.getContext("2d", { willReadFrequently: true });
+    let rotationScanStep = 0; // 0 = 0 deg, 1 = 90 deg, 2 = -90 deg
+
     async function initBiometricEngine() {
       if (isBiometricLoaded || isBiometricLoading) return;
       isBiometricLoading = true;
@@ -1638,17 +1690,17 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
       }
     }
 
-    function extractCenterCropAvatarUrl(video) {
+    function extractCenterCropAvatarUrl(video, size = 120) {
       try {
-        offscreenProcessingCanvas.width = 80;
-        offscreenProcessingCanvas.height = 80;
+        offscreenProcessingCanvas.width = size;
+        offscreenProcessingCanvas.height = size;
         const vw = video.videoWidth || 640;
         const vh = video.videoHeight || 480;
-        const cropSize = Math.min(vw, vh) * 0.45;
+        const cropSize = Math.min(vw, vh) * 0.50;
         const srcX = Math.max(0, (vw - cropSize) / 2);
         const srcY = Math.max(0, (vh - cropSize) / 2);
-        offscreenProcessingCtx.drawImage(video, srcX, srcY, cropSize, cropSize, 0, 0, 80, 80);
-        return offscreenProcessingCanvas.toDataURL("image/jpeg", 0.8);
+        offscreenProcessingCtx.drawImage(video, srcX, srcY, cropSize, cropSize, 0, 0, size, size);
+        return offscreenProcessingCanvas.toDataURL("image/jpeg", 0.82);
       } catch (e) {
         return "";
       }
@@ -1675,14 +1727,86 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
         const updatedFaces = [];
 
         if (!isFallbackBiometrics && window.faceapi) {
-          // Detección ultraligera optimizada para móviles (inputSize 224, threshold 0.52)
-          const detections = await faceapi
-            .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.52 }))
-            .withFaceLandmarks(true)
-            .withFaceDescriptors();
+          // Detección neuronal multi-ángulo (inputSize 256, scoreThreshold 0.38)
+          const detectorOpts = new faceapi.TinyFaceDetectorOptions({ inputSize: 256, scoreThreshold: 0.38 });
+          let detections = [];
+          let activeRotationAngle = 0; // 0, 90, o -90 grados
+
+          if (rotationScanStep === 0) {
+            // Ciclo 0: Orientación frontal / estándar (0°)
+            detections = await faceapi
+              .detectAllFaces(video, detectorOpts)
+              .withFaceLandmarks(true)
+              .withFaceDescriptors();
+            activeRotationAngle = 0;
+
+            if (detections.length === 0) {
+              // Si no hay rostros en 0°, probar 90° en el próximo ciclo
+              rotationScanStep = 1;
+            }
+          } else if (rotationScanStep === 1) {
+            // Ciclo 1: Auxiliar rotado 90° para rostros inclinados
+            rotProcessingCanvas.width = videoH;
+            rotProcessingCanvas.height = videoW;
+            rotProcessingCtx.save();
+            rotProcessingCtx.translate(videoH / 2, videoW / 2);
+            rotProcessingCtx.rotate(Math.PI / 2);
+            rotProcessingCtx.drawImage(video, -videoW / 2, -videoH / 2);
+            rotProcessingCtx.restore();
+
+            detections = await faceapi
+              .detectAllFaces(rotProcessingCanvas, detectorOpts)
+              .withFaceLandmarks(true)
+              .withFaceDescriptors();
+            activeRotationAngle = 90;
+
+            if (detections.length === 0) {
+              // Si tampoco hay rostros a 90°, probar -90° en el próximo ciclo
+              rotationScanStep = 2;
+            } else {
+              rotationScanStep = 1;
+            }
+          } else {
+            // Ciclo 2: Auxiliar rotado -90° para inclinación opuesta
+            rotProcessingCanvas.width = videoH;
+            rotProcessingCanvas.height = videoW;
+            rotProcessingCtx.save();
+            rotProcessingCtx.translate(videoH / 2, videoW / 2);
+            rotProcessingCtx.rotate(-Math.PI / 2);
+            rotProcessingCtx.drawImage(video, -videoW / 2, -videoH / 2);
+            rotProcessingCtx.restore();
+
+            detections = await faceapi
+              .detectAllFaces(rotProcessingCanvas, detectorOpts)
+              .withFaceLandmarks(true)
+              .withFaceDescriptors();
+            activeRotationAngle = -90;
+
+            if (detections.length === 0) {
+              rotationScanStep = 0;
+            } else {
+              rotationScanStep = 2;
+            }
+          }
 
           for (const det of detections) {
-            const rawBox = det.detection.box;
+            let rawBox = det.detection.box;
+            if (activeRotationAngle === 90) {
+              rawBox = {
+                x: rawBox.y,
+                y: Math.max(0, videoH - rawBox.x - rawBox.width),
+                width: rawBox.height,
+                height: rawBox.width
+              };
+            } else if (activeRotationAngle === -90) {
+              rawBox = {
+                x: Math.max(0, videoW - rawBox.y - rawBox.height),
+                y: rawBox.x,
+                width: rawBox.height,
+                height: rawBox.width
+              };
+            }
+
             const box = {
               x: rawBox.x * scaleX,
               y: rawBox.y * scaleY,
@@ -1726,16 +1850,21 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
             });
           }
 
-          // Auto-Captura Facial Manos Libres (Auto-Enroll v9.5)
-          if (isAutoEnrollEnabled && !isCameraPanning && (now - lastAutoEnrollTime > 2500)) {
+          // Auto-Captura Facial Manos Libres Ágil (Auto-Enroll v9.6: 0.8s / 2 ciclos / min 45px)
+          if (isAutoEnrollEnabled && !isCameraPanning && (now - lastAutoEnrollTime > 1500)) {
             const unknownDet = detections.find(d => {
-              if (d.detection.score < 0.68) return false;
-              const b = d.detection.box;
-              const scaledW = b.width * scaleX;
-              if (scaledW < 75) return false;
-              const normX = (b.x * scaleX + scaledW / 2) / dispW;
-              const normY = (b.y * scaleY + (b.height * scaleY) / 2) / dispH;
-              if (normX < 0.22 || normX > 0.78 || normY < 0.18 || normY > 0.82) return false;
+              if (d.detection.score < 0.38) return false;
+              let rBox = d.detection.box;
+              if (activeRotationAngle === 90) {
+                rBox = { x: rBox.y, y: Math.max(0, videoH - rBox.x - rBox.width), width: rBox.height, height: rBox.width };
+              } else if (activeRotationAngle === -90) {
+                rBox = { x: Math.max(0, videoW - rBox.y - rBox.height), y: rBox.x, width: rBox.height, height: rBox.width };
+              }
+              const scaledW = rBox.width * scaleX;
+              if (scaledW < 45) return false; // Detección desde 45px
+              const normX = (rBox.x * scaleX + scaledW / 2) / dispW;
+              const normY = (rBox.y * scaleY + (rBox.height * scaleY) / 2) / dispH;
+              if (normX < 0.10 || normX > 0.90 || normY < 0.08 || normY > 0.92) return false;
 
               if (biometricFaceMatcher) {
                 const match = biometricFaceMatcher.findBestMatch(d.descriptor);
@@ -1745,18 +1874,24 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
             });
 
             if (unknownDet) {
-              const rawBox = unknownDet.detection.box;
-              const boxCenterX = rawBox.x * scaleX + (rawBox.width * scaleX) / 2;
-              const boxCenterY = rawBox.y * scaleY + (rawBox.height * scaleY) / 2;
+              let rBox = unknownDet.detection.box;
+              if (activeRotationAngle === 90) {
+                rBox = { x: rBox.y, y: Math.max(0, videoH - rBox.x - rBox.width), width: rBox.height, height: rBox.width };
+              } else if (activeRotationAngle === -90) {
+                rBox = { x: Math.max(0, videoW - rBox.y - rBox.height), y: rBox.x, width: rBox.height, height: rBox.width };
+              }
+              const boxCenterX = rBox.x * scaleX + (rBox.width * scaleX) / 2;
+              const boxCenterY = rBox.y * scaleY + (rBox.height * scaleY) / 2;
 
-              if (lastAutoEnrollBox && Math.hypot(boxCenterX - lastAutoEnrollBox.x, boxCenterY - lastAutoEnrollBox.y) < 90) {
+              if (lastAutoEnrollBox && Math.hypot(boxCenterX - lastAutoEnrollBox.x, boxCenterY - lastAutoEnrollBox.y) < 120) {
                 autoEnrollStreak++;
               } else {
                 autoEnrollStreak = 1;
                 lastAutoEnrollBox = { x: boxCenterX, y: boxCenterY };
               }
 
-              if (autoEnrollStreak >= 5) {
+              // Fijación ágil de 0.8s (2 ciclos consecutivos)
+              if (autoEnrollStreak >= 2) {
                 autoEnrollStreak = 0;
                 lastAutoEnrollBox = null;
                 lastAutoEnrollTime = now;
@@ -1771,13 +1906,13 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
                 });
                 const nextId = String(maxNum + 1).padStart(2, "0");
                 const autoName = `SUJETO_${nextId}`;
-                const avatarData = extractFaceAvatarUrl(video, rawBox);
+                const avatarData = extractFaceAvatarUrl(video, rBox);
 
                 const newProfile = {
                   id: "face_" + Date.now(),
                   name: autoName,
                   role: "Sujeto Auto-Capturado",
-                  notes: "Captura manos libres v9.5",
+                  notes: "Captura manos libres v9.6",
                   avatarDataUrl: avatarData,
                   descriptors: [Array.from(unknownDet.descriptor)]
                 };
@@ -1900,11 +2035,11 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
       const btn = document.getElementById("btnVisorAutoEnroll");
       if (btn) {
         if (isAutoEnrollEnabled) {
-          btn.textContent = "🤖 AUTO-CAPTURA: ON";
+          btn.textContent = "🤖 AUTO: ON";
           btn.style.borderColor = "var(--accent-green)";
           btn.style.color = "var(--accent-green)";
         } else {
-          btn.textContent = "🤖 AUTO-CAPTURA: OFF";
+          btn.textContent = "🤖 AUTO: OFF";
           btn.style.borderColor = "var(--border-tactical)";
           btn.style.color = "var(--text-muted)";
         }
@@ -1918,11 +2053,11 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
       const banner = document.getElementById("visorAmbientBanner");
       if (btn) {
         if (isVisorAmbientActive) {
-          btn.textContent = "👁 LENTE ACTIVA: ON";
+          btn.textContent = "👁 LENTE: ON";
           btn.style.borderColor = "var(--accent-cyan)";
           btn.style.color = "var(--accent-cyan)";
         } else {
-          btn.textContent = "👁 LENTE ACTIVA: OFF";
+          btn.textContent = "👁 LENTE: OFF";
           btn.style.borderColor = "var(--border-tactical)";
           btn.style.color = "var(--text-muted)";
           if (banner) banner.style.display = "none";
@@ -2011,9 +2146,9 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
         return;
       }
 
-      // 3. Fallback inmediato sin bloqueo: capturar recorte central 80x80 del visor
+      // 3. Fallback inmediato sin bloqueo: capturar recorte central 120x120 del visor
       const video = document.getElementById("visorVideo");
-      const avatarUrl = video ? extractCenterCropAvatarUrl(video) : "";
+      const avatarUrl = video ? extractCenterCropAvatarUrl(video, 120) : "";
       pendingFaceRegistrationData = {
         descriptor: new Array(128).fill(0),
         avatarUrl: avatarUrl
@@ -2022,14 +2157,17 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
       const preview = document.getElementById("regFacePreviewImg");
       if (preview) preview.src = avatarUrl;
       const nameInput = document.getElementById("regFaceName");
-      if (nameInput) nameInput.value = "";
+      if (nameInput) {
+        nameInput.value = "";
+        setTimeout(() => nameInput.focus(), 150);
+      }
       const roleInput = document.getElementById("regFaceRole");
       if (roleInput) roleInput.value = "Prioridad Alfa";
       const notesInput = document.getElementById("regFaceNotes");
-      if (notesInput) notesInput.value = "Captura central táctica";
+      if (notesInput) notesInput.value = "Registro táctico inmediato";
 
       openModal("modalRegisterFace");
-      updateVisorSubtitle("BIOMETRÍA", "Captura central lista. Asigna un nombre al perfil.");
+      updateVisorSubtitle("BIOMETRÍA", "Captura central lista. Asigna Nombre y Rol al sujeto.");
     }
 
     function handleSaveFaceRegistration() {
@@ -2255,7 +2393,7 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
     }
 
     // =========================================================================
-    // TEMPORIZADORES Y SÍNTESIS DE TONOS WEB AUDIO API (FEEDBACK POSITIVO v9.5)
+    // TEMPORIZADORES Y SÍNTESIS DE TONOS WEB AUDIO API (FEEDBACK POSITIVO v9.6)
     // =========================================================================
 
     let audioContextInstance = null;
@@ -3076,7 +3214,7 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
         }
       });
 
-      updateVisorSubtitle("E.V.", "Visor óptico v9.5 en línea. Lente ultra gran angular y biometría híbrida activas.");
+      updateVisorSubtitle("E.V.", "Visor óptico v9.6 en línea. Biometría multi-ángulo y layout táctico activos.");
       playTacticalBeep(1046, 0.1);
     }
 
@@ -3636,12 +3774,12 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
       isVisorContinuousMic = !isVisorContinuousMic;
       const btn = document.getElementById("btnVisorMic");
       if (isVisorContinuousMic) {
-        btn.textContent = "🎙 MIC CONTINUO: ON";
+        btn.textContent = "🎙 MIC: ON";
         btn.classList.add("active-mic");
         startVisorSpeechLoop();
         updateVisorSubtitle("E.V.", "Micrófono continuo activo. Habla para consultar lo que enfocas.");
       } else {
-        btn.textContent = "🎙 MIC CONTINUO: OFF";
+        btn.textContent = "🎙 MIC: OFF";
         btn.classList.remove("active-mic");
         stopVoiceRecognition();
         updateVisorSubtitle("E.V.", "Micrófono continuo desactivado.");

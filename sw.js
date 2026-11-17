@@ -1,5 +1,5 @@
-// Service Worker: E.V. Standalone PWA (v9.5-ULTRAWIDE CORE)
-const CACHE_NAME = 'ev-core-v9.5';
+// Service Worker: E.V. Standalone PWA (v9.6-OMNI BIOMETRIC)
+const CACHE_NAME = 'ev-core-v9.6';
 
 // Activos locales y pesos biométricos offline
 const PRECACHE_ASSETS = [
