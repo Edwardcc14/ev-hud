@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="E.V. Core">
-  <title>E.V. // TACTICAL CORE v9.9</title>
+  <title>E.V. // TACTICAL CORE v10.0</title>
   <link rel="manifest" href="./manifest.json">
   <link rel="icon" type="image/svg+xml"
     href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23070B10' stroke='%23FF9800' stroke-width='4'/><circle cx='50' cy='50' r='20' fill='%2300E5FF'/></svg>">
@@ -552,7 +552,7 @@
       box-shadow: 0 0 12px rgba(0, 229, 255, 0.5);
     }
 
-    /* VISOR E.V. PANTALLA COMPLETA INMERSIVA / ESTEREOSCÓPICO SBS v9.9 */
+    /* VISOR E.V. PANTALLA COMPLETA INMERSIVA / TRUE BINOCULAR SBS v10.0 */
     #visorOverlay {
       position: fixed;
       inset: 0;
@@ -573,6 +573,18 @@
       flex-direction: row;
       align-items: center;
       justify-content: center;
+    }
+
+    /* Ocultamiento del video nativo en VR para eliminar asimetría de compositor */
+    #visorOverlay.vr-mode #visorVideo {
+      opacity: 0 !important;
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 1px !important;
+      height: 1px !important;
+      pointer-events: none !important;
+      z-index: 0 !important;
     }
 
     .vr-split-container {
@@ -643,12 +655,13 @@
       display: none;
       align-items: center;
       justify-content: center;
-      gap: 12px;
+      gap: 10px;
       width: 100%;
       padding: 6px 10px;
       background: rgba(7, 11, 16, 0.88);
       border: 1px solid rgba(0, 229, 255, 0.3);
       border-radius: 6px;
+      flex-wrap: wrap;
     }
 
     #visorOverlay.vr-mode .visor-row-vr-settings {
@@ -665,12 +678,12 @@
     }
 
     .vr-slider-label {
-      min-width: 65px;
+      min-width: 60px;
       white-space: nowrap;
     }
 
     .vr-range-input {
-      width: 80px;
+      width: 70px;
       height: 4px;
       accent-color: var(--accent-cyan);
       cursor: pointer;
@@ -1243,12 +1256,13 @@
       <div class="msg-wrap assistant">
         <div class="msg-header">
           <span>[E.V. // CO-PILOTO TÁCTICO]</span>
-          <span>v9.9-STEREOSCOPIC VR HUD</span>
+          <span>v10.0-TRUE BINOCULAR</span>
         </div>
         <div class="msg-bubble">
-          Sistemas en línea, Operador. Modo Visor Estereoscópico v9.9 activo: proyección dual SBS 3D para casco VR con
-          ajuste DIP/Zoom, HUD AR sin mareo, visor 100 % despejado sin botones estorbando al caminar, control total por
-          voz hands-free y rastreo biométrico estabilizado. Pulsa 👓 VR en el visor para alternar vista dividida.
+          Sistemas en línea, Operador. Modo True Binocular v10.0 activo: proyección dual simétrica con Aspect-Ratio
+          Lock y estabilización Digital EIS anti-vibración para casco VR, alineación vertical y cruz de calibración
+          óptica, visor 100 % despejado sin botones estorbando al caminar y motor biométrico de largo alcance con
+          asociación espacial e iluminación adaptativa. Pulsa 👓 VR en el visor para alternar vista binocular.
         </div>
       </div>
     </div>
@@ -1284,9 +1298,9 @@
     </div>
   </main>
 
-  <!-- VISOR ÓPTICO E.V. PANTALLA COMPLETA INMERSIVA / ESTEREOSCÓPICO SBS v9.9 -->
+  <!-- VISOR ÓPTICO E.V. PANTALLA COMPLETA INMERSIVA / TRUE BINOCULAR SBS v10.0 -->
   <div id="visorOverlay">
-    <!-- Contenedor Estereoscópico Dividido SBS (Modo Casco VR v9.9) -->
+    <!-- Contenedor Estereoscópico Dividido SBS (Modo Casco VR v10.0) -->
     <div id="vrContainer" class="vr-split-container">
       <div id="vrEyeLeft" class="vr-eye">
         <video id="visorVideo" autoplay playsinline muted></video>
@@ -1294,7 +1308,7 @@
       </div>
       <div id="vrDivider" class="vr-central-divider" style="display: none;"></div>
       <div id="vrEyeRight" class="vr-eye" style="display: none;">
-        <video id="visorVideoRight" autoplay playsinline muted></video>
+        <video id="visorVideoRight" autoplay playsinline muted style="display: none;"></video>
         <canvas id="visorCanvasRight"></canvas>
       </div>
     </div>
@@ -1305,7 +1319,7 @@
       <div class="visor-badge">
         <span
           style="display: inline-block; width: 6px; height: 6px; background: var(--accent-cyan); border-radius: 50%;"></span>
-        <span>E.V. // OPTICAL CORE v9.9</span>
+        <span>E.V. // OPTICAL CORE v10.0</span>
         <span id="visorModelTag" style="color: var(--accent-amber); margin-left: 4px;">[3.5 FLASH-LITE]</span>
         <span id="visorBioStatus" class="visor-bio-badge" style="margin-left: 6px;">BIOMETRÍA: INICIANDO...</span>
       </div>
@@ -1333,7 +1347,7 @@
       <div id="evBioSidebarContent" class="bio-sidebar-content"></div>
     </div>
 
-    <!-- DOCK INFERIOR SIN SUPERPOSICIONES (MODO GAFAS LIMPIAS v9.9) -->
+    <!-- DOCK INFERIOR SIN SUPERPOSICIONES (MODO GAFAS LIMPIAS v10.0) -->
     <div id="visorBottomDock" class="visor-bottom-dock">
       <!-- Fila 1 (Arriba): Cuadro de subtítulos y estado (Auto-ocultado en 4s) -->
       <div id="visorSubtitles" class="visor-subtitles">
@@ -1343,16 +1357,21 @@
 
       <!-- Fila 2 & 3: Botones tácticos (Ocultos por defecto para Modo Gafas Limpias; doble toque para alternar) -->
       <div id="visorControlsDock" class="visor-controls-dock" style="display: none;">
-        <!-- Fila VR: Calibración Óptica SBS (DIP / Zoom de Lente) -->
+        <!-- Fila VR: Calibración Óptica SBS (IPD / Alineación Vertical / Zoom / Guía) -->
         <div id="visorVrSettingsRow" class="visor-row-vr-settings">
           <div class="vr-slider-group">
-            <span class="vr-slider-label">DIP: <span id="vrIpdVal">0</span>px</span>
-            <input type="range" id="sliderVrIpd" class="vr-range-input" min="-40" max="40" step="1" value="0">
+            <span class="vr-slider-label">IPD: <span id="vrIpdVal">0</span>px</span>
+            <input type="range" id="sliderVrIpd" class="vr-range-input" min="-60" max="60" step="1" value="0">
+          </div>
+          <div class="vr-slider-group">
+            <span class="vr-slider-label">VERT: <span id="vrVertVal">0</span>px</span>
+            <input type="range" id="sliderVrVert" class="vr-range-input" min="-20" max="20" step="1" value="0">
           </div>
           <div class="vr-slider-group">
             <span class="vr-slider-label">ZOOM: <span id="vrScaleVal">95</span>%</span>
             <input type="range" id="sliderVrScale" class="vr-range-input" min="75" max="100" step="1" value="95">
           </div>
+          <button id="btnToggleVrCross" class="btn-visor-action accent-cyan" style="padding: 2px 8px; font-size: 9px;" title="Alternar cruz de calibración central">✛ GUÍA</button>
         </div>
 
         <!-- Fila 2 (Centro): Botones biométricos prioritarios -->
@@ -1495,22 +1514,31 @@
 
   <script>
     // =========================================================================
-    // E.V. STANDALONE PWA (v9.9-STEREOSCOPIC VR HUD) - NÚCLEO JS
+    // E.V. STANDALONE PWA (v10.0-TRUE BINOCULAR) - NÚCLEO JS
     // =========================================================================
 
-    // Variables de Óptica y Calibración v9.9 (Modo Gafas Limpias + VR SBS + HUD AR)
+    // Variables de Óptica y Calibración v10.0 (True Binocular SBS + Digital EIS)
     let availableVideoDevices = [];
     let rearCameras = [];
     let frontCameras = [];
     let activeCameraLens = "0.5x"; // '0.5x' | '1x' | 'user'
 
-    // Variables de Modo Estereoscópico VR SBS (Casco / Visor v9.9)
+    // Variables de Modo True Binocular SBS (Casco / Visor v10.0)
     let isVrModeActive = false;
     let vrIpd = parseInt(localStorage.getItem("ev_vr_ipd") || "0", 10);
+    let vrVert = parseInt(localStorage.getItem("ev_vr_vert") || "0", 10);
     let vrScale = parseFloat(localStorage.getItem("ev_vr_scale") || "0.95");
+    let isVrCrossActive = false;
     let currentSubtitleSpeaker = "";
     let currentSubtitleText = "";
     let isSubtitleVisible = false;
+
+    // Variables de Estabilización Óptica Digital EIS (Digital EIS Anti-Vibración)
+    let stabilizedOffsetX = 0;
+    let stabilizedOffsetY = 0;
+    let targetEisX = 0;
+    let targetEisY = 0;
+    let currentSceneLuminance = 80;
 
     // Variables de Calibración Cinética y Visión Ambiental
     let isAutoEnrollEnabled = true;
@@ -1529,7 +1557,7 @@
     let isSidebarCollapsed = false;
     let lastPanTimestamp = 0;
 
-    // Variables Biometría Híbrida Indestructible v9.9
+    // Variables Biometría Híbrida Indestructible v10.0
     let isFallbackBiometrics = false;
     let nativeFaceDetectorInstance = null;
 
@@ -1554,7 +1582,7 @@
     if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
       window.addEventListener("load", () => {
         navigator.serviceWorker.register("./sw.js")
-          .then((reg) => console.log("[E.V. PWA] Service Worker v9.9 registrado:", reg.scope))
+          .then((reg) => console.log("[E.V. PWA] Service Worker v10.0 registrado:", reg.scope))
           .catch((err) => console.warn("[E.V. PWA] Fallo registro SW:", err));
       });
     }
@@ -1624,7 +1652,7 @@
       document.getElementById("btnVisorMic").addEventListener("click", toggleVisorContinuousMic);
       document.getElementById("btnVisorFlipCamera").addEventListener("click", cycleVisorLens);
 
-      // Controles Estereoscópicos VR SBS (v9.9)
+      // Controles True Binocular VR SBS (v10.0)
       const btnVR = document.getElementById("btnVisorVR");
       if (btnVR) {
         btnVR.addEventListener("click", () => toggleStereoscopicVrMode());
@@ -1637,6 +1665,14 @@
           applyVrCalibration();
         });
       }
+      const sliderVert = document.getElementById("sliderVrVert");
+      if (sliderVert) {
+        sliderVert.addEventListener("input", (e) => {
+          vrVert = parseInt(e.target.value, 10);
+          localStorage.setItem("ev_vr_vert", vrVert);
+          applyVrCalibration();
+        });
+      }
       const sliderScale = document.getElementById("sliderVrScale");
       if (sliderScale) {
         sliderScale.addEventListener("input", (e) => {
@@ -1645,9 +1681,19 @@
           applyVrCalibration();
         });
       }
+      const btnCross = document.getElementById("btnToggleVrCross");
+      if (btnCross) {
+        btnCross.addEventListener("click", () => {
+          isVrCrossActive = !isVrCrossActive;
+          btnCross.textContent = isVrCrossActive ? "✛ GUÍA: ON" : "✛ GUÍA";
+          btnCross.style.borderColor = isVrCrossActive ? "var(--accent-amber)" : "var(--accent-cyan)";
+          btnCross.style.color = isVrCrossActive ? "var(--accent-amber)" : "var(--accent-cyan)";
+          playTacticalBeep(isVrCrossActive ? 990 : 660, 0.06);
+        });
+      }
       applyVrCalibration();
 
-      // Gesto de doble toque / doble clic en pantalla para alternar controles (Modo Gafas Limpias v9.9)
+      // Gesto de doble toque / doble clic en pantalla para alternar controles (Modo Gafas Limpias v10.0)
       const visorOverlayEl = document.getElementById("visorOverlay");
       if (visorOverlayEl) {
         visorOverlayEl.addEventListener("dblclick", (e) => {
@@ -1681,25 +1727,30 @@
     });
 
     // =========================================================================
-    // CONTROL Y CALIBRACIÓN ÓPTICA VR ESTEREOSCÓPICA SBS (v9.9)
+    // CONTROL Y CALIBRACIÓN ÓPTICA TRUE BINOCULAR VR SBS (v10.0)
     // =========================================================================
 
     function applyVrCalibration() {
       const eyeLeft = document.getElementById("vrEyeLeft");
       const eyeRight = document.getElementById("vrEyeRight");
       if (isVrModeActive) {
-        if (eyeLeft) eyeLeft.style.transform = `scale(${vrScale}) translateX(${-vrIpd}px)`;
-        if (eyeRight) eyeRight.style.transform = `scale(${vrScale}) translateX(${vrIpd}px)`;
+        if (eyeLeft) eyeLeft.style.transform = `scale(${vrScale}) translate(${-vrIpd}px, ${-vrVert}px)`;
+        if (eyeRight) eyeRight.style.transform = `scale(${vrScale}) translate(${vrIpd}px, ${vrVert}px)`;
       } else {
         if (eyeLeft) eyeLeft.style.transform = "none";
         if (eyeRight) eyeRight.style.transform = "none";
       }
       const ipdVal = document.getElementById("vrIpdVal");
       if (ipdVal) ipdVal.textContent = vrIpd;
+      const vertVal = document.getElementById("vrVertVal");
+      if (vertVal) vertVal.textContent = vrVert;
       const scaleVal = document.getElementById("vrScaleVal");
       if (scaleVal) scaleVal.textContent = Math.round(vrScale * 100);
+
       const sliderIpd = document.getElementById("sliderVrIpd");
       if (sliderIpd) sliderIpd.value = vrIpd;
+      const sliderVert = document.getElementById("sliderVrVert");
+      if (sliderVert) sliderVert.value = vrVert;
       const sliderScale = document.getElementById("sliderVrScale");
       if (sliderScale) sliderScale.value = Math.round(vrScale * 100);
     }
@@ -1734,7 +1785,7 @@
           screen.orientation.lock("landscape").catch(() => {});
         }
         playCommandAckSound();
-        updateVisorSubtitle("ÓPTICA", "Modo Estereoscópico VR activado. Calibración SBS en línea.");
+        updateVisorSubtitle("ÓPTICA", "Modo True Binocular VR activado. Render simétrico y Digital EIS activo.");
       } else {
         if (overlay) overlay.classList.remove("vr-mode");
         if (eyeRight) eyeRight.style.display = "none";
@@ -1936,7 +1987,7 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
       // 1. Detección Facial Nativa Instantánea Acelerada por Hardware (window.FaceDetector)
       if (window.FaceDetector) {
         try {
-          nativeFaceDetectorInstance = new window.FaceDetector({ fastMode: true, maxDetectedFaces: 6 });
+          nativeFaceDetectorInstance = new window.FaceDetector({ fastMode: false, maxDetectedFaces: 6 });
           isBiometricLoaded = true;
           isBiometricLoading = false;
           isFallbackBiometrics = true;
@@ -2143,14 +2194,29 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
         const t = getVideoCoverTransform(video);
         let detectionsList = [];
 
-        // 1. Detección Facial Nativa Acelerada por Hardware (Chrome Android)
+        // Auto-Contrast / Iluminación Adaptativa en interiores o poca luz (< 55)
+        let detectorSource = video;
+        let scaleUpX = 1;
+        let scaleUpY = 1;
+        if (currentSceneLuminance < 55 && video.videoWidth && video.videoHeight) {
+          offscreenProcessingCanvas.width = 320;
+          offscreenProcessingCanvas.height = Math.round((video.videoHeight * 320) / video.videoWidth);
+          offscreenProcessingCtx.filter = 'contrast(1.14) brightness(1.08)';
+          offscreenProcessingCtx.drawImage(video, 0, 0, offscreenProcessingCanvas.width, offscreenProcessingCanvas.height);
+          offscreenProcessingCtx.filter = 'none';
+          detectorSource = offscreenProcessingCanvas;
+          scaleUpX = video.videoWidth / offscreenProcessingCanvas.width;
+          scaleUpY = video.videoHeight / offscreenProcessingCanvas.height;
+        }
+
+        // 1. Detección Facial Nativa Acelerada por Hardware (window.FaceDetector)
         if (nativeFaceDetectorInstance) {
           try {
-            const nativeDets = await nativeFaceDetectorInstance.detect(video);
+            const nativeDets = await nativeFaceDetectorInstance.detect(detectorSource);
             for (const f of nativeDets) {
               const b = f.boundingBox;
               detectionsList.push({
-                rawBox: { x: b.x, y: b.y, width: b.width, height: b.height },
+                rawBox: { x: b.x * scaleUpX, y: b.y * scaleUpY, width: b.width * scaleUpX, height: b.height * scaleUpY },
                 score: 0.95,
                 descriptor: null
               });
@@ -2159,23 +2225,23 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
             console.debug("[BiometricEngine] Fallo en FaceDetector nativo:", nativeErr);
           }
         } else if (window.faceapi && !isFallbackBiometrics) {
-          // 2. Fallback ligero TinyFaceDetector (inputSize 160, scoreThreshold 0.35)
+          // 2. Fallback ligero TinyFaceDetector (inputSize 224, scoreThreshold 0.36)
           try {
-            const detectorOpts = new faceapi.TinyFaceDetectorOptions({ inputSize: 160, scoreThreshold: 0.35 });
+            const detectorOpts = new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.36 });
             if (STATE.faceDb.length > 0 && biometricFaceMatcher) {
-              const dets = await faceapi.detectAllFaces(video, detectorOpts).withFaceLandmarks(true).withFaceDescriptors();
+              const dets = await faceapi.detectAllFaces(detectorSource, detectorOpts).withFaceLandmarks(true).withFaceDescriptors();
               for (const d of dets) {
                 detectionsList.push({
-                  rawBox: { x: d.detection.box.x, y: d.detection.box.y, width: d.detection.box.width, height: d.detection.box.height },
+                  rawBox: { x: d.detection.box.x * scaleUpX, y: d.detection.box.y * scaleUpY, width: d.detection.box.width * scaleUpX, height: d.detection.box.height * scaleUpY },
                   score: d.detection.score,
                   descriptor: d.descriptor
                 });
               }
             } else {
-              const dets = await faceapi.detectAllFaces(video, detectorOpts);
+              const dets = await faceapi.detectAllFaces(detectorSource, detectorOpts);
               for (const d of dets) {
                 detectionsList.push({
-                  rawBox: { x: d.box.x, y: d.box.y, width: d.box.width, height: d.box.height },
+                  rawBox: { x: d.box.x * scaleUpX, y: d.box.y * scaleUpY, width: d.box.width * scaleUpX, height: d.box.height * scaleUpY },
                   score: d.score,
                   descriptor: null
                 });
@@ -2206,29 +2272,43 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
             if (matchLabel !== "unknown") {
               matchedProfile = STATE.faceDb.find(p => p.name === matchLabel);
             }
-          } else if (STATE.faceDb.length > 0) {
-            // Asociación espacial por proximidad a perfiles conocidos
-            const prevMatch = currentTrackedFaces.find(pf =>
-              pf.isRecognized && Math.hypot((pf.targetBox ? pf.targetBox.x : pf.box.x) - targetBox.x, (pf.targetBox ? pf.targetBox.y : pf.box.y) - targetBox.y) < 140
-            );
-            if (prevMatch) {
-              matchedProfile = STATE.faceDb.find(p => p.name === prevMatch.name);
-              if (matchedProfile) {
-                matchLabel = matchedProfile.name;
-                matchDistance = 0.25;
-              }
+          }
+
+          // Asociación Espacial Inteligente (IoU / Distancia Euclidiana < 35% del ancho del rostro)
+          const targetCenterX = targetBox.x + targetBox.width / 2;
+          const targetCenterY = targetBox.y + targetBox.height / 2;
+
+          const existing = currentTrackedFaces.find(f => {
+            const fBox = f.targetBox || f.box;
+            const fCenterX = fBox.x + fBox.width / 2;
+            const fCenterY = fBox.y + fBox.height / 2;
+            const centerDist = Math.hypot(targetCenterX - fCenterX, targetCenterY - fCenterY);
+            if (centerDist < Math.max(targetBox.width, fBox.width) * 0.35) return true;
+
+            const interL = Math.max(targetBox.x, fBox.x);
+            const interT = Math.max(targetBox.y, fBox.y);
+            const interR = Math.min(targetBox.x + targetBox.width, fBox.x + fBox.width);
+            const interB = Math.min(targetBox.y + targetBox.height, fBox.y + fBox.height);
+            if (interR > interL && interB > interT) {
+              const interArea = (interR - interL) * (interB - interT);
+              const unionArea = (targetBox.width * targetBox.height) + (fBox.width * fBox.height) - interArea;
+              if (interArea / unionArea > 0.30) return true;
+            }
+            return false;
+          });
+
+          if (!matchedProfile && existing && existing.isRecognized) {
+            matchedProfile = STATE.faceDb.find(p => p.name === existing.name || p.id === existing.id);
+            if (matchedProfile) {
+              matchLabel = matchedProfile.name;
+              matchDistance = 0.25;
             }
           }
 
           const isRecognized = matchLabel !== "unknown" && matchedProfile !== null;
-          const faceName = isRecognized ? matchedProfile.name : "SUJETO NO REGISTRADO";
-          const faceRole = isRecognized ? (matchedProfile.role || "PERSONA AUTORIZADA") : "OBJETIVO EN FOCO";
+          const faceName = isRecognized ? matchedProfile.name : (existing ? existing.name : "SUJETO NO REGISTRADO");
+          const faceRole = isRecognized ? (matchedProfile.role || "PERSONA AUTORIZADA") : (existing ? existing.role : "OBJETIVO EN FOCO");
           const confidence = isRecognized ? Math.round(Math.max(78, (1 - matchDistance) * 100)) : Math.round((det.score || 0.92) * 100);
-
-          // Buscar instancia previa para suavizado lerp continuo
-          const existing = currentTrackedFaces.find(f =>
-            Math.hypot((f.targetBox ? f.targetBox.x : f.box.x) - targetBox.x, (f.targetBox ? f.targetBox.y : f.box.y) - targetBox.y) < 140
-          );
 
           const currentBox = existing ? { ...existing.box } : { ...targetBox };
 
@@ -2236,7 +2316,7 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
             id: matchedProfile ? matchedProfile.id : (existing ? existing.id : "face_" + Math.round(targetBox.x)),
             name: faceName,
             role: faceRole,
-            notes: matchedProfile ? matchedProfile.notes : "",
+            notes: matchedProfile ? matchedProfile.notes : (existing ? existing.notes : ""),
             isRecognized,
             similarity: confidence,
             distance: matchDistance,
@@ -2244,9 +2324,11 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
             rawBox: { x: rBox.x, y: rBox.y, width: rBox.width, height: rBox.height },
             targetBox,
             box: currentBox,
+            avatarDataUrl: existing ? existing.avatarDataUrl : "",
             descriptor: det.descriptor ? Array.from(det.descriptor) : (existing ? existing.descriptor : null),
-            lastSeen: now
+            lastSeen: now // ttl = 1800 ms
           });
+        }
         }
 
         // Auto-Captura Facial Manos Libres con Anti-Duplicados (8 segundos)
@@ -2293,7 +2375,7 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
                     id: "face_" + Date.now(),
                     name: autoName,
                     role: "Sujeto Auto-Capturado",
-                    notes: "Captura HUD AR v9.9",
+                    notes: "Captura HUD AR v10.0",
                     avatarDataUrl: avatarData,
                     descriptors: unknownTarget.descriptor ? [unknownTarget.descriptor] : []
                   };
@@ -3634,7 +3716,7 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
       }
       startVisorSpeechLoop();
 
-      updateVisorSubtitle("E.V.", "Visor óptico v9.9 en línea. Proyección dual SBS y HUD AR activos.");
+      updateVisorSubtitle("E.V.", "Visor óptico v10.0 en línea. Modo True Binocular y Digital EIS activos.");
       playTacticalBeep(1046, 0.1);
     }
 
@@ -3766,39 +3848,45 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
       }
     }
 
-    // Bucle de renderizado ultrarrápido a 60 FPS (ZERO-LAG: Proyección dual sincronizada SBS v9.9)
+    // Bucle de renderizado ultrarrápido a 60 FPS (Zero-Asymmetry Dual Canvas SBS v10.0)
     function startVisorCanvasRenderer() {
       const canvasLeft = document.getElementById("visorCanvas");
       const canvasRight = document.getElementById("visorCanvasRight");
-      const videoLeft = document.getElementById("visorVideo");
-      const videoRight = document.getElementById("visorVideoRight");
-      if (!canvasLeft || !videoLeft) return;
+      const video = document.getElementById("visorVideo");
+      if (!canvasLeft || !video) return;
 
       function renderLoop() {
         if (!isVisorActive) return;
 
         const now = performance.now();
 
-        // 1. Detección de movimiento cinematográfico (cada 120ms sin sobrecargar)
+        // 1. Detección de movimiento cinematográfico y estabilización Digital EIS (cada 120ms)
         if (now - lastMotionCheckTime > 120) {
           lastMotionCheckTime = now;
           const refW = isVrModeActive ? Math.floor(window.innerWidth / 2) : window.innerWidth;
-          processVisorMotion(videoLeft, refW, window.innerHeight);
+          processVisorMotion(video, refW, window.innerHeight);
         }
 
         // 2. Interpolación suave de escleras (Spider-Man Brand New Day)
         scleraAperture += (targetScleraAperture - scleraAperture) * 0.16;
 
-        // 3. Suavizado lerp a 60 FPS y persistencia anti-corte (1400ms) de tracking facial
+        // 3. Suavizado de Retícula y Fichas HUD (Kalman-Lite Lerp 0.28 con deadzone 3px y persistencia 1800ms)
         if (currentTrackedFaces && currentTrackedFaces.length > 0) {
-          currentTrackedFaces = currentTrackedFaces.filter(f => (now - f.lastSeen) < 1400);
+          currentTrackedFaces = currentTrackedFaces.filter(f => (now - f.lastSeen) < 1800);
+          const deadzone = 3;
+          const lerpFactor = 0.28;
           for (let i = 0; i < currentTrackedFaces.length; i++) {
             const f = currentTrackedFaces[i];
             if (f.targetBox) {
-              f.box.x += (f.targetBox.x - f.box.x) * 0.35;
-              f.box.y += (f.targetBox.y - f.box.y) * 0.35;
-              f.box.width += (f.targetBox.width - f.box.width) * 0.35;
-              f.box.height += (f.targetBox.height - f.box.height) * 0.35;
+              const dx = f.targetBox.x - f.box.x;
+              const dy = f.targetBox.y - f.box.y;
+              const dw = f.targetBox.width - f.box.width;
+              const dh = f.targetBox.height - f.box.height;
+
+              if (Math.abs(dx) > deadzone) f.box.x += dx * lerpFactor;
+              if (Math.abs(dy) > deadzone) f.box.y += dy * lerpFactor;
+              if (Math.abs(dw) > deadzone) f.box.width += dw * lerpFactor;
+              if (Math.abs(dh) > deadzone) f.box.height += dh * lerpFactor;
             }
           }
         }
@@ -3807,7 +3895,7 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
           const eyeW = Math.floor(window.innerWidth / 2);
           const eyeH = window.innerHeight;
 
-          // Ojo Izquierdo: Paralaje positivo (+5px) para convergencia binocular 3D
+          // Ojo Izquierdo: Render simétrico con Aspect-Ratio Lock y paralaje positivo (+5px)
           if (canvasLeft.width !== eyeW || canvasLeft.height !== eyeH) {
             canvasLeft.width = eyeW;
             canvasLeft.height = eyeH;
@@ -3815,18 +3903,16 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
             smoothedTargetY = eyeH / 2;
           }
           const ctxLeft = canvasLeft.getContext("2d");
-          ctxLeft.clearRect(0, 0, eyeW, eyeH);
-          renderVisorEye(ctxLeft, eyeW, eyeH, 5, false, videoLeft);
+          renderEyeViewport(ctxLeft, -vrIpd, 5);
 
-          // Ojo Derecho: Paralaje convergente (-5px) sincronizado a 60 FPS
+          // Ojo Derecho: Render simétrico con Aspect-Ratio Lock y paralaje convergente (-5px)
           if (canvasRight) {
             if (canvasRight.width !== eyeW || canvasRight.height !== eyeH) {
               canvasRight.width = eyeW;
               canvasRight.height = eyeH;
             }
             const ctxRight = canvasRight.getContext("2d");
-            ctxRight.clearRect(0, 0, eyeW, eyeH);
-            renderVisorEye(ctxRight, eyeW, eyeH, -5, true, videoRight || videoLeft);
+            renderEyeViewport(ctxRight, vrIpd, -5);
           }
         } else {
           const fullW = window.innerWidth;
@@ -3839,8 +3925,7 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
             smoothedTargetY = fullH / 2;
           }
           const ctx = canvasLeft.getContext("2d");
-          ctx.clearRect(0, 0, fullW, fullH);
-          renderVisorEye(ctx, fullW, fullH, 0, false, videoLeft);
+          renderEyeViewport(ctx, 0, 0);
         }
 
         visorAnimId = requestAnimationFrame(renderLoop);
@@ -3849,23 +3934,109 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
       visorAnimId = requestAnimationFrame(renderLoop);
     }
 
-    function renderVisorEye(ctx, w, h, parallaxX = 0, isRightEye = false, videoSource = null) {
+    // Renderizado 100% Simétrico Binocular para ambos ojos con la misma función exacta (Zero-Asymmetry)
+    function renderEyeViewport(ctx, eyeOffset = 0, hudParallax = 0) {
+      const w = ctx.canvas.width;
+      const h = ctx.canvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      const video = document.getElementById("visorVideo");
+
+      // En modo VR, ambos ojos dibujan la misma fuente con Aspect-Ratio Lock y estabilización Digital EIS
+      if (isVrModeActive && video && video.readyState >= 2) {
+        drawStabilizedVideoFrame(ctx, video, w, h, eyeOffset);
+      }
+
+      // Cruz central de calibración e IPD (opcional)
+      if (isVrCrossActive) {
+        drawCalibrationCross(ctx, w, h, hudParallax);
+      }
+
       // 1. Escleras Mecánicas Oculares
-      drawMechanicalScleras(ctx, w, h, scleraAperture, parallaxX);
+      drawMechanicalScleras(ctx, w, h, scleraAperture, hudParallax);
 
       // 2. HUD AR Flotante Estilo Iron Man / E.D.I.T.H.
-      drawBiometricFaceOverlays(ctx, w, h, parallaxX, videoSource);
+      drawBiometricFaceOverlays(ctx, w, h, hudParallax, video);
 
       // 3. Retícula de Puntería / Target Lock
-      drawVisorReticle(ctx, w, h, parallaxX);
+      drawVisorReticle(ctx, w, h, hudParallax);
 
       // 4. Telemetría Táctica
-      drawVisorTelemetry(ctx, w, h, parallaxX);
+      drawVisorTelemetry(ctx, w, h, hudParallax);
 
       // 5. Subtítulos Flotantes en Canvas (Modo VR SBS sin invasión de pantalla)
       if (isVrModeActive && isSubtitleVisible) {
-        drawVisorCanvasSubtitles(ctx, w, h, parallaxX);
+        drawVisorCanvasSubtitles(ctx, w, h, hudParallax);
       }
+    }
+
+    // Preservación Estricta de Proporción (Aspect-Ratio Lock) y Estabilizador Óptico Electrónico (Digital EIS)
+    function drawStabilizedVideoFrame(ctx, video, eyeW, eyeH, eyeOffset = 0) {
+      const vw = video.videoWidth || 1280;
+      const vh = video.videoHeight || 720;
+      if (vw === 0 || vh === 0) return;
+
+      const cropMargin = 0.06; // Margen de recorte de 6% para amortiguación EIS
+      const aspectEye = eyeW / eyeH;
+      const aspectVideo = vw / vh;
+
+      let vCropW, vCropH;
+      if (aspectEye > aspectVideo) {
+        vCropW = vw * (1.0 - cropMargin * 2);
+        vCropH = vCropW / aspectEye;
+      } else {
+        vCropH = vh * (1.0 - cropMargin * 2);
+        vCropW = vCropH * aspectEye;
+      }
+
+      // Centro del sensor con vector de estabilización EIS
+      const centerX = vw / 2;
+      const centerY = vh / 2;
+      let sx = centerX - (vCropW / 2) + stabilizedOffsetX;
+      let sy = centerY - (vCropH / 2) + stabilizedOffsetY;
+
+      // Clamping estricto dentro de los límites del sensor
+      sx = Math.max(0, Math.min(vw - vCropW, sx));
+      sy = Math.max(0, Math.min(vh - vCropH, sy));
+
+      ctx.drawImage(video, sx, sy, vCropW, vCropH, 0, 0, eyeW, eyeH);
+    }
+
+    // Cruz central de calibración rápida en 2 segundos
+    function drawCalibrationCross(ctx, w, h, hudParallax = 0) {
+      ctx.save();
+      const cx = Math.floor(w / 2) + hudParallax;
+      const cy = Math.floor(h / 2);
+
+      ctx.strokeStyle = "rgba(0, 229, 255, 0.75)";
+      ctx.lineWidth = 1.2;
+
+      ctx.beginPath();
+      ctx.moveTo(cx - 36, cy); ctx.lineTo(cx + 36, cy);
+      ctx.moveTo(cx, cy - 36); ctx.lineTo(cx, cy + 36);
+      ctx.stroke();
+
+      ctx.strokeStyle = "rgba(255, 152, 0, 0.65)";
+      ctx.lineWidth = 1.0;
+      for (let offset = -30; offset <= 30; offset += 10) {
+        if (offset === 0) continue;
+        ctx.beginPath();
+        ctx.moveTo(cx + offset, cy - 4); ctx.lineTo(cx + offset, cy + 4);
+        ctx.moveTo(cx - 4, cy + offset); ctx.lineTo(cx + 4, cy + offset);
+        ctx.stroke();
+      }
+
+      ctx.strokeStyle = "rgba(0, 229, 255, 0.4)";
+      ctx.beginPath();
+      ctx.arc(cx, cy, 14, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.font = "8.5px 'Share Tech Mono', monospace";
+      ctx.fillStyle = "rgba(0, 229, 255, 0.85)";
+      ctx.textAlign = "center";
+      ctx.fillText("ALIGN CROSS", cx, cy - 20);
+
+      ctx.restore();
     }
 
     function processVisorMotion(video, dispW, dispH) {
@@ -3883,16 +4054,50 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
         const totalPixels = 128 * 96;
         let changed = 0;
         let sumX = 0, sumY = 0;
+        let lumSum = 0;
 
         if (prevMotionPixels && prevMotionPixels.length === totalPixels) {
           for (let i = 0, p = 0; i < data.length; i += 4, p++) {
             const gray = (data[i] * 299 + data[i + 1] * 587 + data[i + 2] * 114) / 1000;
+            lumSum += gray;
             const diff = Math.abs(gray - prevMotionPixels[p]);
             // Umbral estricto 46 para rechazar ruido CMOS con poca luz y pasos
             if (diff > 46) {
               changed++;
               sumX += (p % 128);
               sumY += Math.floor(p / 128);
+            }
+          }
+
+          currentSceneLuminance = lumSum / totalPixels;
+
+          // Digital EIS: Estimación de flujo óptico central entre frames con factor de amortiguación 0.22
+          let bestShiftX = 0;
+          let bestShiftY = 0;
+          let minSAD = Infinity;
+
+          for (let dy = -2; dy <= 2; dy++) {
+            for (let dx = -2; dx <= 2; dx++) {
+              let sad = 0;
+              let sampleCount = 0;
+              for (let by = 36; by < 60; by += 2) {
+                const py = by + dy;
+                if (py < 0 || py >= 96) continue;
+                for (let bx = 48; bx < 80; bx += 2) {
+                  const px = bx + dx;
+                  if (px < 0 || px >= 128) continue;
+                  const curIdx = by * 128 + bx;
+                  const prevIdx = py * 128 + px;
+                  const curGray = (data[curIdx * 4] * 299 + data[curIdx * 4 + 1] * 587 + data[curIdx * 4 + 2] * 114) / 1000;
+                  sad += Math.abs(curGray - prevMotionPixels[prevIdx]);
+                  sampleCount++;
+                }
+              }
+              if (sampleCount > 0 && sad < minSAD) {
+                minSAD = sad;
+                bestShiftX = dx;
+                bestShiftY = dy;
+              }
             }
           }
 
@@ -3907,9 +4112,17 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
             consecutiveMotionFrames = 0;
             targetScleraAperture = 0.85;
             cameraSteadyStartTime = null;
+            targetEisX = 0;
+            targetEisY = 0;
           } else {
             isCameraPanning = false;
             const timeSincePan = now - lastPanTimestamp;
+
+            // Escalar desplazamiento de bloque central a espacio del sensor de video
+            const scaleX = (video.videoWidth || 1280) / 128;
+            const scaleY = (video.videoHeight || 720) / 96;
+            targetEisX = -bestShiftX * scaleX * 1.5;
+            targetEisY = -bestShiftY * scaleY * 1.5;
 
             // Detección de estabilidad para Lente Activa (Visión Ambiental Proactiva)
             if (changedRatio < 0.04) {
@@ -3944,6 +4157,14 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
               }
             }
           }
+
+          // Factor de amortiguación 0.22 con margen de recorte cropMargin = 0.06
+          stabilizedOffsetX += (targetEisX - stabilizedOffsetX) * 0.22;
+          stabilizedOffsetY += (targetEisY - stabilizedOffsetY) * 0.22;
+
+          const maxOffset = (video.videoWidth || 1280) * 0.06;
+          stabilizedOffsetX = Math.max(-maxOffset, Math.min(maxOffset, stabilizedOffsetX));
+          stabilizedOffsetY = Math.max(-maxOffset, Math.min(maxOffset, stabilizedOffsetY));
         }
 
         if (!prevMotionPixels) prevMotionPixels = new Uint8Array(totalPixels);
