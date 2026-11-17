@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="E.V. Core">
-  <title>E.V. // TACTICAL CORE v9.3</title>
+  <title>E.V. // TACTICAL CORE v9.5</title>
   <link rel="manifest" href="./manifest.json">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23070B10' stroke='%23FF9800' stroke-width='4'/><circle cx='50' cy='50' r='20' fill='%2300E5FF'/></svg>">
 
@@ -828,7 +828,7 @@
       bottom: 10px;
       left: 6px;
       right: 6px;
-      z-index: 30;
+      z-index: 60;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -857,6 +857,8 @@
       backdrop-filter: blur(4px);
       transition: all 0.2s;
       white-space: nowrap;
+      pointer-events: auto;
+      z-index: 60;
     }
 
     .btn-visor-action.accent-cyan {
@@ -884,9 +886,9 @@
     .modal-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(3px);
-      z-index: 200;
+      background: rgba(0, 0, 0, 0.82);
+      backdrop-filter: blur(5px);
+      z-index: 10010;
       display: none;
       align-items: center;
       justify-content: center;
@@ -1055,10 +1057,10 @@
       <div class="msg-wrap assistant">
         <div class="msg-header">
           <span>[E.V. // CO-PILOTO TÁCTICO]</span>
-          <span>v9.3-AUTONOMOUS LENS</span>
+          <span>v9.5-ULTRAWIDE CORE</span>
         </div>
         <div class="msg-bubble">
-          Sistemas en línea, Operador. Enrutador híbrido, auto-captura manos libres y lente ambiental autónoma v9.3 activos. Pulsa ⚙ API KEY si aún no has sincronizado tu clave de Gemini, abre 👥 BIOMETRÍA para administrar perfiles, o accede al 👁 VISOR E.V. para reconocimiento facial y análisis proactivo en vivo.
+          Sistemas en línea, Operador. Óptica ultra gran angular 0.5x anti-mareo, enrutador híbrido, auto-captura manos libres y núcleo biométrico reactivo v9.5 activos. Pulsa ⚙ API KEY si aún no has sincronizado tu clave de Gemini, abre 👥 BIOMETRÍA para administrar perfiles, o accede al 👁 VISOR E.V. para reconocimiento facial y visión panorámica en tiempo real.
         </div>
       </div>
     </div>
@@ -1102,7 +1104,7 @@
     <div class="visor-top-bar">
       <div class="visor-badge">
         <span style="display: inline-block; width: 6px; height: 6px; background: var(--accent-cyan); border-radius: 50%;"></span>
-        <span>E.V. // OPTICAL CORE v9.3</span>
+        <span>E.V. // OPTICAL CORE v9.5</span>
         <span id="visorModelTag" style="color: var(--accent-amber); margin-left: 4px;">[3.5 FLASH-LITE]</span>
         <span id="visorBioStatus" class="visor-bio-badge" style="margin-left: 6px;">BIOMETRÍA: INICIANDO...</span>
       </div>
@@ -1147,8 +1149,8 @@
       <button id="btnVisorMic" class="btn-visor-action accent-cyan" title="Micrófono continuo con envío de frame">
         🎙 MIC CONTINUO: OFF
       </button>
-      <button id="btnVisorFlipCamera" class="btn-visor-action" title="Cambiar cámara frontal/trasera">
-        🔄 CÁMARA
+      <button id="btnVisorFlipCamera" class="btn-visor-action accent-cyan" title="Alternar Lente Óptica (0.5x Ultra / 1x Principal / Frontal)">
+        🔭 0.5x ULTRAWIDE
       </button>
     </div>
   </div>
@@ -1254,10 +1256,16 @@
 
   <script>
     // =========================================================================
-    // E.V. STANDALONE PWA (v9.3-AUTONOMOUS LENS) - NÚCLEO JS
+    // E.V. STANDALONE PWA (v9.5-ULTRAWIDE CORE) - NÚCLEO JS
     // =========================================================================
 
-    // Variables de Calibración v9.3
+    // Variables de Óptica y Calibración v9.5 (Anti-Mareo 0.5x Ultra Wide)
+    let availableVideoDevices = [];
+    let rearCameras = [];
+    let frontCameras = [];
+    let activeCameraLens = "0.5x"; // '0.5x' | '1x' | 'user'
+
+    // Variables de Calibración Cinética y Visión Ambiental
     let isAutoEnrollEnabled = true;
     let autoEnrollStreak = 0;
     let lastAutoEnrollBox = null;
@@ -1270,6 +1278,10 @@
     let isAmbientAnalyzing = false;
     let isSidebarCollapsed = false;
     let lastPanTimestamp = 0;
+
+    // Variables Biometría Híbrida Indestructible v9.5
+    let isFallbackBiometrics = false;
+    let nativeFaceDetectorInstance = null;
 
     // 1. ESTADO GLOBAL DE LA APLICACIÓN
     const STATE = {
@@ -1292,7 +1304,7 @@
     if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
       window.addEventListener("load", () => {
         navigator.serviceWorker.register("./sw.js")
-          .then((reg) => console.log("[E.V. PWA] Service Worker v9.3 registrado:", reg.scope))
+          .then((reg) => console.log("[E.V. PWA] Service Worker v9.5 registrado:", reg.scope))
           .catch((err) => console.warn("[E.V. PWA] Fallo registro SW:", err));
       });
     }
@@ -1352,7 +1364,7 @@
       document.getElementById("evBioSidebarToggle").addEventListener("click", toggleBiometricSidebar);
       document.getElementById("btnVisorScanDetail").addEventListener("click", handleVisorScanDetail);
       document.getElementById("btnVisorMic").addEventListener("click", toggleVisorContinuousMic);
-      document.getElementById("btnVisorFlipCamera").addEventListener("click", flipVisorCamera);
+      document.getElementById("btnVisorFlipCamera").addEventListener("click", cycleVisorLens);
 
       // Manejo de Ahorro de Batería en background (Android)
       document.addEventListener("visibilitychange", () => {
@@ -1524,38 +1536,61 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
       const badge = document.getElementById("visorBioStatus");
       if (badge) {
         badge.className = "visor-bio-badge";
-        badge.textContent = "BIOMETRÍA: CARGANDO PESOS...";
+        badge.textContent = "BIOMETRÍA: INICIANDO PESOS...";
       }
+
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Timeout de 4.5s en carga de pesos face-api")), 4500)
+      );
 
       try {
         if (!window.faceapi) {
           console.warn("[BiometricEngine] Esperando librería face-api...");
-          await new Promise((r) => setTimeout(r, 600));
+          await Promise.race([
+            new Promise((r) => setTimeout(r, 600)),
+            timeoutPromise
+          ]);
         }
 
-        // Cargar los 3 modelos neuronales ligeros
-        await Promise.all([
-          faceapi.nets.tinyFaceDetector.loadFromUri(FACE_API_MODELS_URL),
-          faceapi.nets.faceLandmark68Net.loadFromUri(FACE_API_MODELS_URL),
-          faceapi.nets.faceRecognitionNet.loadFromUri(FACE_API_MODELS_URL)
+        // Cargar los 3 modelos neuronales ligeros con timeout protector de 4.5s
+        await Promise.race([
+          Promise.all([
+            faceapi.nets.tinyFaceDetector.loadFromUri(FACE_API_MODELS_URL),
+            faceapi.nets.faceLandmark68Net.loadFromUri(FACE_API_MODELS_URL),
+            faceapi.nets.faceRecognitionNet.loadFromUri(FACE_API_MODELS_URL)
+          ]),
+          timeoutPromise
         ]);
 
         isBiometricLoaded = true;
         isBiometricLoading = false;
+        isFallbackBiometrics = false;
 
         rebuildFaceMatcher();
 
         if (badge) {
           badge.className = "visor-bio-badge ready";
-          badge.textContent = "BIOMETRÍA: OFFLINE READY";
+          badge.textContent = `BIOMETRÍA: OFFLINE (${STATE.faceDb.length} PERFILES)`;
         }
         console.log("[BiometricEngine] Pesos biométricos offline cargados al 100%.");
       } catch (err) {
+        console.warn("[BiometricEngine] Fallo o timeout (4.5s) al cargar face-api.js:", err.message);
+        isBiometricLoaded = true; // No bloquear la interfaz ni los bucles
         isBiometricLoading = false;
-        console.warn("[BiometricEngine] Error cargando biometría:", err);
+        isFallbackBiometrics = true;
+
+        if (window.FaceDetector && !nativeFaceDetectorInstance) {
+          try {
+            nativeFaceDetectorInstance = new window.FaceDetector({ fastMode: true, maxDetectedFaces: 5 });
+            console.log("[BiometricEngine] FaceDetector nativo por hardware activado.");
+          } catch (e) {
+            nativeFaceDetectorInstance = null;
+          }
+        }
+
         if (badge) {
-          badge.className = "visor-bio-badge";
-          badge.textContent = "BIOMETRÍA: ERROR CARGA";
+          badge.className = "visor-bio-badge ready";
+          badge.textContent = nativeFaceDetectorInstance ? "BIOMETRÍA: NATIVO CHROME" : "BIOMETRÍA: ÓPTICA ACTIVA";
         }
       }
     }
@@ -1603,6 +1638,22 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
       }
     }
 
+    function extractCenterCropAvatarUrl(video) {
+      try {
+        offscreenProcessingCanvas.width = 80;
+        offscreenProcessingCanvas.height = 80;
+        const vw = video.videoWidth || 640;
+        const vh = video.videoHeight || 480;
+        const cropSize = Math.min(vw, vh) * 0.45;
+        const srcX = Math.max(0, (vw - cropSize) / 2);
+        const srcY = Math.max(0, (vh - cropSize) / 2);
+        offscreenProcessingCtx.drawImage(video, srcX, srcY, cropSize, cropSize, 0, 0, 80, 80);
+        return offscreenProcessingCanvas.toDataURL("image/jpeg", 0.8);
+      } catch (e) {
+        return "";
+      }
+    }
+
     // Bucle de inferencia biométrica desacoplado (~3.5 FPS / cada 280ms)
     async function runBiometricInferenceStep() {
       if (isBiometricInferring || !isVisorActive || !isBiometricLoaded) return;
@@ -1613,12 +1664,6 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
       const now = performance.now();
 
       try {
-        // Detección ultraligera optimizada para móviles (inputSize 224, threshold 0.52)
-        const detections = await faceapi
-          .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.52 }))
-          .withFaceLandmarks(true)
-          .withFaceDescriptors();
-
         const videoW = video.videoWidth || 1280;
         const videoH = video.videoHeight || 720;
         const dispW = window.innerWidth;
@@ -1629,129 +1674,169 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
 
         const updatedFaces = [];
 
-        for (const det of detections) {
-          const rawBox = det.detection.box;
-          const box = {
-            x: rawBox.x * scaleX,
-            y: rawBox.y * scaleY,
-            width: rawBox.width * scaleX,
-            height: rawBox.height * scaleY
-          };
+        if (!isFallbackBiometrics && window.faceapi) {
+          // Detección ultraligera optimizada para móviles (inputSize 224, threshold 0.52)
+          const detections = await faceapi
+            .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.52 }))
+            .withFaceLandmarks(true)
+            .withFaceDescriptors();
 
-          const descriptorArray = Array.from(det.descriptor);
-          let matchLabel = "unknown";
-          let matchDistance = 1.0;
-          let matchedProfile = null;
+          for (const det of detections) {
+            const rawBox = det.detection.box;
+            const box = {
+              x: rawBox.x * scaleX,
+              y: rawBox.y * scaleY,
+              width: rawBox.width * scaleX,
+              height: rawBox.height * scaleY
+            };
 
-          if (biometricFaceMatcher) {
-            const bestMatch = biometricFaceMatcher.findBestMatch(det.descriptor);
-            matchLabel = bestMatch.label;
-            matchDistance = bestMatch.distance;
-            if (matchLabel !== "unknown") {
-              matchedProfile = STATE.faceDb.find(p => p.name === matchLabel);
+            const descriptorArray = Array.from(det.descriptor);
+            let matchLabel = "unknown";
+            let matchDistance = 1.0;
+            let matchedProfile = null;
+
+            if (biometricFaceMatcher) {
+              const bestMatch = biometricFaceMatcher.findBestMatch(det.descriptor);
+              matchLabel = bestMatch.label;
+              matchDistance = bestMatch.distance;
+              if (matchLabel !== "unknown") {
+                matchedProfile = STATE.faceDb.find(p => p.name === matchLabel);
+              }
+            }
+
+            let avatarUrl = "";
+            if (!matchedProfile) {
+              avatarUrl = extractFaceAvatarUrl(video, rawBox);
+            } else {
+              avatarUrl = matchedProfile.avatarDataUrl || extractFaceAvatarUrl(video, rawBox);
+            }
+
+            updatedFaces.push({
+              id: matchedProfile ? matchedProfile.id : "unk_" + Math.round(box.x),
+              name: matchedProfile ? matchedProfile.name : "Sujeto Desconocido",
+              role: matchedProfile ? matchedProfile.role : "SUJETO NO REGISTRADO",
+              notes: matchedProfile ? matchedProfile.notes : "",
+              isRecognized: matchLabel !== "unknown",
+              similarity: Math.round(Math.max(0, 1 - matchDistance) * 100),
+              distance: matchDistance,
+              box,
+              descriptor: descriptorArray,
+              avatarUrl,
+              lastSeen: now
+            });
+          }
+
+          // Auto-Captura Facial Manos Libres (Auto-Enroll v9.5)
+          if (isAutoEnrollEnabled && !isCameraPanning && (now - lastAutoEnrollTime > 2500)) {
+            const unknownDet = detections.find(d => {
+              if (d.detection.score < 0.68) return false;
+              const b = d.detection.box;
+              const scaledW = b.width * scaleX;
+              if (scaledW < 75) return false;
+              const normX = (b.x * scaleX + scaledW / 2) / dispW;
+              const normY = (b.y * scaleY + (b.height * scaleY) / 2) / dispH;
+              if (normX < 0.22 || normX > 0.78 || normY < 0.18 || normY > 0.82) return false;
+
+              if (biometricFaceMatcher) {
+                const match = biometricFaceMatcher.findBestMatch(d.descriptor);
+                if (match.label !== "unknown") return false;
+              }
+              return true;
+            });
+
+            if (unknownDet) {
+              const rawBox = unknownDet.detection.box;
+              const boxCenterX = rawBox.x * scaleX + (rawBox.width * scaleX) / 2;
+              const boxCenterY = rawBox.y * scaleY + (rawBox.height * scaleY) / 2;
+
+              if (lastAutoEnrollBox && Math.hypot(boxCenterX - lastAutoEnrollBox.x, boxCenterY - lastAutoEnrollBox.y) < 90) {
+                autoEnrollStreak++;
+              } else {
+                autoEnrollStreak = 1;
+                lastAutoEnrollBox = { x: boxCenterX, y: boxCenterY };
+              }
+
+              if (autoEnrollStreak >= 5) {
+                autoEnrollStreak = 0;
+                lastAutoEnrollBox = null;
+                lastAutoEnrollTime = now;
+
+                let maxNum = 0;
+                STATE.faceDb.forEach(p => {
+                  const m = p.name.match(/^SUJETO_(\d+)$/i);
+                  if (m) {
+                    const val = parseInt(m[1], 10);
+                    if (val > maxNum) maxNum = val;
+                  }
+                });
+                const nextId = String(maxNum + 1).padStart(2, "0");
+                const autoName = `SUJETO_${nextId}`;
+                const avatarData = extractFaceAvatarUrl(video, rawBox);
+
+                const newProfile = {
+                  id: "face_" + Date.now(),
+                  name: autoName,
+                  role: "Sujeto Auto-Capturado",
+                  notes: "Captura manos libres v9.5",
+                  avatarDataUrl: avatarData,
+                  descriptors: [Array.from(unknownDet.descriptor)]
+                };
+
+                STATE.faceDb.push(newProfile);
+                localStorage.setItem("ev_face_db", JSON.stringify(STATE.faceDb));
+                rebuildFaceMatcher();
+                renderBiometricProfilesList();
+                playCommandAckSound();
+                updateVisorSubtitle("AUTO-CAPTURA", `Nuevo sujeto registrado automáticamente como ${autoName}. Di: "El ${autoName.toLowerCase()} es [Nombre]" para nombrarlo.`);
+              }
+            } else {
+              autoEnrollStreak = Math.max(0, autoEnrollStreak - 1);
             }
           }
-
-          let avatarUrl = "";
-          if (!matchedProfile) {
-            avatarUrl = extractFaceAvatarUrl(video, rawBox);
-          } else {
-            avatarUrl = matchedProfile.avatarDataUrl || extractFaceAvatarUrl(video, rawBox);
+        } else if (nativeFaceDetectorInstance) {
+          // Fallback nativo: Detección acelerada por hardware (Chrome Android)
+          try {
+            const detectedFaces = await nativeFaceDetectorInstance.detect(video);
+            for (const f of detectedFaces) {
+              const b = f.boundingBox;
+              const box = {
+                x: b.x * scaleX,
+                y: b.y * scaleY,
+                width: b.width * scaleX,
+                height: b.height * scaleY
+              };
+              const avatarUrl = extractFaceAvatarUrl(video, b);
+              updatedFaces.push({
+                id: "face_native_" + Math.round(box.x),
+                name: "Sujeto Detectado",
+                role: "BIOMETRÍA NATIVA (CHROME)",
+                notes: "Aceleración de hardware",
+                isRecognized: false,
+                similarity: 70,
+                distance: 0.5,
+                box,
+                descriptor: new Array(128).fill(0),
+                avatarUrl,
+                lastSeen: now
+              });
+            }
+          } catch (nativeErr) {
+            console.debug("[BiometricEngine] Fallo en FaceDetector nativo:", nativeErr);
           }
-
-          updatedFaces.push({
-            id: matchedProfile ? matchedProfile.id : "unk_" + Math.round(box.x),
-            name: matchedProfile ? matchedProfile.name : "Sujeto Desconocido",
-            role: matchedProfile ? matchedProfile.role : "SUJETO NO REGISTRADO",
-            notes: matchedProfile ? matchedProfile.notes : "",
-            isRecognized: matchLabel !== "unknown",
-            similarity: Math.round(Math.max(0, 1 - matchDistance) * 100),
-            distance: matchDistance,
-            box,
-            descriptor: descriptorArray,
-            avatarUrl,
-            lastSeen: now
-          });
         }
 
-        // Suavizado Temporal (Track Persistence): Mantener rostros vistos en los últimos 900ms para evitar parpadeos
+        // Suavizado Temporal y Presencia Efímera (1.8s timeout):
+        // Mantener rostros vistos recientemente si no han pasado 1800ms
         for (const prev of currentTrackedFaces) {
           if (!updatedFaces.some(u => u.name === prev.name || Math.abs(u.box.x - prev.box.x) < 50)) {
-            if (now - prev.lastSeen < 900) {
+            if (now - prev.lastSeen < 1800) {
               updatedFaces.push(prev);
             }
           }
         }
 
-        // Auto-Captura Facial Manos Libres (Auto-Enroll v9.3)
-        if (isAutoEnrollEnabled && !isCameraPanning && (now - lastAutoEnrollTime > 2500)) {
-          const unknownDet = detections.find(d => {
-            if (d.detection.score < 0.68) return false;
-            const b = d.detection.box;
-            const scaledW = b.width * scaleX;
-            if (scaledW < 75) return false;
-            const normX = (b.x * scaleX + scaledW / 2) / dispW;
-            const normY = (b.y * scaleY + (b.height * scaleY) / 2) / dispH;
-            if (normX < 0.22 || normX > 0.78 || normY < 0.18 || normY > 0.82) return false;
-
-            if (biometricFaceMatcher) {
-              const match = biometricFaceMatcher.findBestMatch(d.descriptor);
-              if (match.label !== "unknown") return false;
-            }
-            return true;
-          });
-
-          if (unknownDet) {
-            const rawBox = unknownDet.detection.box;
-            const boxCenterX = rawBox.x * scaleX + (rawBox.width * scaleX) / 2;
-            const boxCenterY = rawBox.y * scaleY + (rawBox.height * scaleY) / 2;
-
-            if (lastAutoEnrollBox && Math.hypot(boxCenterX - lastAutoEnrollBox.x, boxCenterY - lastAutoEnrollBox.y) < 90) {
-              autoEnrollStreak++;
-            } else {
-              autoEnrollStreak = 1;
-              lastAutoEnrollBox = { x: boxCenterX, y: boxCenterY };
-            }
-
-            if (autoEnrollStreak >= 5) {
-              autoEnrollStreak = 0;
-              lastAutoEnrollBox = null;
-              lastAutoEnrollTime = now;
-
-              let maxNum = 0;
-              STATE.faceDb.forEach(p => {
-                const m = p.name.match(/^SUJETO_(\d+)$/i);
-                if (m) {
-                  const val = parseInt(m[1], 10);
-                  if (val > maxNum) maxNum = val;
-                }
-              });
-              const nextId = String(maxNum + 1).padStart(2, "0");
-              const autoName = `SUJETO_${nextId}`;
-              const avatarData = extractFaceAvatarUrl(video, rawBox);
-
-              const newProfile = {
-                id: "face_" + Date.now(),
-                name: autoName,
-                role: "Sujeto Auto-Capturado",
-                notes: "Captura manos libres v9.3",
-                avatarDataUrl: avatarData,
-                descriptors: [Array.from(unknownDet.descriptor)]
-              };
-
-              STATE.faceDb.push(newProfile);
-              localStorage.setItem("ev_face_db", JSON.stringify(STATE.faceDb));
-              rebuildFaceMatcher();
-              renderBiometricProfilesList();
-              playCommandAckSound();
-              updateVisorSubtitle("AUTO-CAPTURA", `Nuevo sujeto registrado automáticamente como ${autoName}. Di: "El ${autoName.toLowerCase()} es [Nombre]" para nombrarlo.`);
-            }
-          } else {
-            autoEnrollStreak = Math.max(0, autoEnrollStreak - 1);
-          }
-        }
-
-        currentTrackedFaces = updatedFaces;
+        // Purgar de forma reactiva cualquier rostro ausente por más de 1800ms
+        currentTrackedFaces = updatedFaces.filter(f => (now - f.lastSeen) < 1800);
         renderBiometricSidebar();
 
       } catch (err) {
@@ -1909,24 +1994,42 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
       document.getElementById("regFaceNotes").value = "";
 
       openModal("modalRegisterFace");
-      playTacticalBeep(988, 0.1);
+      playCommandAckSound();
     }
 
     function handleTriggerRegisterFromVisor() {
-      // Si hay un rostro desconocido en pantalla, registrarlo
+      playCommandAckSound();
+      // 1. Si hay un rostro desconocido en pantalla, registrarlo
       const unkIdx = currentTrackedFaces.findIndex(f => !f.isRecognized);
       if (unkIdx !== -1) {
         openRegisterFaceModalFromDetection(unkIdx);
         return;
       }
-      // Si hay cualquier rostro
+      // 2. Si hay cualquier rostro en pantalla
       if (currentTrackedFaces.length > 0) {
         openRegisterFaceModalFromDetection(0);
         return;
       }
 
-      updateVisorSubtitle("BIOMETRÍA", "Enfoca un rostro en el visor antes de registrar.");
-      playTacticalBeep(440, 0.1);
+      // 3. Fallback inmediato sin bloqueo: capturar recorte central 80x80 del visor
+      const video = document.getElementById("visorVideo");
+      const avatarUrl = video ? extractCenterCropAvatarUrl(video) : "";
+      pendingFaceRegistrationData = {
+        descriptor: new Array(128).fill(0),
+        avatarUrl: avatarUrl
+      };
+
+      const preview = document.getElementById("regFacePreviewImg");
+      if (preview) preview.src = avatarUrl;
+      const nameInput = document.getElementById("regFaceName");
+      if (nameInput) nameInput.value = "";
+      const roleInput = document.getElementById("regFaceRole");
+      if (roleInput) roleInput.value = "Prioridad Alfa";
+      const notesInput = document.getElementById("regFaceNotes");
+      if (notesInput) notesInput.value = "Captura central táctica";
+
+      openModal("modalRegisterFace");
+      updateVisorSubtitle("BIOMETRÍA", "Captura central lista. Asigna un nombre al perfil.");
     }
 
     function handleSaveFaceRegistration() {
@@ -1955,7 +2058,7 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
         role,
         notes,
         avatarDataUrl: pendingFaceRegistrationData.avatarUrl,
-        descriptors: [pendingFaceRegistrationData.descriptor]
+        descriptors: pendingFaceRegistrationData.descriptor ? [pendingFaceRegistrationData.descriptor] : []
       };
 
       STATE.faceDb.push(newProfile);
@@ -1966,10 +2069,10 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
       pendingFaceRegistrationData = null;
 
       closeModal("modalRegisterFace");
-      playTacticalBeep(1318, 0.15);
+      playCommandAckSound();
 
       if (isVisorActive) {
-        updateVisorSubtitle("BIOMETRÍA", `Perfil "${name}" registrado exitosamente.`);
+        updateVisorSubtitle("BIOMETRÍA", `PERFIL GUARDADO: ${name.toUpperCase()}`);
       }
     }
 
@@ -2152,7 +2255,7 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
     }
 
     // =========================================================================
-    // TEMPORIZADORES Y SÍNTESIS DE TONOS WEB AUDIO API (FEEDBACK POSITIVO v9.3)
+    // TEMPORIZADORES Y SÍNTESIS DE TONOS WEB AUDIO API (FEEDBACK POSITIVO v9.5)
     // =========================================================================
 
     let audioContextInstance = null;
@@ -2848,6 +2951,107 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
     let smoothedTargetY = 0;
     let lastMotionCheckTime = 0;
 
+    async function enumerateCameraDevices() {
+      try {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+          return;
+        }
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        availableVideoDevices = devices.filter(d => d.kind === "videoinput");
+        rearCameras = [];
+        frontCameras = [];
+
+        availableVideoDevices.forEach((dev) => {
+          const label = (dev.label || "").toLowerCase();
+          if (label.includes("front") || label.includes("user") || label.includes("delantera") || label.includes("anterior")) {
+            frontCameras.push(dev);
+          } else {
+            rearCameras.push(dev);
+          }
+        });
+
+        console.log(`[E.V. Optics] Dispositivos ópticos detectados: ${availableVideoDevices.length} (Traseras: ${rearCameras.length}, Frontales: ${frontCameras.length})`);
+      } catch (e) {
+        console.warn("[E.V. Optics] Error enumerando sensores ópticos:", e);
+      }
+    }
+
+    function findUltraWideCamera() {
+      if (rearCameras.length === 0) return null;
+      // Heurística de selección de lente ultra gran angular (0.5x / Mayor FOV)
+      const ultraByLabel = rearCameras.find(dev => {
+        const lbl = (dev.label || "").toLowerCase();
+        return lbl.includes("ultra") || lbl.includes("0.5") || lbl.includes("wide") || lbl.includes("angular") || lbl.includes("camera2 2") || lbl.includes("back 2");
+      });
+      if (ultraByLabel) return ultraByLabel;
+
+      // En terminales Android multi-lente (ej. Samsung Galaxy A34 / Xiaomi), el segundo sensor trasero suele ser el 0.5x Ultra
+      if (rearCameras.length > 1) {
+        return rearCameras[1];
+      }
+      return rearCameras[0];
+    }
+
+    function findStandardBackCamera() {
+      if (rearCameras.length === 0) return null;
+      const stdByLabel = rearCameras.find(dev => {
+        const lbl = (dev.label || "").toLowerCase();
+        return lbl.includes("main") || lbl.includes("standard") || lbl.includes("camera2 0") || lbl.includes("back 0") || lbl.includes("principal");
+      });
+      if (stdByLabel) return stdByLabel;
+      return rearCameras[0];
+    }
+
+    function findFrontCamera() {
+      if (frontCameras.length > 0) return frontCameras[0];
+      const frontByLabel = availableVideoDevices.find(dev => {
+        const lbl = (dev.label || "").toLowerCase();
+        return lbl.includes("front") || lbl.includes("user") || lbl.includes("delantera");
+      });
+      return frontByLabel || null;
+    }
+
+    function updateLensButtonUI() {
+      const btn = document.getElementById("btnVisorFlipCamera");
+      if (!btn) return;
+      if (activeCameraLens === "0.5x") {
+        btn.textContent = "🔭 0.5x ULTRAWIDE";
+        btn.title = "Lente Ultra Gran Angular Activa (Toca para cambiar a 1x Principal)";
+        btn.style.color = "var(--accent-cyan)";
+        btn.style.borderColor = "var(--accent-cyan)";
+      } else if (activeCameraLens === "1x") {
+        btn.textContent = "📷 1x PRINCIPAL";
+        btn.title = "Lente Estándar Activa (Toca para cambiar a Cámara Frontal)";
+        btn.style.color = "var(--accent-amber)";
+        btn.style.borderColor = "var(--accent-amber)";
+      } else {
+        btn.textContent = "🤳 FRONTAL";
+        btn.title = "Cámara Frontal Activa (Toca para cambiar a 0.5x Ultrawide)";
+        btn.style.color = "#00E5FF";
+        btn.style.borderColor = "#00E5FF";
+      }
+    }
+
+    async function cycleVisorLens() {
+      if (activeCameraLens === "0.5x") {
+        activeCameraLens = "1x";
+        currentFacingMode = "environment";
+      } else if (activeCameraLens === "1x") {
+        activeCameraLens = "user";
+        currentFacingMode = "user";
+      } else {
+        activeCameraLens = "0.5x";
+        currentFacingMode = "environment";
+      }
+      updateLensButtonUI();
+      playTacticalBeep(784, 0.08);
+      await startVisorCamera();
+    }
+
+    function flipVisorCamera() {
+      cycleVisorLens();
+    }
+
     async function openVisorOverlay() {
       isVisorActive = true;
       getAudioContext();
@@ -2860,6 +3064,7 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
         }
       } catch (e) {}
 
+      updateLensButtonUI();
       await startVisorCamera();
       startVisorCanvasRenderer();
 
@@ -2871,7 +3076,7 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
         }
       });
 
-      updateVisorSubtitle("E.V.", "Visor óptico v9.3 en línea. Auto-captura y lente autónoma activas.");
+      updateVisorSubtitle("E.V.", "Visor óptico v9.5 en línea. Lente ultra gran angular y biometría híbrida activas.");
       playTacticalBeep(1046, 0.1);
     }
 
@@ -2922,31 +3127,76 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
       try {
         if (visorStream) {
           visorStream.getTracks().forEach(t => t.stop());
+          visorStream = null;
         }
-        const constraints = {
-          video: {
-            facingMode: { ideal: currentFacingMode },
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
-          },
-          audio: false
+
+        if (availableVideoDevices.length === 0) {
+          await enumerateCameraDevices();
+        }
+
+        let videoConstraints = {
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
         };
-        visorStream = await navigator.mediaDevices.getUserMedia(constraints);
+
+        if (activeCameraLens === "0.5x") {
+          const ultraCam = findUltraWideCamera();
+          if (ultraCam && ultraCam.deviceId) {
+            videoConstraints.deviceId = { exact: ultraCam.deviceId };
+          } else {
+            videoConstraints.facingMode = { ideal: "environment" };
+          }
+        } else if (activeCameraLens === "1x") {
+          const stdCam = findStandardBackCamera();
+          if (stdCam && stdCam.deviceId) {
+            videoConstraints.deviceId = { exact: stdCam.deviceId };
+          } else {
+            videoConstraints.facingMode = { ideal: "environment" };
+          }
+        } else {
+          const frontCam = findFrontCamera();
+          if (frontCam && frontCam.deviceId) {
+            videoConstraints.deviceId = { exact: frontCam.deviceId };
+          } else {
+            videoConstraints.facingMode = { ideal: "user" };
+          }
+        }
+
+        visorStream = await navigator.mediaDevices.getUserMedia({
+          video: videoConstraints,
+          audio: false
+        });
+
+        // Re-enumerar tras otorgar permisos para capturar labels exactos
+        if (availableVideoDevices.some(d => !d.label)) {
+          await enumerateCameraDevices();
+        }
+
+        // Calibrar zoom mínimo por hardware para eliminar efecto túnel
+        const track = visorStream.getVideoTracks()[0];
+        if (track && track.getCapabilities && track.applyConstraints) {
+          try {
+            const caps = track.getCapabilities();
+            if (caps.zoom) {
+              const minZoom = caps.zoom.min || 1.0;
+              await track.applyConstraints({ advanced: [{ zoom: minZoom }] });
+              console.log(`[E.V. Optics] Zoom por hardware fijado a mínimo: ${minZoom}x`);
+            }
+          } catch (zoomErr) {
+            console.debug("[E.V. Optics] Control de zoom no disponible:", zoomErr);
+          }
+        }
+
         const video = document.getElementById("visorVideo");
         if (video) {
           video.srcObject = visorStream;
           await video.play();
         }
+        updateLensButtonUI();
       } catch (err) {
         console.warn("[Visor E.V.] Fallo de cámara:", err);
         updateVisorSubtitle("ALERTA", "Fallo al acceder al sensor óptico de cámara.");
       }
-    }
-
-    function flipVisorCamera() {
-      currentFacingMode = currentFacingMode === "environment" ? "user" : "environment";
-      startVisorCamera();
-      playTacticalBeep(784, 0.08);
     }
 
     // Bucle de renderizado ultrarrápido a 60 FPS (ZERO-LAG: Solo dibuja canvas sin inferencia pesada)

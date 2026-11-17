@@ -1,5 +1,5 @@
-// Service Worker: E.V. Standalone PWA (v9.3-AUTONOMOUS LENS)
-const CACHE_NAME = 'ev-core-v9.3';
+// Service Worker: E.V. Standalone PWA (v9.5-ULTRAWIDE CORE)
+const CACHE_NAME = 'ev-core-v9.5';
 
 // Activos locales y pesos biométricos offline
 const PRECACHE_ASSETS = [
