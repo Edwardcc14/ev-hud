@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="E.V. Core">
-  <title>E.V. // TACTICAL CORE v10.0</title>
+  <title>E.V. // TACTICAL CORE v10.1</title>
   <link rel="manifest" href="./manifest.json">
   <link rel="icon" type="image/svg+xml"
     href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23070B10' stroke='%23FF9800' stroke-width='4'/><circle cx='50' cy='50' r='20' fill='%2300E5FF'/></svg>">
@@ -46,6 +46,22 @@
     textarea,
     [contenteditable="true"] {
       user-select: text;
+    }
+
+    /* DESBLOQUEO TÁCTIL TOTAL (v10.1-TOUCH UNBLOCK): Botones y controles siempre interactivos */
+    button,
+    input,
+    select,
+    textarea,
+    .btn-hud,
+    .btn-icon,
+    .btn-visor-action,
+    .btn-exit-visor,
+    .btn-bio-mini,
+    .btn-timer-cancel {
+      pointer-events: auto !important;
+      position: relative;
+      touch-action: manipulation;
     }
 
     html,
@@ -552,7 +568,7 @@
       box-shadow: 0 0 12px rgba(0, 229, 255, 0.5);
     }
 
-    /* VISOR E.V. PANTALLA COMPLETA INMERSIVA / TRUE BINOCULAR SBS v10.0 */
+    /* VISOR E.V. PANTALLA COMPLETA INMERSIVA / TRUE BINOCULAR SBS v10.1 */
     #visorOverlay {
       position: fixed;
       inset: 0;
@@ -561,12 +577,20 @@
       height: 100vh;
       height: 100dvh;
       background: #000;
-      z-index: 9999;
-      display: none;
+      z-index: -1 !important;
+      display: none !important;
+      pointer-events: none !important;
       flex-direction: column;
       overflow: hidden;
       padding-top: env(safe-area-inset-top, 0);
       padding-bottom: env(safe-area-inset-bottom, 0);
+      touch-action: manipulation;
+    }
+
+    #visorOverlay.active {
+      display: flex !important;
+      pointer-events: auto !important;
+      z-index: 9999 !important;
     }
 
     #visorOverlay.vr-mode {
@@ -587,7 +611,9 @@
       z-index: 0 !important;
     }
 
-    .vr-split-container {
+    /* CAPAS VISUALES PASIVAS (v10.1-TOUCH UNBLOCK): Jamás bloquean toques táctiles */
+    .vr-split-container,
+    #vrContainer {
       position: absolute;
       inset: 0;
       width: 100%;
@@ -596,9 +622,12 @@
       flex-direction: row;
       overflow: hidden;
       z-index: 1;
+      pointer-events: none !important;
     }
 
-    .vr-eye {
+    .vr-eye,
+    #vrEyeLeft,
+    #vrEyeRight {
       position: relative;
       width: 100%;
       height: 100%;
@@ -607,6 +636,7 @@
       background: #000;
       will-change: transform;
       transition: transform 0.05s ease-out;
+      pointer-events: none !important;
     }
 
     #visorOverlay.vr-mode .vr-eye {
@@ -614,13 +644,15 @@
       flex: 0 0 calc(50% - 2px);
     }
 
-    .vr-central-divider {
+    .vr-central-divider,
+    #vrDivider {
       width: 4px;
       height: 100%;
       background: #000;
       flex-shrink: 0;
       z-index: 5;
       box-shadow: 0 0 10px #000;
+      pointer-events: none !important;
     }
 
     #visorOverlay.vr-mode #visorSubtitles {
@@ -631,6 +663,7 @@
       display: none !important;
     }
 
+    video,
     #visorVideo,
     #visorVideoRight {
       position: absolute;
@@ -639,10 +672,16 @@
       height: 100%;
       object-fit: cover;
       z-index: 1;
+      pointer-events: none !important;
     }
 
+    canvas,
     #visorCanvas,
-    #visorCanvasRight {
+    #visorCanvasRight,
+    #motionCanvas,
+    #canvasLeft,
+    #canvasRight,
+    #hudCanvas {
       position: absolute;
       inset: 0;
       width: 100%;
@@ -662,6 +701,9 @@
       border: 1px solid rgba(0, 229, 255, 0.3);
       border-radius: 6px;
       flex-wrap: wrap;
+      pointer-events: auto !important;
+      position: relative;
+      z-index: 10002;
     }
 
     #visorOverlay.vr-mode .visor-row-vr-settings {
@@ -675,6 +717,7 @@
       font-family: var(--font-mono);
       font-size: 10px;
       color: var(--accent-cyan);
+      pointer-events: auto !important;
     }
 
     .vr-slider-label {
@@ -687,6 +730,10 @@
       height: 4px;
       accent-color: var(--accent-cyan);
       cursor: pointer;
+      pointer-events: auto !important;
+      position: relative;
+      z-index: 10003;
+      touch-action: manipulation;
     }
 
     .visor-top-bar {
@@ -694,12 +741,20 @@
       top: 0;
       left: 0;
       right: 0;
-      z-index: 3;
+      z-index: 10000;
       padding: 10px 14px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       background: linear-gradient(to bottom, rgba(7, 11, 16, 0.9), transparent);
+      pointer-events: auto !important;
+    }
+
+    .visor-top-bar button {
+      position: relative;
+      z-index: 10001;
+      pointer-events: auto !important;
+      touch-action: manipulation;
     }
 
     .visor-badge {
@@ -937,7 +992,7 @@
       color: var(--accent-amber);
     }
 
-    /* DOCK INFERIOR DEL VISOR (MODO GAFAS LIMPIAS v9.9) */
+    /* DOCK INFERIOR DEL VISOR (MODO GAFAS LIMPIAS v10.1) */
     .visor-bottom-dock {
       position: absolute;
       bottom: 0;
@@ -947,7 +1002,7 @@
       flex-direction: column;
       gap: 8px;
       padding: 0 12px calc(10px + env(safe-area-inset-bottom, 0px));
-      z-index: 80;
+      z-index: 10000;
       pointer-events: none;
       background: transparent;
       box-sizing: border-box;
@@ -957,7 +1012,7 @@
 
     .visor-bottom-dock.controls-active {
       background: linear-gradient(to top, rgba(7, 11, 16, 0.95) 0%, rgba(7, 11, 16, 0.75) 75%, transparent 100%);
-      pointer-events: auto;
+      pointer-events: auto !important;
       padding: 10px 12px calc(12px + env(safe-area-inset-bottom, 0px));
     }
 
@@ -966,10 +1021,12 @@
       flex-direction: column;
       gap: 8px;
       width: 100%;
-      pointer-events: auto;
+      pointer-events: auto !important;
+      position: relative;
+      z-index: 10001;
     }
 
-    /* SUBTÍTULOS FLOTANTES EN EL VISOR (AUTO-OCULTADO EN 4s v9.9) */
+    /* SUBTÍTULOS FLOTANTES EN EL VISOR (AUTO-OCULTADO EN 4s v10.1) */
     .visor-subtitles {
       position: relative;
       width: 100%;
@@ -986,7 +1043,7 @@
       line-height: 1.35;
       display: none;
       backdrop-filter: blur(4px);
-      pointer-events: auto;
+      pointer-events: auto !important;
       transition: opacity 0.3s ease;
     }
 
@@ -1042,8 +1099,9 @@
       backdrop-filter: blur(4px);
       transition: all 0.2s;
       white-space: nowrap;
-      pointer-events: auto;
-      z-index: 85;
+      pointer-events: auto !important;
+      position: relative;
+      z-index: 10002;
       touch-action: manipulation;
     }
 
@@ -1068,17 +1126,25 @@
       color: #FF5252;
     }
 
-    /* MODALES TÁCTICOS */
+    /* MODALES TÁCTICOS (v10.1-TOUCH UNBLOCK) */
     .modal-backdrop {
       position: fixed;
       inset: 0;
       background: rgba(0, 0, 0, 0.82);
       backdrop-filter: blur(5px);
-      z-index: 10020;
-      display: none;
+      z-index: -1 !important;
+      display: none !important;
+      pointer-events: none !important;
       align-items: center;
       justify-content: center;
       padding: 16px;
+      touch-action: manipulation;
+    }
+
+    .modal-backdrop.active {
+      display: flex !important;
+      pointer-events: auto !important;
+      z-index: 10020 !important;
     }
 
     .modal-card {
@@ -1095,6 +1161,9 @@
       gap: 12px;
       max-height: 85vh;
       overflow-y: auto;
+      position: relative;
+      z-index: 10021;
+      pointer-events: auto !important;
     }
 
     .modal-title {
@@ -1256,13 +1325,12 @@
       <div class="msg-wrap assistant">
         <div class="msg-header">
           <span>[E.V. // CO-PILOTO TÁCTICO]</span>
-          <span>v10.0-TRUE BINOCULAR</span>
+          <span>v10.1-TOUCH UNBLOCK</span>
         </div>
         <div class="msg-bubble">
-          Sistemas en línea, Operador. Modo True Binocular v10.0 activo: proyección dual simétrica con Aspect-Ratio
-          Lock y estabilización Digital EIS anti-vibración para casco VR, alineación vertical y cruz de calibración
-          óptica, visor 100 % despejado sin botones estorbando al caminar y motor biométrico de largo alcance con
-          asociación espacial e iluminación adaptativa. Pulsa 👓 VR en el visor para alternar vista binocular.
+          Sistemas en línea, Operador. Modo v10.1-TOUCH UNBLOCK activo: interacción táctil 100 % desbloqueada en
+          móviles Android, capas visuales pasivas sin intercepción de toques, micro-botón 🎛 en cabecera del visor y
+          reconocimiento nativo de doble toque (&lt; 320 ms). Proyección True Binocular SBS y estabilización Digital EIS en línea.
         </div>
       </div>
     </div>
@@ -1298,9 +1366,9 @@
     </div>
   </main>
 
-  <!-- VISOR ÓPTICO E.V. PANTALLA COMPLETA INMERSIVA / TRUE BINOCULAR SBS v10.0 -->
+  <!-- VISOR ÓPTICO E.V. PANTALLA COMPLETA INMERSIVA / TRUE BINOCULAR SBS v10.1 -->
   <div id="visorOverlay">
-    <!-- Contenedor Estereoscópico Dividido SBS (Modo Casco VR v10.0) -->
+    <!-- Contenedor Estereoscópico Dividido SBS (Modo Casco VR v10.1) -->
     <div id="vrContainer" class="vr-split-container">
       <div id="vrEyeLeft" class="vr-eye">
         <video id="visorVideo" autoplay playsinline muted></video>
@@ -1319,11 +1387,13 @@
       <div class="visor-badge">
         <span
           style="display: inline-block; width: 6px; height: 6px; background: var(--accent-cyan); border-radius: 50%;"></span>
-        <span>E.V. // OPTICAL CORE v10.0</span>
+        <span>E.V. // OPTICAL CORE v10.1</span>
         <span id="visorModelTag" style="color: var(--accent-amber); margin-left: 4px;">[3.5 FLASH-LITE]</span>
         <span id="visorBioStatus" class="visor-bio-badge" style="margin-left: 6px;">BIOMETRÍA: INICIANDO...</span>
       </div>
       <div style="display: flex; align-items: center; gap: 6px;">
+        <button id="btnVisorToggleControls" class="btn-exit-visor" title="Alternar panel de controles y calibración"
+          style="padding: 4px 8px; font-size: 13px; color: #FF8A80; border-color: rgba(255, 23, 68, 0.4); background: rgba(255, 23, 68, 0.15);">🎛</button>
         <button id="btnVisorVR" class="btn-exit-visor" title="Alternar Modo Estereoscópico VR SBS (Casco)"
           style="padding: 4px 8px; font-weight: bold;">👓 VR</button>
         <button id="btnVisorForceReload" class="btn-exit-visor" title="Purgar caché y forzar recarga limpia"
@@ -1582,12 +1652,12 @@
     if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
       window.addEventListener("load", () => {
         navigator.serviceWorker.register("./sw.js")
-          .then((reg) => console.log("[E.V. PWA] Service Worker v10.0 registrado:", reg.scope))
+          .then((reg) => console.log("[E.V. PWA] Service Worker v10.1 registrado:", reg.scope))
           .catch((err) => console.warn("[E.V. PWA] Fallo registro SW:", err));
       });
     }
 
-    // 3. INICIALIZACIÓN DE LA INTERFAZ
+    // 3. INICIALIZACIÓN DE LA INTERFAZ (v10.1-TOUCH UNBLOCK)
     document.addEventListener("DOMContentLoaded", () => {
       updateApiKeyStatusUI();
       updateModelModeUI();
@@ -1601,26 +1671,27 @@
         verifyGeminiApiKey(STATE.apiKey, false);
       }
 
+      // ENLACE SEGURO DE EVENTOS (Optional Chaining Safe Binding): Previene cualquier error de referencia null
       // Eventos de botones de cabecera
-      document.getElementById("btnModelMode").addEventListener("click", cycleModelMode);
-      document.getElementById("btnVoiceToggle").addEventListener("click", toggleVoiceOutput);
-      document.getElementById("btnApiKeyOpen").addEventListener("click", () => openModal("modalApiKey"));
-      document.getElementById("btnNotesOpen").addEventListener("click", () => openModal("modalNotes"));
-      document.getElementById("btnBiometricsOpen").addEventListener("click", () => openModal("modalBiometrics"));
-      document.getElementById("btnSaveApiKey").addEventListener("click", handleSaveApiKey);
-      document.getElementById("btnAddNote").addEventListener("click", handleAddNoteManual);
+      document.getElementById("btnModelMode")?.addEventListener("click", cycleModelMode);
+      document.getElementById("btnVoiceToggle")?.addEventListener("click", toggleVoiceOutput);
+      document.getElementById("btnApiKeyOpen")?.addEventListener("click", () => openModal("modalApiKey"));
+      document.getElementById("btnNotesOpen")?.addEventListener("click", () => openModal("modalNotes"));
+      document.getElementById("btnBiometricsOpen")?.addEventListener("click", () => openModal("modalBiometrics"));
+      document.getElementById("btnSaveApiKey")?.addEventListener("click", handleSaveApiKey);
+      document.getElementById("btnAddNote")?.addEventListener("click", handleAddNoteManual);
 
       // Eventos de gestión biométrica
-      document.getElementById("btnSaveRegisteredFace").addEventListener("click", handleSaveFaceRegistration);
-      document.getElementById("btnExportBio").addEventListener("click", exportBiometricsJson);
+      document.getElementById("btnSaveRegisteredFace")?.addEventListener("click", handleSaveFaceRegistration);
+      document.getElementById("btnExportBio")?.addEventListener("click", exportBiometricsJson);
       const bioFileInput = document.getElementById("bioFileInput");
-      document.getElementById("btnImportBio").addEventListener("click", () => bioFileInput.click());
-      bioFileInput.addEventListener("change", handleImportBiometricsJson);
+      document.getElementById("btnImportBio")?.addEventListener("click", () => bioFileInput?.click());
+      bioFileInput?.addEventListener("change", handleImportBiometricsJson);
 
       // Eventos de entrada y envío
-      document.getElementById("btnSend").addEventListener("click", handleUserSubmit);
-      document.getElementById("btnMic").addEventListener("click", toggleVoiceDictation);
-      document.getElementById("inputPrompt").addEventListener("keydown", (e) => {
+      document.getElementById("btnSend")?.addEventListener("click", handleUserSubmit);
+      document.getElementById("btnMic")?.addEventListener("click", toggleVoiceDictation);
+      document.getElementById("inputPrompt")?.addEventListener("keydown", (e) => {
         if (e.key === "Enter" && !e.shiftKey) {
           e.preventDefault();
           handleUserSubmit();
@@ -1629,14 +1700,15 @@
 
       // Adjuntar imagen
       const fileInput = document.getElementById("fileInput");
-      document.getElementById("btnAttach").addEventListener("click", () => fileInput.click());
-      fileInput.addEventListener("change", handleFileSelected);
-      document.getElementById("btnRemoveAttach").addEventListener("click", removeAttachedImage);
+      document.getElementById("btnAttach")?.addEventListener("click", () => fileInput?.click());
+      fileInput?.addEventListener("change", handleFileSelected);
+      document.getElementById("btnRemoveAttach")?.addEventListener("click", removeAttachedImage);
 
-      // Visor E.V.
-      document.getElementById("btnVisorOpen").addEventListener("click", openVisorOverlay);
-      document.getElementById("btnExitVisor").addEventListener("click", closeVisorOverlay);
-      document.getElementById("btnVisorForceReload").addEventListener("click", () => {
+      // Visor E.V. y Barra Superior
+      document.getElementById("btnVisorOpen")?.addEventListener("click", openVisorOverlay);
+      document.getElementById("btnExitVisor")?.addEventListener("click", closeVisorOverlay);
+      document.getElementById("btnVisorToggleControls")?.addEventListener("click", toggleVisorControls);
+      document.getElementById("btnVisorForceReload")?.addEventListener("click", () => {
         playCommandAckSound();
         if (window.caches) {
           caches.keys().then((ks) => Promise.all(ks.map((k) => caches.delete(k)))).then(() => location.reload(true));
@@ -1644,73 +1716,88 @@
           location.reload(true);
         }
       });
-      document.getElementById("btnVisorRegisterFace").addEventListener("click", handleTriggerRegisterFromVisor);
-      document.getElementById("btnVisorAutoEnroll").addEventListener("click", toggleVisorAutoEnroll);
-      document.getElementById("btnVisorAmbient").addEventListener("click", toggleVisorAmbient);
-      document.getElementById("evBioSidebarToggle").addEventListener("click", toggleBiometricSidebar);
-      document.getElementById("btnVisorScanDetail").addEventListener("click", handleVisorScanDetail);
-      document.getElementById("btnVisorMic").addEventListener("click", toggleVisorContinuousMic);
-      document.getElementById("btnVisorFlipCamera").addEventListener("click", cycleVisorLens);
+      document.getElementById("btnVisorRegisterFace")?.addEventListener("click", handleTriggerRegisterFromVisor);
+      document.getElementById("btnVisorAutoEnroll")?.addEventListener("click", toggleVisorAutoEnroll);
+      document.getElementById("btnVisorAmbient")?.addEventListener("click", toggleVisorAmbient);
+      document.getElementById("evBioSidebarToggle")?.addEventListener("click", toggleBiometricSidebar);
+      document.getElementById("btnVisorScanDetail")?.addEventListener("click", handleVisorScanDetail);
+      document.getElementById("btnVisorMic")?.addEventListener("click", toggleVisorContinuousMic);
+      document.getElementById("btnVisorFlipCamera")?.addEventListener("click", cycleVisorLens);
 
-      // Controles True Binocular VR SBS (v10.0)
+      // Controles True Binocular VR SBS (v10.1)
       const btnVR = document.getElementById("btnVisorVR");
-      if (btnVR) {
-        btnVR.addEventListener("click", () => toggleStereoscopicVrMode());
-      }
+      btnVR?.addEventListener("click", () => toggleStereoscopicVrMode());
+
       const sliderIpd = document.getElementById("sliderVrIpd");
-      if (sliderIpd) {
-        sliderIpd.addEventListener("input", (e) => {
-          vrIpd = parseInt(e.target.value, 10);
-          localStorage.setItem("ev_vr_ipd", vrIpd);
-          applyVrCalibration();
-        });
-      }
+      sliderIpd?.addEventListener("input", (e) => {
+        vrIpd = parseInt(e.target.value, 10);
+        localStorage.setItem("ev_vr_ipd", vrIpd);
+        applyVrCalibration();
+      });
+
       const sliderVert = document.getElementById("sliderVrVert");
-      if (sliderVert) {
-        sliderVert.addEventListener("input", (e) => {
-          vrVert = parseInt(e.target.value, 10);
-          localStorage.setItem("ev_vr_vert", vrVert);
-          applyVrCalibration();
-        });
-      }
+      sliderVert?.addEventListener("input", (e) => {
+        vrVert = parseInt(e.target.value, 10);
+        localStorage.setItem("ev_vr_vert", vrVert);
+        applyVrCalibration();
+      });
+
       const sliderScale = document.getElementById("sliderVrScale");
-      if (sliderScale) {
-        sliderScale.addEventListener("input", (e) => {
-          vrScale = parseFloat(e.target.value) / 100.0;
-          localStorage.setItem("ev_vr_scale", vrScale);
-          applyVrCalibration();
-        });
-      }
+      sliderScale?.addEventListener("input", (e) => {
+        vrScale = parseFloat(e.target.value) / 100.0;
+        localStorage.setItem("ev_vr_scale", vrScale);
+        applyVrCalibration();
+      });
+
       const btnCross = document.getElementById("btnToggleVrCross");
-      if (btnCross) {
-        btnCross.addEventListener("click", () => {
-          isVrCrossActive = !isVrCrossActive;
-          btnCross.textContent = isVrCrossActive ? "✛ GUÍA: ON" : "✛ GUÍA";
-          btnCross.style.borderColor = isVrCrossActive ? "var(--accent-amber)" : "var(--accent-cyan)";
-          btnCross.style.color = isVrCrossActive ? "var(--accent-amber)" : "var(--accent-cyan)";
-          playTacticalBeep(isVrCrossActive ? 990 : 660, 0.06);
-        });
-      }
+      btnCross?.addEventListener("click", () => {
+        isVrCrossActive = !isVrCrossActive;
+        btnCross.textContent = isVrCrossActive ? "✛ GUÍA: ON" : "✛ GUÍA";
+        btnCross.style.borderColor = isVrCrossActive ? "var(--accent-amber)" : "var(--accent-cyan)";
+        btnCross.style.color = isVrCrossActive ? "var(--accent-amber)" : "var(--accent-cyan)";
+        playTacticalBeep(isVrCrossActive ? 990 : 660, 0.06);
+      });
       applyVrCalibration();
 
-      // Gesto de doble toque / doble clic en pantalla para alternar controles (Modo Gafas Limpias v10.0)
+      // Cierre táctil de modales al pulsar fuera de la tarjeta
+      document.querySelectorAll(".modal-backdrop").forEach((m) => {
+        m.addEventListener("click", (e) => {
+          if (e.target === m) closeModal(m.id);
+        });
+      });
+
+      // Gesto de doble toque nativo en pantalla táctil para alternar controles (< 320 ms) (v10.1-TOUCH UNBLOCK)
       const visorOverlayEl = document.getElementById("visorOverlay");
       if (visorOverlayEl) {
-        visorOverlayEl.addEventListener("dblclick", (e) => {
-          if (e.target.closest("button, .btn-visor-action, .modal-backdrop, .btn-exit-visor, input")) return;
-          toggleVisorControls();
+        let lastTapTime = 0;
+        let tapTimeout = null;
+
+        visorOverlayEl.addEventListener("pointerup", (e) => {
+          if (e.target.closest("button, input, select, textarea, .btn-visor-action, .btn-exit-visor, .vr-range-input, .bio-sidebar-header, #evBiometricSidebar, .modal-backdrop, .modal-card")) {
+            return;
+          }
+          const now = performance.now();
+          const diff = now - lastTapTime;
+          if (diff > 0 && diff < 320) {
+            e.preventDefault();
+            lastTapTime = 0;
+            if (tapTimeout) { clearTimeout(tapTimeout); tapTimeout = null; }
+            toggleVisorControls();
+          } else {
+            lastTapTime = now;
+            if (tapTimeout) clearTimeout(tapTimeout);
+            tapTimeout = setTimeout(() => {
+              lastTapTime = 0;
+            }, 320);
+          }
         });
 
-        visorOverlayEl.addEventListener("touchend", (e) => {
-          if (e.target.closest("button, .btn-visor-action, .modal-backdrop, .btn-exit-visor, input")) return;
-          const now = performance.now();
-          if (now - lastVisorTapTime < 340) {
-            e.preventDefault();
-            toggleVisorControls();
-            lastVisorTapTime = 0;
-          } else {
-            lastVisorTapTime = now;
+        // Respaldo para doble clic de ratón en escritorio
+        visorOverlayEl.addEventListener("dblclick", (e) => {
+          if (e.target.closest("button, input, select, textarea, .btn-visor-action, .btn-exit-visor, .vr-range-input, .bio-sidebar-header, #evBiometricSidebar, .modal-backdrop, .modal-card")) {
+            return;
           }
+          toggleVisorControls();
         });
       }
 
@@ -1806,19 +1893,37 @@
       applyVrCalibration();
     }
 
+    let lastControlsToggleTime = 0;
     function toggleVisorControls() {
+      const now = performance.now();
+      if (now - lastControlsToggleTime < 220) return; // Debounce
+      lastControlsToggleTime = now;
+
       const dock = document.getElementById("visorControlsDock");
       const bottomDock = document.getElementById("visorBottomDock");
       if (!dock || !bottomDock) return;
       const isHidden = dock.style.display === "none";
+      const btnToggle = document.getElementById("btnVisorToggleControls");
       if (isHidden) {
         dock.style.display = "flex";
         bottomDock.classList.add("controls-active");
-        playTacticalBeep(780, 0.05);
+        bottomDock.style.pointerEvents = "auto";
+        if (btnToggle) {
+          btnToggle.style.background = "rgba(0, 229, 255, 0.25)";
+          btnToggle.style.borderColor = "var(--accent-cyan)";
+          btnToggle.style.color = "var(--accent-cyan)";
+        }
+        playTacticalBeep(880, 0.05);
       } else {
         dock.style.display = "none";
         bottomDock.classList.remove("controls-active");
-        playTacticalBeep(520, 0.05);
+        bottomDock.style.pointerEvents = "none";
+        if (btnToggle) {
+          btnToggle.style.background = "rgba(255, 23, 68, 0.15)";
+          btnToggle.style.borderColor = "rgba(255, 23, 68, 0.4)";
+          btnToggle.style.color = "#FF8A80";
+        }
+        playTacticalBeep(440, 0.05);
       }
     }
 
@@ -2328,7 +2433,6 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
             descriptor: det.descriptor ? Array.from(det.descriptor) : (existing ? existing.descriptor : null),
             lastSeen: now // ttl = 1800 ms
           });
-        }
         }
 
         // Auto-Captura Facial Manos Libres con Anti-Duplicados (8 segundos)
@@ -3681,13 +3785,27 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
       isVisorActive = true;
       getAudioContext();
       const overlay = document.getElementById("visorOverlay");
+      overlay.classList.add("active");
       overlay.style.display = "flex";
+      overlay.style.pointerEvents = "auto";
+      overlay.style.zIndex = "9999";
 
       // Modo Gafas Limpias: controles inferiores ocultos por defecto
       const dock = document.getElementById("visorControlsDock");
       const bottomDock = document.getElementById("visorBottomDock");
       if (dock) dock.style.display = "none";
-      if (bottomDock) bottomDock.classList.remove("controls-active");
+      if (bottomDock) {
+        bottomDock.classList.remove("controls-active");
+        bottomDock.style.pointerEvents = "none";
+      }
+
+      // Restablecer botón micro de controles 🎛
+      const btnToggle = document.getElementById("btnVisorToggleControls");
+      if (btnToggle) {
+        btnToggle.style.background = "rgba(255, 23, 68, 0.15)";
+        btnToggle.style.borderColor = "rgba(255, 23, 68, 0.4)";
+        btnToggle.style.color = "#FF8A80";
+      }
 
       try {
         if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
@@ -3716,7 +3834,7 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
       }
       startVisorSpeechLoop();
 
-      updateVisorSubtitle("E.V.", "Visor óptico v10.0 en línea. Modo True Binocular y Digital EIS activos.");
+      updateVisorSubtitle("E.V.", "Visor óptico v10.1 en línea. Interacción táctil desbloqueada y estabilización EIS activa.");
       playTacticalBeep(1046, 0.1);
     }
 
@@ -3758,7 +3876,10 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
       }
 
       const overlay = document.getElementById("visorOverlay");
+      overlay.classList.remove("active");
       overlay.style.display = "none";
+      overlay.style.pointerEvents = "none";
+      overlay.style.zIndex = "-1";
 
       try {
         if (document.fullscreenElement && document.exitFullscreen) {
@@ -4780,17 +4901,27 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
     function openModal(id) {
       const modal = document.getElementById(id);
       if (modal) {
+        modal.classList.add("active");
         modal.style.display = "flex";
+        modal.style.pointerEvents = "auto";
+        modal.style.zIndex = "10020";
         if (id === "modalApiKey") {
-          document.getElementById("apiKeyInput").value = STATE.apiKey || "";
-          document.getElementById("apiKeyStatus").textContent = "";
+          const keyInput = document.getElementById("apiKeyInput");
+          if (keyInput) keyInput.value = STATE.apiKey || "";
+          const keyStatus = document.getElementById("apiKeyStatus");
+          if (keyStatus) keyStatus.textContent = "";
         }
       }
     }
 
     function closeModal(id) {
       const modal = document.getElementById(id);
-      if (modal) modal.style.display = "none";
+      if (modal) {
+        modal.classList.remove("active");
+        modal.style.display = "none";
+        modal.style.pointerEvents = "none";
+        modal.style.zIndex = "-1";
+      }
     }
 
     async function handleSaveApiKey() {

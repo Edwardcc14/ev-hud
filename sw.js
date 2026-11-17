@@ -1,5 +1,5 @@
-// Service Worker: E.V. Standalone PWA (v10.0-TRUE BINOCULAR)
-const CACHE_NAME = 'ev-core-v10.0';
+// Service Worker: E.V. Standalone PWA (v10.1-TOUCH UNBLOCK)
+const CACHE_NAME = 'ev-core-v10.1';
 
 // Activos locales y pesos biométricos offline
 const PRECACHE_ASSETS = [
