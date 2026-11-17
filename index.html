@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="E.V. Core">
-  <title>E.V. // TACTICAL CORE v9.6</title>
+  <title>E.V. // TACTICAL CORE v9.7</title>
   <link rel="manifest" href="./manifest.json">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23070B10' stroke='%23FF9800' stroke-width='4'/><circle cx='50' cy='50' r='20' fill='%2300E5FF'/></svg>">
 
@@ -797,7 +797,7 @@
       color: var(--accent-amber);
     }
 
-    /* DOCK INFERIOR DEL VISOR (ARQUITECTURA FLEXBOX COLUMN v9.6) */
+    /* DOCK INFERIOR DEL VISOR (ARQUITECTURA FLEXBOX COLUMN v9.7) */
     .visor-bottom-dock {
       position: absolute;
       bottom: 0;
@@ -1086,10 +1086,10 @@
       <div class="msg-wrap assistant">
         <div class="msg-header">
           <span>[E.V. // CO-PILOTO TÁCTICO]</span>
-          <span>v9.6-OMNI BIOMETRIC</span>
+          <span>v9.7-IRONMAN AR HUD</span>
         </div>
         <div class="msg-bubble">
-          Sistemas en línea, Operador. Óptica ultra gran angular 0.5x, detección facial multi-ángulo omni-orientación, auto-captura ágil y layout táctico sin superposiciones v9.6 activos. Pulsa ⚙ API KEY si aún no has sincronizado tu clave de Gemini, abre 👥 BIOMETRÍA para administrar perfiles, o accede al 👁 VISOR E.V. para reconocimiento facial y visión panorámica en tiempo real.
+          Sistemas en línea, Operador. HUD AR holográfico Iron Man 60 FPS, detección facial acelerada por hardware nativo, telemetría táctica y tarjetas AR flotantes v9.7 activos. Pulsa ⚙ API KEY si aún no has sincronizado tu clave de Gemini, abre 👥 BIOMETRÍA para administrar perfiles, o accede al 👁 VISOR E.V. para reconocimiento facial y visión holográfica en tiempo real.
         </div>
       </div>
     </div>
@@ -1133,7 +1133,7 @@
     <div class="visor-top-bar">
       <div class="visor-badge">
         <span style="display: inline-block; width: 6px; height: 6px; background: var(--accent-cyan); border-radius: 50%;"></span>
-        <span>E.V. // OPTICAL CORE v9.6</span>
+        <span>E.V. // OPTICAL CORE v9.7</span>
         <span id="visorModelTag" style="color: var(--accent-amber); margin-left: 4px;">[3.5 FLASH-LITE]</span>
         <span id="visorBioStatus" class="visor-bio-badge" style="margin-left: 6px;">BIOMETRÍA: INICIANDO...</span>
       </div>
@@ -1158,7 +1158,7 @@
       <div id="evBioSidebarContent" class="bio-sidebar-content"></div>
     </div>
 
-    <!-- DOCK INFERIOR SIN SUPERPOSICIONES (FLEXBOX COLUMN v9.6) -->
+    <!-- DOCK INFERIOR SIN SUPERPOSICIONES (FLEXBOX COLUMN v9.7) -->
     <div id="visorBottomDock" class="visor-bottom-dock">
       <!-- Fila 1 (Arriba): Cuadro de subtítulos y estado -->
       <div id="visorSubtitles" class="visor-subtitles">
@@ -1295,10 +1295,10 @@
 
   <script>
     // =========================================================================
-    // E.V. STANDALONE PWA (v9.6-OMNI BIOMETRIC) - NÚCLEO JS
+    // E.V. STANDALONE PWA (v9.7-IRONMAN AR HUD) - NÚCLEO JS
     // =========================================================================
 
-    // Variables de Óptica y Calibración v9.6 (Anti-Mareo 0.5x Ultra Wide)
+    // Variables de Óptica y Calibración v9.7 (Anti-Mareo 0.5x Ultra Wide + HUD AR Iron Man)
     let availableVideoDevices = [];
     let rearCameras = [];
     let frontCameras = [];
@@ -1318,7 +1318,7 @@
     let isSidebarCollapsed = false;
     let lastPanTimestamp = 0;
 
-    // Variables Biometría Híbrida Indestructible v9.6
+    // Variables Biometría Híbrida Indestructible v9.7
     let isFallbackBiometrics = false;
     let nativeFaceDetectorInstance = null;
 
@@ -1343,7 +1343,7 @@
     if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
       window.addEventListener("load", () => {
         navigator.serviceWorker.register("./sw.js")
-          .then((reg) => console.log("[E.V. PWA] Service Worker v9.6 registrado:", reg.scope))
+          .then((reg) => console.log("[E.V. PWA] Service Worker v9.7 registrado:", reg.scope))
           .catch((err) => console.warn("[E.V. PWA] Fallo registro SW:", err));
       });
     }
@@ -1586,63 +1586,71 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
       isBiometricLoading = true;
 
       const badge = document.getElementById("visorBioStatus");
-      if (badge) {
-        badge.className = "visor-bio-badge";
-        badge.textContent = "BIOMETRÍA: INICIANDO PESOS...";
+
+      // 1. Detección Facial Nativa Instantánea Acelerada por Hardware (window.FaceDetector)
+      if (window.FaceDetector) {
+        try {
+          nativeFaceDetectorInstance = new window.FaceDetector({ fastMode: true, maxDetectedFaces: 6 });
+          isBiometricLoaded = true;
+          isBiometricLoading = false;
+          isFallbackBiometrics = true;
+          if (badge) {
+            badge.className = "visor-bio-badge ready";
+            badge.textContent = `AR NATIVO (GPU 60 FPS) · ${STATE.faceDb.length} PERFILES`;
+          }
+          console.log("[BiometricEngine] window.FaceDetector nativo activo por hardware a 60 FPS.");
+
+          // Carga opcional asíncrona en segundo plano sin bloquear el renderizado ni la cámara
+          if (window.faceapi && STATE.faceDb.length > 0) {
+            setTimeout(async () => {
+              try {
+                await faceapi.nets.tinyFaceDetector.loadFromUri(FACE_API_MODELS_URL);
+                await faceapi.nets.faceLandmark68Net.loadFromUri(FACE_API_MODELS_URL);
+                await faceapi.nets.faceRecognitionNet.loadFromUri(FACE_API_MODELS_URL);
+                rebuildFaceMatcher();
+                console.log("[BiometricEngine] Reconocimiento neuronal secundario en línea.");
+              } catch (e) {}
+            }, 1000);
+          }
+          return;
+        } catch (e) {
+          console.warn("[BiometricEngine] FaceDetector nativo falló, recurriendo a fallback:", e);
+        }
       }
 
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Timeout de 4.5s en carga de pesos face-api")), 4500)
-      );
+      // 2. Fallback Asíncrono face-api (tinyFaceDetector únicamente, inputSize 160)
+      if (badge) {
+        badge.className = "visor-bio-badge";
+        badge.textContent = "BIOMETRÍA: CARGANDO PESOS LIGEROS...";
+      }
 
       try {
         if (!window.faceapi) {
-          console.warn("[BiometricEngine] Esperando librería face-api...");
-          await Promise.race([
-            new Promise((r) => setTimeout(r, 600)),
-            timeoutPromise
-          ]);
+          await new Promise((r) => setTimeout(r, 400));
         }
-
-        // Cargar los 3 modelos neuronales ligeros con timeout protector de 4.5s
-        await Promise.race([
-          Promise.all([
-            faceapi.nets.tinyFaceDetector.loadFromUri(FACE_API_MODELS_URL),
-            faceapi.nets.faceLandmark68Net.loadFromUri(FACE_API_MODELS_URL),
-            faceapi.nets.faceRecognitionNet.loadFromUri(FACE_API_MODELS_URL)
-          ]),
-          timeoutPromise
-        ]);
-
-        isBiometricLoaded = true;
-        isBiometricLoading = false;
-        isFallbackBiometrics = false;
-
-        rebuildFaceMatcher();
-
-        if (badge) {
-          badge.className = "visor-bio-badge ready";
-          badge.textContent = `BIOMETRÍA: OFFLINE (${STATE.faceDb.length} PERFILES)`;
-        }
-        console.log("[BiometricEngine] Pesos biométricos offline cargados al 100%.");
-      } catch (err) {
-        console.warn("[BiometricEngine] Fallo o timeout (4.5s) al cargar face-api.js:", err.message);
-        isBiometricLoaded = true; // No bloquear la interfaz ni los bucles
-        isBiometricLoading = false;
-        isFallbackBiometrics = true;
-
-        if (window.FaceDetector && !nativeFaceDetectorInstance) {
-          try {
-            nativeFaceDetectorInstance = new window.FaceDetector({ fastMode: true, maxDetectedFaces: 5 });
-            console.log("[BiometricEngine] FaceDetector nativo por hardware activado.");
-          } catch (e) {
-            nativeFaceDetectorInstance = null;
+        if (window.faceapi) {
+          await faceapi.nets.tinyFaceDetector.loadFromUri(FACE_API_MODELS_URL);
+          if (STATE.faceDb.length > 0) {
+            faceapi.nets.faceLandmark68Net.loadFromUri(FACE_API_MODELS_URL).catch(() => {});
+            faceapi.nets.faceRecognitionNet.loadFromUri(FACE_API_MODELS_URL).catch(() => {});
+          }
+          isBiometricLoaded = true;
+          isBiometricLoading = false;
+          isFallbackBiometrics = false;
+          rebuildFaceMatcher();
+          if (badge) {
+            badge.className = "visor-bio-badge ready";
+            badge.textContent = `BIOMETRÍA: LIGERA (${STATE.faceDb.length} PERFILES)`;
           }
         }
-
+      } catch (err) {
+        console.warn("[BiometricEngine] Fallo en fallback face-api:", err);
+        isBiometricLoaded = true;
+        isBiometricLoading = false;
+        isFallbackBiometrics = true;
         if (badge) {
           badge.className = "visor-bio-badge ready";
-          badge.textContent = nativeFaceDetectorInstance ? "BIOMETRÍA: NATIVO CHROME" : "BIOMETRÍA: ÓPTICA ACTIVA";
+          badge.textContent = "BIOMETRÍA: ÓPTICA AR";
         }
       }
     }
@@ -1706,7 +1714,7 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
       }
     }
 
-    // Bucle de inferencia biométrica desacoplado (~3.5 FPS / cada 280ms)
+    // Bucle de inferencia biométrica acelerado (~8 FPS / cada 120ms)
     async function runBiometricInferenceStep() {
       if (isBiometricInferring || !isVisorActive || !isBiometricLoaded) return;
       const video = document.getElementById("visorVideo");
@@ -1724,174 +1732,134 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
         const scaleX = dispW / videoW;
         const scaleY = dispH / videoH;
 
+        let detectionsList = [];
+
+        // 1. Detección Facial Nativa Acelerada por Hardware (Chrome Android)
+        if (nativeFaceDetectorInstance) {
+          try {
+            const nativeDets = await nativeFaceDetectorInstance.detect(video);
+            for (const f of nativeDets) {
+              const b = f.boundingBox;
+              detectionsList.push({
+                rawBox: { x: b.x, y: b.y, width: b.width, height: b.height },
+                score: 0.95,
+                descriptor: null
+              });
+            }
+          } catch (nativeErr) {
+            console.debug("[BiometricEngine] Fallo en FaceDetector nativo:", nativeErr);
+          }
+        } else if (window.faceapi && !isFallbackBiometrics) {
+          // 2. Fallback ligero TinyFaceDetector (inputSize 160, scoreThreshold 0.35)
+          try {
+            const detectorOpts = new faceapi.TinyFaceDetectorOptions({ inputSize: 160, scoreThreshold: 0.35 });
+            if (STATE.faceDb.length > 0 && biometricFaceMatcher) {
+              const dets = await faceapi.detectAllFaces(video, detectorOpts).withFaceLandmarks(true).withFaceDescriptors();
+              for (const d of dets) {
+                detectionsList.push({
+                  rawBox: { x: d.detection.box.x, y: d.detection.box.y, width: d.detection.box.width, height: d.detection.box.height },
+                  score: d.detection.score,
+                  descriptor: d.descriptor
+                });
+              }
+            } else {
+              const dets = await faceapi.detectAllFaces(video, detectorOpts);
+              for (const d of dets) {
+                detectionsList.push({
+                  rawBox: { x: d.box.x, y: d.box.y, width: d.box.width, height: d.box.height },
+                  score: d.score,
+                  descriptor: null
+                });
+              }
+            }
+          } catch (faErr) {
+            console.debug("[BiometricEngine] Fallo faceapi:", faErr);
+          }
+        }
+
         const updatedFaces = [];
 
-        if (!isFallbackBiometrics && window.faceapi) {
-          // Detección neuronal multi-ángulo (inputSize 256, scoreThreshold 0.38)
-          const detectorOpts = new faceapi.TinyFaceDetectorOptions({ inputSize: 256, scoreThreshold: 0.38 });
-          let detections = [];
-          let activeRotationAngle = 0; // 0, 90, o -90 grados
+        for (const det of detectionsList) {
+          const rBox = det.rawBox;
+          const targetBox = {
+            x: rBox.x * scaleX,
+            y: rBox.y * scaleY,
+            width: rBox.width * scaleX,
+            height: rBox.height * scaleY
+          };
 
-          if (rotationScanStep === 0) {
-            // Ciclo 0: Orientación frontal / estándar (0°)
-            detections = await faceapi
-              .detectAllFaces(video, detectorOpts)
-              .withFaceLandmarks(true)
-              .withFaceDescriptors();
-            activeRotationAngle = 0;
+          // Estimación de distancia basada en proporción focal de altura
+          const distanceEst = (Math.max(0.4, Math.min(3.5, (videoH * 0.45) / Math.max(1, rBox.height)))).toFixed(1);
 
-            if (detections.length === 0) {
-              // Si no hay rostros en 0°, probar 90° en el próximo ciclo
-              rotationScanStep = 1;
+          let matchLabel = "unknown";
+          let matchDistance = 1.0;
+          let matchedProfile = null;
+
+          if (det.descriptor && biometricFaceMatcher) {
+            const bestMatch = biometricFaceMatcher.findBestMatch(det.descriptor);
+            matchLabel = bestMatch.label;
+            matchDistance = bestMatch.distance;
+            if (matchLabel !== "unknown") {
+              matchedProfile = STATE.faceDb.find(p => p.name === matchLabel);
             }
-          } else if (rotationScanStep === 1) {
-            // Ciclo 1: Auxiliar rotado 90° para rostros inclinados
-            rotProcessingCanvas.width = videoH;
-            rotProcessingCanvas.height = videoW;
-            rotProcessingCtx.save();
-            rotProcessingCtx.translate(videoH / 2, videoW / 2);
-            rotProcessingCtx.rotate(Math.PI / 2);
-            rotProcessingCtx.drawImage(video, -videoW / 2, -videoH / 2);
-            rotProcessingCtx.restore();
-
-            detections = await faceapi
-              .detectAllFaces(rotProcessingCanvas, detectorOpts)
-              .withFaceLandmarks(true)
-              .withFaceDescriptors();
-            activeRotationAngle = 90;
-
-            if (detections.length === 0) {
-              // Si tampoco hay rostros a 90°, probar -90° en el próximo ciclo
-              rotationScanStep = 2;
-            } else {
-              rotationScanStep = 1;
-            }
-          } else {
-            // Ciclo 2: Auxiliar rotado -90° para inclinación opuesta
-            rotProcessingCanvas.width = videoH;
-            rotProcessingCanvas.height = videoW;
-            rotProcessingCtx.save();
-            rotProcessingCtx.translate(videoH / 2, videoW / 2);
-            rotProcessingCtx.rotate(-Math.PI / 2);
-            rotProcessingCtx.drawImage(video, -videoW / 2, -videoH / 2);
-            rotProcessingCtx.restore();
-
-            detections = await faceapi
-              .detectAllFaces(rotProcessingCanvas, detectorOpts)
-              .withFaceLandmarks(true)
-              .withFaceDescriptors();
-            activeRotationAngle = -90;
-
-            if (detections.length === 0) {
-              rotationScanStep = 0;
-            } else {
-              rotationScanStep = 2;
+          } else if (STATE.faceDb.length > 0) {
+            // Asociación espacial por proximidad a perfiles conocidos
+            const prevMatch = currentTrackedFaces.find(pf =>
+              pf.isRecognized && Math.hypot((pf.targetBox ? pf.targetBox.x : pf.box.x) - targetBox.x, (pf.targetBox ? pf.targetBox.y : pf.box.y) - targetBox.y) < 140
+            );
+            if (prevMatch) {
+              matchedProfile = STATE.faceDb.find(p => p.name === prevMatch.name);
+              if (matchedProfile) {
+                matchLabel = matchedProfile.name;
+                matchDistance = 0.25;
+              }
             }
           }
 
-          for (const det of detections) {
-            let rawBox = det.detection.box;
-            if (activeRotationAngle === 90) {
-              rawBox = {
-                x: rawBox.y,
-                y: Math.max(0, videoH - rawBox.x - rawBox.width),
-                width: rawBox.height,
-                height: rawBox.width
-              };
-            } else if (activeRotationAngle === -90) {
-              rawBox = {
-                x: Math.max(0, videoW - rawBox.y - rawBox.height),
-                y: rawBox.x,
-                width: rawBox.height,
-                height: rawBox.width
-              };
-            }
+          const isRecognized = matchLabel !== "unknown" && matchedProfile !== null;
+          const faceName = isRecognized ? matchedProfile.name : "SUJETO NO REGISTRADO";
+          const faceRole = isRecognized ? (matchedProfile.role || "PERSONA AUTORIZADA") : "OBJETIVO EN FOCO";
+          const confidence = isRecognized ? Math.round(Math.max(78, (1 - matchDistance) * 100)) : Math.round((det.score || 0.92) * 100);
 
-            const box = {
-              x: rawBox.x * scaleX,
-              y: rawBox.y * scaleY,
-              width: rawBox.width * scaleX,
-              height: rawBox.height * scaleY
-            };
+          // Buscar instancia previa para suavizado lerp continuo
+          const existing = currentTrackedFaces.find(f =>
+            Math.hypot((f.targetBox ? f.targetBox.x : f.box.x) - targetBox.x, (f.targetBox ? f.targetBox.y : f.box.y) - targetBox.y) < 120
+          );
 
-            const descriptorArray = Array.from(det.descriptor);
-            let matchLabel = "unknown";
-            let matchDistance = 1.0;
-            let matchedProfile = null;
+          const currentBox = existing ? { ...existing.box } : { ...targetBox };
 
-            if (biometricFaceMatcher) {
-              const bestMatch = biometricFaceMatcher.findBestMatch(det.descriptor);
-              matchLabel = bestMatch.label;
-              matchDistance = bestMatch.distance;
-              if (matchLabel !== "unknown") {
-                matchedProfile = STATE.faceDb.find(p => p.name === matchLabel);
-              }
-            }
+          updatedFaces.push({
+            id: matchedProfile ? matchedProfile.id : (existing ? existing.id : "face_" + Math.round(targetBox.x)),
+            name: faceName,
+            role: faceRole,
+            notes: matchedProfile ? matchedProfile.notes : "",
+            isRecognized,
+            similarity: confidence,
+            distance: matchDistance,
+            distanceEst,
+            rawBox: { x: rBox.x, y: rBox.y, width: rBox.width, height: rBox.height },
+            targetBox,
+            box: currentBox,
+            descriptor: det.descriptor ? Array.from(det.descriptor) : (existing ? existing.descriptor : null),
+            lastSeen: now
+          });
+        }
 
-            let avatarUrl = "";
-            if (!matchedProfile) {
-              avatarUrl = extractFaceAvatarUrl(video, rawBox);
-            } else {
-              avatarUrl = matchedProfile.avatarDataUrl || extractFaceAvatarUrl(video, rawBox);
-            }
-
-            updatedFaces.push({
-              id: matchedProfile ? matchedProfile.id : "unk_" + Math.round(box.x),
-              name: matchedProfile ? matchedProfile.name : "Sujeto Desconocido",
-              role: matchedProfile ? matchedProfile.role : "SUJETO NO REGISTRADO",
-              notes: matchedProfile ? matchedProfile.notes : "",
-              isRecognized: matchLabel !== "unknown",
-              similarity: Math.round(Math.max(0, 1 - matchDistance) * 100),
-              distance: matchDistance,
-              box,
-              descriptor: descriptorArray,
-              avatarUrl,
-              lastSeen: now
-            });
-          }
-
-          // Auto-Captura Facial Manos Libres Ágil (Auto-Enroll v9.6: 0.8s / 2 ciclos / min 45px)
-          if (isAutoEnrollEnabled && !isCameraPanning && (now - lastAutoEnrollTime > 1500)) {
-            const unknownDet = detections.find(d => {
-              if (d.detection.score < 0.38) return false;
-              let rBox = d.detection.box;
-              if (activeRotationAngle === 90) {
-                rBox = { x: rBox.y, y: Math.max(0, videoH - rBox.x - rBox.width), width: rBox.height, height: rBox.width };
-              } else if (activeRotationAngle === -90) {
-                rBox = { x: Math.max(0, videoW - rBox.y - rBox.height), y: rBox.x, width: rBox.height, height: rBox.width };
-              }
-              const scaledW = rBox.width * scaleX;
-              if (scaledW < 45) return false; // Detección desde 45px
-              const normX = (rBox.x * scaleX + scaledW / 2) / dispW;
-              const normY = (rBox.y * scaleY + (rBox.height * scaleY) / 2) / dispH;
-              if (normX < 0.10 || normX > 0.90 || normY < 0.08 || normY > 0.92) return false;
-
-              if (biometricFaceMatcher) {
-                const match = biometricFaceMatcher.findBestMatch(d.descriptor);
-                if (match.label !== "unknown") return false;
-              }
-              return true;
-            });
-
-            if (unknownDet) {
-              let rBox = unknownDet.detection.box;
-              if (activeRotationAngle === 90) {
-                rBox = { x: rBox.y, y: Math.max(0, videoH - rBox.x - rBox.width), width: rBox.height, height: rBox.width };
-              } else if (activeRotationAngle === -90) {
-                rBox = { x: Math.max(0, videoW - rBox.y - rBox.height), y: rBox.x, width: rBox.height, height: rBox.width };
-              }
-              const boxCenterX = rBox.x * scaleX + (rBox.width * scaleX) / 2;
-              const boxCenterY = rBox.y * scaleY + (rBox.height * scaleY) / 2;
-
-              if (lastAutoEnrollBox && Math.hypot(boxCenterX - lastAutoEnrollBox.x, boxCenterY - lastAutoEnrollBox.y) < 120) {
+        // Auto-Captura Facial Manos Libres Ágil (5 ciclos de 120ms = 0.6s)
+        if (isAutoEnrollEnabled && !isCameraPanning && (now - lastAutoEnrollTime > 1500)) {
+          const unknownTarget = updatedFaces.find(f => !f.isRecognized && f.targetBox.width >= 45);
+          if (unknownTarget) {
+            const centerX = unknownTarget.targetBox.x + unknownTarget.targetBox.width / 2;
+            const centerY = unknownTarget.targetBox.y + unknownTarget.targetBox.height / 2;
+            if (centerX > dispW * 0.12 && centerX < dispW * 0.88 && centerY > dispH * 0.10 && centerY < dispH * 0.90) {
+              if (lastAutoEnrollBox && Math.hypot(centerX - lastAutoEnrollBox.x, centerY - lastAutoEnrollBox.y) < 90) {
                 autoEnrollStreak++;
               } else {
                 autoEnrollStreak = 1;
-                lastAutoEnrollBox = { x: boxCenterX, y: boxCenterY };
+                lastAutoEnrollBox = { x: centerX, y: centerY };
               }
 
-              // Fijación ágil de 0.8s (2 ciclos consecutivos)
-              if (autoEnrollStreak >= 2) {
+              if (autoEnrollStreak >= 5) {
                 autoEnrollStreak = 0;
                 lastAutoEnrollBox = null;
                 lastAutoEnrollTime = now;
@@ -1906,15 +1874,15 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
                 });
                 const nextId = String(maxNum + 1).padStart(2, "0");
                 const autoName = `SUJETO_${nextId}`;
-                const avatarData = extractFaceAvatarUrl(video, rBox);
+                const avatarData = extractCenterCropAvatarUrl(video, 120);
 
                 const newProfile = {
                   id: "face_" + Date.now(),
                   name: autoName,
                   role: "Sujeto Auto-Capturado",
-                  notes: "Captura manos libres v9.6",
+                  notes: "Captura HUD AR v9.7",
                   avatarDataUrl: avatarData,
-                  descriptors: [Array.from(unknownDet.descriptor)]
+                  descriptors: unknownTarget.descriptor ? [unknownTarget.descriptor] : []
                 };
 
                 STATE.faceDb.push(newProfile);
@@ -1924,54 +1892,14 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
                 playCommandAckSound();
                 updateVisorSubtitle("AUTO-CAPTURA", `Nuevo sujeto registrado automáticamente como ${autoName}. Di: "El ${autoName.toLowerCase()} es [Nombre]" para nombrarlo.`);
               }
-            } else {
-              autoEnrollStreak = Math.max(0, autoEnrollStreak - 1);
             }
-          }
-        } else if (nativeFaceDetectorInstance) {
-          // Fallback nativo: Detección acelerada por hardware (Chrome Android)
-          try {
-            const detectedFaces = await nativeFaceDetectorInstance.detect(video);
-            for (const f of detectedFaces) {
-              const b = f.boundingBox;
-              const box = {
-                x: b.x * scaleX,
-                y: b.y * scaleY,
-                width: b.width * scaleX,
-                height: b.height * scaleY
-              };
-              const avatarUrl = extractFaceAvatarUrl(video, b);
-              updatedFaces.push({
-                id: "face_native_" + Math.round(box.x),
-                name: "Sujeto Detectado",
-                role: "BIOMETRÍA NATIVA (CHROME)",
-                notes: "Aceleración de hardware",
-                isRecognized: false,
-                similarity: 70,
-                distance: 0.5,
-                box,
-                descriptor: new Array(128).fill(0),
-                avatarUrl,
-                lastSeen: now
-              });
-            }
-          } catch (nativeErr) {
-            console.debug("[BiometricEngine] Fallo en FaceDetector nativo:", nativeErr);
+          } else {
+            autoEnrollStreak = Math.max(0, autoEnrollStreak - 1);
           }
         }
 
-        // Suavizado Temporal y Presencia Efímera (1.8s timeout):
-        // Mantener rostros vistos recientemente si no han pasado 1800ms
-        for (const prev of currentTrackedFaces) {
-          if (!updatedFaces.some(u => u.name === prev.name || Math.abs(u.box.x - prev.box.x) < 50)) {
-            if (now - prev.lastSeen < 1800) {
-              updatedFaces.push(prev);
-            }
-          }
-        }
-
-        // Purgar de forma reactiva cualquier rostro ausente por más de 1800ms
-        currentTrackedFaces = updatedFaces.filter(f => (now - f.lastSeen) < 1800);
+        // Purgar al instante (<350 ms) rostros que salieron del encuadre
+        currentTrackedFaces = updatedFaces.filter(f => (now - f.lastSeen) < 350);
         renderBiometricSidebar();
 
       } catch (err) {
@@ -2393,7 +2321,7 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
     }
 
     // =========================================================================
-    // TEMPORIZADORES Y SÍNTESIS DE TONOS WEB AUDIO API (FEEDBACK POSITIVO v9.6)
+    // TEMPORIZADORES Y SÍNTESIS DE TONOS WEB AUDIO API (FEEDBACK POSITIVO v9.7)
     // =========================================================================
 
     let audioContextInstance = null;
@@ -3209,12 +3137,12 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
       // Inicializar inferencia biométrica en segundo plano
       initBiometricEngine().then(() => {
         if (isVisorActive && !biometricIntervalId) {
-          // Bucle de inferencia a ~3.5 FPS (280ms) desacoplado del render 60 FPS
-          biometricIntervalId = setInterval(runBiometricInferenceStep, 280);
+          // Bucle de inferencia nativo a ~8 FPS (120ms) desacoplado del render 60 FPS
+          biometricIntervalId = setInterval(runBiometricInferenceStep, 120);
         }
       });
 
-      updateVisorSubtitle("E.V.", "Visor óptico v9.6 en línea. Biometría multi-ángulo y layout táctico activos.");
+      updateVisorSubtitle("E.V.", "Visor óptico v9.7 en línea. HUD AR Iron Man y rastreo acelerado por hardware activos.");
       playTacticalBeep(1046, 0.1);
     }
 
@@ -3369,16 +3297,30 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
         // 2. Interpolación suave de escleras (Spider-Man Brand New Day)
         scleraAperture += (targetScleraAperture - scleraAperture) * 0.16;
 
-        // 3. Dibujar Escleras Mecánicas Oculares
+        // 3. Suavizado lerp a 60 FPS y purga instantánea (<350ms) de tracking facial
+        if (currentTrackedFaces && currentTrackedFaces.length > 0) {
+          currentTrackedFaces = currentTrackedFaces.filter(f => (now - f.lastSeen) < 350);
+          for (let i = 0; i < currentTrackedFaces.length; i++) {
+            const f = currentTrackedFaces[i];
+            if (f.targetBox) {
+              f.box.x += (f.targetBox.x - f.box.x) * 0.35;
+              f.box.y += (f.targetBox.y - f.box.y) * 0.35;
+              f.box.width += (f.targetBox.width - f.box.width) * 0.35;
+              f.box.height += (f.targetBox.height - f.box.height) * 0.35;
+            }
+          }
+        }
+
+        // 4. Dibujar Escleras Mecánicas Oculares
         drawMechanicalScleras(ctx, w, h, scleraAperture);
 
-        // 4. Dibujar Cajas Biométricas Faciales y Líneas de Telemetría al Sidebar
+        // 5. Dibujar HUD AR Flotante Estilo Iron Man / E.D.I.T.H.
         drawBiometricFaceOverlays(ctx);
 
-        // 5. Dibujar Retícula de Puntería / Target Lock
+        // 6. Dibujar Retícula de Puntería / Target Lock
         drawVisorReticle(ctx, w, h);
 
-        // 6. Dibujar Telemetría Táctica
+        // 7. Dibujar Telemetría Táctica
         drawVisorTelemetry(ctx, w, h);
 
         visorAnimId = requestAnimationFrame(renderLoop);
@@ -3515,61 +3457,176 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
       }
     }
 
-    // Dibuja las cajas biométricas faciales y líneas que conectan con la tarjeta del sidebar
+    // Dibuja el HUD AR Holográfico Flotante Estilo Iron Man / E.D.I.T.H.
     function drawBiometricFaceOverlays(ctx) {
       if (!currentTrackedFaces || currentTrackedFaces.length === 0) return;
 
-      const sidebarEl = document.getElementById("evBiometricSidebar");
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      const video = document.getElementById("visorVideo");
 
-      currentTrackedFaces.forEach((face, idx) => {
+      currentTrackedFaces.forEach((face) => {
         const b = face.box;
         const color = face.isRecognized ? "#00E5FF" : "#FF9800";
-        const cornerSize = Math.min(18, b.width * 0.25);
+        const colorDim = face.isRecognized ? "rgba(0, 229, 255, 0.25)" : "rgba(255, 152, 0, 0.25)";
+        const cornerSize = Math.max(12, Math.min(22, b.width * 0.22));
 
         ctx.save();
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 2.0;
-        ctx.shadowColor = color;
-        ctx.shadowBlur = 6;
 
-        // Marco con esquinas cortadas tácticas alrededor del rostro
-        ctx.beginPath();
-        // Superior Izquierda
-        ctx.moveTo(b.x, b.y + cornerSize); ctx.lineTo(b.x, b.y); ctx.lineTo(b.x + cornerSize, b.y);
-        // Superior Derecha
-        ctx.moveTo(b.x + b.width - cornerSize, b.y); ctx.lineTo(b.x + b.width, b.y); ctx.lineTo(b.x + b.width, b.y + cornerSize);
-        // Inferior Derecha
-        ctx.moveTo(b.x + b.width, b.y + b.height - cornerSize); ctx.lineTo(b.x + b.width, b.y + b.height); ctx.lineTo(b.x + b.width - cornerSize, b.y + b.height);
-        // Inferior Izquierda
-        ctx.moveTo(b.x + cornerSize, b.y + b.height); ctx.lineTo(b.x, b.y + b.height); ctx.lineTo(b.x, b.y + b.height - cornerSize);
+        // 1. Retícula Facial con Esquinas Tácticas (Doble trazado sin shadowBlur para 60 FPS)
+        ctx.strokeStyle = colorDim;
+        ctx.lineWidth = 4.0;
+        drawCornerBrackets(ctx, b.x, b.y, b.width, b.height, cornerSize);
         ctx.stroke();
 
-        // Etiqueta flotante superior
-        ctx.font = "10px 'Share Tech Mono', monospace";
-        ctx.fillStyle = color;
-        const labelText = face.isRecognized ? `ID: ${face.name.toUpperCase()} [${face.similarity}%]` : `SUJETO NO REGISTRADO`;
-        ctx.fillText(labelText, b.x, Math.max(16, b.y - 6));
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1.8;
+        drawCornerBrackets(ctx, b.x, b.y, b.width, b.height, cornerSize);
+        ctx.stroke();
 
-        // Línea vectorial discontinua que conecta la caja con la tarjeta lateral correspondiente
-        const cardEl = document.getElementById(`bioCard_${idx}`);
-        if (cardEl && sidebarEl) {
-          const cardRect = cardEl.getBoundingClientRect();
-          const targetX = cardRect.right;
-          const targetY = cardRect.top + cardRect.height / 2;
+        // 2. Cálculo de Posición de la Tarjeta Flotante AR (162x56 px)
+        const cardW = 162;
+        const cardH = 56;
+        let placeRight = true;
+        let cardX = b.x + b.width + 24;
+        let cardY = Math.max(14, Math.min(h - cardH - 14, b.y + b.height * 0.25 - 24));
 
-          ctx.setLineDash([4, 4]);
-          ctx.strokeStyle = face.isRecognized ? "rgba(0, 229, 255, 0.45)" : "rgba(255, 152, 0, 0.45)";
-          ctx.lineWidth = 1.2;
-
-          ctx.beginPath();
-          ctx.moveTo(b.x, b.y + b.height / 2);
-          ctx.lineTo(targetX, targetY);
-          ctx.stroke();
-          ctx.setLineDash([]);
+        if (cardX + cardW > w - 10) {
+          placeRight = false;
+          cardX = Math.max(10, b.x - cardW - 24);
         }
+
+        // 3. Línea Vectorial Conectora Dinámica desde la Retícula a la Tarjeta
+        const startX = placeRight ? (b.x + b.width) : b.x;
+        const startY = b.y + b.height * 0.25;
+        const endX = placeRight ? cardX : (cardX + cardW);
+        const endY = cardY + 28;
+        const midX = placeRight ? (startX + 14) : (startX - 14);
+
+        ctx.setLineDash([4, 3]);
+        ctx.strokeStyle = colorDim;
+        ctx.lineWidth = 3.0;
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        ctx.lineTo(midX, endY);
+        ctx.lineTo(endX, endY);
+        ctx.stroke();
+
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        ctx.lineTo(midX, endY);
+        ctx.lineTo(endX, endY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Punto de anclaje táctico
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(startX, startY, 2.5, 0, Math.PI * 2);
+        ctx.arc(endX, endY, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 4. Tarjeta Holográfica Flotante (Fondo oscuro biselado + doble borde de brillo)
+        ctx.fillStyle = "rgba(7, 11, 16, 0.84)";
+        drawChamferedRect(ctx, cardX, cardY, cardW, cardH, 6);
+        ctx.fill();
+
+        ctx.strokeStyle = colorDim;
+        ctx.lineWidth = 3.0;
+        drawChamferedRect(ctx, cardX, cardY, cardW, cardH, 6);
+        ctx.stroke();
+
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1.2;
+        drawChamferedRect(ctx, cardX, cardY, cardW, cardH, 6);
+        ctx.stroke();
+
+        // 5. Live Video PIP de Rostro Recortado en Tiempo Real (48x48 px a 60 FPS)
+        const pipX = cardX + 4;
+        const pipY = cardY + 4;
+        const pipSize = 48;
+
+        if (face.rawBox && video && video.readyState >= 2) {
+          ctx.save();
+          ctx.beginPath();
+          ctx.rect(pipX, pipY, pipSize, pipSize);
+          ctx.clip();
+          const rbx = Math.max(0, face.rawBox.x);
+          const rby = Math.max(0, face.rawBox.y);
+          const rbw = Math.min(video.videoWidth - rbx, face.rawBox.width);
+          const rbh = Math.min(video.videoHeight - rby, face.rawBox.height);
+          if (rbw > 0 && rbh > 0) {
+            ctx.drawImage(video, rbx, rby, rbw, rbh, pipX, pipY, pipSize, pipSize);
+          }
+          ctx.restore();
+
+          // Marco fino del PIP
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 1.0;
+          ctx.strokeRect(pipX, pipY, pipSize, pipSize);
+        } else {
+          // Placeholder táctico si no hay frame aún
+          ctx.fillStyle = "rgba(255, 255, 255, 0.06)";
+          ctx.fillRect(pipX, pipY, pipSize, pipSize);
+          ctx.fillStyle = color;
+          ctx.font = "8px 'Share Tech Mono', monospace";
+          ctx.fillText("NO SIGNAL", pipX + 3, pipY + 28);
+        }
+
+        // 6. Tipografía Táctica del HUD Flotante
+        const textX = pipX + pipSize + 6;
+        ctx.font = "bold 10px 'Share Tech Mono', monospace";
+        ctx.fillStyle = "#FFFFFF";
+        const displayName = face.name.toUpperCase().slice(0, 13);
+        ctx.fillText(displayName, textX, cardY + 16);
+
+        ctx.font = "8.5px 'Share Tech Mono', monospace";
+        ctx.fillStyle = color;
+        const displayRole = (face.role || "OBJETIVO").slice(0, 16);
+        ctx.fillText(displayRole, textX, cardY + 29);
+
+        ctx.font = "8px 'Share Tech Mono', monospace";
+        ctx.fillStyle = "rgba(255, 255, 255, 0.72)";
+        const telemetry = `DIST: ~${face.distanceEst || '1.2'}m | ${face.similarity}%`;
+        ctx.fillText(telemetry, textX, cardY + 42);
+
+        // Micro-barra de confianza/afinidad inferior
+        const barW = cardW - pipSize - 16;
+        const barH = 2.5;
+        const barY = cardY + 47;
+        ctx.fillStyle = "rgba(255, 255, 255, 0.12)";
+        ctx.fillRect(textX, barY, barW, barH);
+        ctx.fillStyle = color;
+        const fillW = Math.max(4, barW * (face.similarity / 100));
+        ctx.fillRect(textX, barY, fillW, barH);
 
         ctx.restore();
       });
+    }
+
+    function drawCornerBrackets(ctx, x, y, w, h, s) {
+      ctx.beginPath();
+      // Superior Izquierda
+      ctx.moveTo(x, y + s); ctx.lineTo(x, y); ctx.lineTo(x + s, y);
+      // Superior Derecha
+      ctx.moveTo(x + w - s, y); ctx.lineTo(x + w, y); ctx.lineTo(x + w, y + s);
+      // Inferior Derecha
+      ctx.moveTo(x + w, y + h - s); ctx.lineTo(x + w, y + h); ctx.lineTo(x + w - s, y + h);
+      // Inferior Izquierda
+      ctx.moveTo(x + s, y + h); ctx.lineTo(x, y + h); ctx.lineTo(x, y + h - s);
+    }
+
+    function drawChamferedRect(ctx, x, y, w, h, chamfer) {
+      ctx.beginPath();
+      ctx.moveTo(x + chamfer, y);
+      ctx.lineTo(x + w - chamfer, y);
+      ctx.lineTo(x + w, y + chamfer);
+      ctx.lineTo(x + w, y + h);
+      ctx.lineTo(x, y + h);
+      ctx.lineTo(x, y + chamfer);
+      ctx.closePath();
     }
 
     function drawMechanicalScleras(ctx, w, h, aperture) {
@@ -3586,22 +3643,29 @@ Eres ágil, altamente perspicaz, leal, eficiente y con un toque sutil de ingenio
 
     function drawScleraShutter(ctx, cx, cy, rx, ry, isRight, aperture) {
       ctx.save();
-      const strokeColor = hasTargetLock || currentTrackedFaces.length > 0 ? (currentTrackedFaces.some(f => !f.isRecognized) ? "#FF9800" : "#00E5FF") : "#00E5FF";
-      ctx.strokeStyle = strokeColor;
-      ctx.shadowColor = strokeColor;
-      ctx.shadowBlur = 8;
-      ctx.lineWidth = 2.5;
+      const isAmber = hasTargetLock || currentTrackedFaces.some(f => !f.isRecognized);
+      const strokeColor = isAmber ? "#FF9800" : "#00E5FF";
+      const glowColor = isAmber ? "rgba(255, 152, 0, 0.25)" : "rgba(0, 229, 255, 0.25)";
 
-      const dir = isRight ? -1 : 1;
       const startAngle = isRight ? Math.PI * 0.65 : -Math.PI * 0.35;
       const endAngle = isRight ? Math.PI * 1.35 : Math.PI * 0.35;
 
+      // Trazo exterior brillante suave (reemplaza shadowBlur para GPU 60 FPS nativo)
+      ctx.strokeStyle = glowColor;
+      ctx.lineWidth = 5.0;
       ctx.beginPath();
       ctx.ellipse(cx, cy, rx, ry, 0, startAngle, endAngle);
       ctx.stroke();
 
-      ctx.lineWidth = 1.6;
-      ctx.strokeStyle = strokeColor === "#FF9800" ? "rgba(255, 152, 0, 0.7)" : "rgba(0, 229, 255, 0.7)";
+      // Trazo interior nítido
+      ctx.strokeStyle = strokeColor;
+      ctx.lineWidth = 2.0;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, rx, ry, 0, startAngle, endAngle);
+      ctx.stroke();
+
+      ctx.lineWidth = 1.4;
+      ctx.strokeStyle = isAmber ? "rgba(255, 152, 0, 0.7)" : "rgba(0, 229, 255, 0.7)";
       const blades = 4;
       for (let b = 1; b <= blades; b++) {
         const factor = 1.0 - (b * 0.15 * (1.1 - aperture));

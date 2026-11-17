@@ -1,5 +1,5 @@
-// Service Worker: E.V. Standalone PWA (v9.6-OMNI BIOMETRIC)
-const CACHE_NAME = 'ev-core-v9.6';
+// Service Worker: E.V. Standalone PWA (v9.7-IRONMAN AR HUD)
+const CACHE_NAME = 'ev-core-v9.7';
 
 // Activos locales y pesos biométricos offline
 const PRECACHE_ASSETS = [
